@@ -1,0 +1,41 @@
+/* global styles and theme variables. */
+
+:root {
+  --main-bg: #0a0a0a;
+  --main-bg-elevated: #09090b;
+  --card-bg: #121215;
+  --card-bg-muted: rgba(24, 24, 27, 0.3);
+  --surface: #18181b;
+  --surface-hover: #27272a;
+  --border: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(255, 255, 255, 0.08);
+  --text-primary: #fff;
+  --text-muted: #a1a1aa;
+  --text-muted-strong: #71717a;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-glow: rgba(37, 99, 235, 0.25);
+  --xp-yellow: #eab308;
+  --xp-yellow-dark: #ca8a04;
+  --danger: #ef4444;
+  --font-primary: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-primary);
+  background-color: var(--main-bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
