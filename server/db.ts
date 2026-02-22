@@ -1,31 +1,25 @@
-import { Database } from 'bun:sqlite';
-import { existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { MongoClient, ServerApiVersion } from "mongodb";
+const uri = process.env.MONGODB_URI;
 
-let database: Database | null = null;
-
-/**
- * directory for sqlite file (created if missing). I have an empty schema for now since we didn't decide yet.
- */
-function getDatabasePath(): string {
-  const dataDir = join(import.meta.dir, '..', 'data');
-  if (!existsSync(dataDir)) {
-    mkdirSync(dataDir, { recursive: true });
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
   }
-  return join(dataDir, 'tradelingo.sqlite');
-}
+});
 
-export function getDb(): Database {
-  if (database === null) {
-    const path = getDatabasePath();
-    database = new Database(path);
-  }
-  return database;
-}
-
-export function closeDb(): void {
-  if (database !== null) {
-    database.close();
-    database = null;
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
   }
 }
+run().catch(console.dir);
