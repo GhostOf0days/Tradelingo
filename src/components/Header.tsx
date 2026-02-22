@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LayoutGrid, Compass, Calculator, Zap, Search, Bell } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import './Header.css';
+import { useNavigate } from 'react-router-dom';
 
 const navigationItems = [
   { id: 'modules', label: 'Modules', icon: LayoutGrid },
@@ -13,6 +14,7 @@ const navigationItems = [
 function Header() {
   const [activeItem, setActiveItem] = useState('modules');
   const { user } = useUser();
+  const navigate = useNavigate();
 
   return (
     <header className="header">
@@ -72,7 +74,11 @@ function Header() {
           </>
         ) : (
           <div className="header__auth">
-            <button type="button" className="header__auth-btn header__auth-btn--register">
+            <button
+              type="button"
+              className="header__auth-btn header__auth-btn--register"
+              onClick={() => navigate('/register')} // goes to /register page
+            >
               Register
             </button>
             <button type="button" className="header__auth-btn header__auth-btn--login">
