@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -13,7 +14,8 @@ const uri = process.env.MONGODB_URI;
 if (!uri) throw new Error("Please add your MONGODB_URI to the .env file");
 
 const client = new MongoClient(uri);
-const db = client.db('tradalingo');
+// FIXED: Now targets the correct 'tradelingo' database
+const db = client.db('tradelingo');
 const usersCollection = db.collection('users');
 
 // --- API ROUTES ---
@@ -28,10 +30,14 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
+    // SECURITY: Hash the password before saving it to MongoDB
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     // Initialize the user with default progress data
     const newUser = {
       email,
-      password, 
+      password: hashedPassword, // Store the encrypted string
       displayName: email.split('@')[0], 
       experiencePoints: 0,
       lastUnlockedModuleId: 1, // Start at module 1
@@ -59,7 +65,13 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await usersCollection.findOne({ email });
     
-    if (!user || user.password !== password) {
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // SECURITY: Compare the typed password with the hashed password in the DB
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 

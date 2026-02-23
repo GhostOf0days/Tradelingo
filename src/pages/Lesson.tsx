@@ -15,15 +15,25 @@ export default function Lesson() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCurrentProgress = async () => {
-    if (!user) return;
+    // 1. If they aren't logged in, redirect them to login so they don't get stuck!
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const res = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+      
+      if (!res.ok) throw new Error("Failed to reach database");
+      
       const data = await res.json();
-      const currentIdx = data.progressByModuleId[id || "1"]?.lessonCurrent || 0;
+      
+      // Get current lesson index, safely defaulting to 0
+      const currentIdx = data.progressByModuleId?.[id || "1"]?.lessonCurrent || 0;
       
       if (currentIdx >= MODULE_1_LESSONS.length) {
-        navigate('/');
+        navigate('/'); // Module already finished
       } else {
         setLessonNumber(currentIdx);
         setLessonData(MODULE_1_LESSONS[currentIdx]);
@@ -31,8 +41,12 @@ export default function Lesson() {
         setSelectedAnswer(null);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error loading lesson:", err);
+      // Fallback: If the database connection blips, safely load Lesson 1 anyway
+      setLessonNumber(0);
+      setLessonData(MODULE_1_LESSONS[0]);
     } finally {
+      // ALWAYS turn off the loading screen, no matter what happens
       setIsLoading(false);
     }
   };
