@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 import './ModulesPage.css';
 
+// The source of truth for the curriculum
 const MODULES = [
   { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600 },
   { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800 },
@@ -9,16 +12,38 @@ const MODULES = [
   { id: 4, title: 'Brokers', lessonTotal: 10, experiencePoints: 600 },
 ];
 
-/** for initial user only the first module is unlocked. later this can come from db/auth */
-const INITIAL_LAST_UNLOCKED_MODULE_ID = 1;
-
-/** progress is tied to account; for a new account everything starts at 0. later load from db */
-const INITIAL_PROGRESS: Record<number, { lessonCurrent: number; streakBonus: number }> = {};
-
 function ModulesPage() {
   const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
-  const lastUnlockedModuleId = INITIAL_LAST_UNLOCKED_MODULE_ID;
-  const progressByModuleId = INITIAL_PROGRESS;
+  const [lastUnlockedModuleId, setLastUnlockedModuleId] = useState(1);
+  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, any>>({});
+  
+  const navigate = useNavigate();
+  const { user } = useUser();
+
+  // Fetch progress from MongoDB when the component loads or the user logs in
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!user) {
+        // Reset to defaults if logged out
+        setLastUnlockedModuleId(1);
+        setProgressByModuleId({});
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+        if (response.ok) {
+          const data = await response.json();
+          setLastUnlockedModuleId(data.lastUnlockedModuleId);
+          setProgressByModuleId(data.progressByModuleId);
+        }
+      } catch (err) {
+        console.error("Failed to fetch progress", err);
+      }
+    };
+
+    fetchProgress();
+  }, [user]);
 
   const filteredModules = MODULES.filter((module, index) => {
     const moduleNumber = index + 1;
@@ -26,6 +51,7 @@ function ModulesPage() {
     const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
     const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
     const isCompleted = lessonCurrent >= module.lessonTotal && module.lessonTotal > 0;
+    
     if (filter === 'completed') return isCompleted;
     return !isCompleted;
   });
@@ -58,6 +84,7 @@ function ModulesPage() {
           </button>
         </div>
       </div>
+      
       {filteredModules.length === 0 ? (
         <p className="modules__empty">
           {filter === 'completed' ? 'No completed modules yet.' : 'No modules in progress.'}
@@ -126,12 +153,33 @@ function ModulesPage() {
                           ))}
                           <div className="modules__streak-badge">+{progress.streakBonus}</div>
                         </div>
-                        {actionLabel !== null && (
-                          <button type="button" className="modules__card-btn">
-                            {actionLabel}
-                            <Play size={12} fill="currentColor" className="modules__card-btn-icon" />
-                          </button>
-                        )}
+                        
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {/* NEW PRE-TEST BUTTON (Only show if they haven't started the module) */}
+                          {lessonCurrent === 0 && (
+                            <button 
+                              type="button" 
+                              className="modules__card-btn"
+                              style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+                              onClick={() => navigate(`/pretest/${module.id}`)}
+                            >
+                              Test Out
+                            </button>
+                          )}
+                          
+                          {/* EXISTING LESSON BUTTON */}
+                          {actionLabel !== null && (
+                            <button 
+                              type="button" 
+                              className="modules__card-btn"
+                              onClick={() => navigate(`/lesson/${module.id}`)}
+                            >
+                              {actionLabel}
+                              <Play size={12} fill="currentColor" className="modules__card-btn-icon" />
+                            </button>
+                          )}
+                        </div>
+
                       </div>
                     </>
                   )}

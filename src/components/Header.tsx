@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutGrid, Compass, Calculator, Zap, Search, Bell } from 'lucide-react';
+import { LayoutGrid, Compass, Calculator, Zap, Search, Bell, LogOut } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import './Header.css';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,8 @@ const navigationItems = [
 
 function Header() {
   const [activeItem, setActiveItem] = useState('modules');
-  const { user } = useUser();
+  // Grab both the user and the setUser function from context
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   return (
@@ -71,17 +72,36 @@ function Header() {
                 <span className="header__avatar-inner" />
               </div>
             </div>
+
+            {/* --- LOGOUT BUTTON --- */}
+            <button 
+              type="button" 
+              className="header__icon-btn" 
+              aria-label="Log out"
+              style={{ marginLeft: '0.5rem' }}
+              onClick={() => {
+                setUser(null); // Clears the state AND local storage
+                navigate('/');   // Send them back to the home view
+              }}
+            >
+              <LogOut size={20} />
+            </button>
+
           </>
         ) : (
           <div className="header__auth">
             <button
               type="button"
               className="header__auth-btn header__auth-btn--register"
-              onClick={() => navigate('/register')} // goes to /register page
+              onClick={() => navigate('/register')}
             >
               Register
             </button>
-            <button type="button" className="header__auth-btn header__auth-btn--login">
+            <button 
+              type="button" 
+              className="header__auth-btn header__auth-btn--login"
+              onClick={() => navigate('/login')}
+            >
               Log in
             </button>
           </div>

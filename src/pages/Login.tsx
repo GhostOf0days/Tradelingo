@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
-import "./Register.css";
+import "./Register.css"; // We can reuse the exact same sleek styles!
 
-export default function Register() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -13,11 +13,10 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear any previous errors
+    setError("");
 
     try {
-      // Send the data to your Express backend
-      const response = await fetch("http://localhost:3000/api/register", {
+      const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -26,17 +25,17 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to register");
+        throw new Error(data.error || "Failed to log in");
       }
 
-      // Update the global UserContext so the Header shows the new user's XP
+      // Update global state and local storage
       setUser({
-        email: email, 
+        email: data.email, 
         displayName: data.displayName,
         experiencePoints: data.experiencePoints
       });
 
-      // Navigate back to the Modules page after successful registration
+      // Send them to the modules page
       navigate("/");
       
     } catch (err: any) {
@@ -47,9 +46,8 @@ export default function Register() {
   return (
     <div className="auth">
       <div className="auth__card">
-        <h1 className="auth__title">Create Account</h1>
+        <h1 className="auth__title">Welcome Back</h1>
         
-        {/* Display backend errors (like "User already exists") to the user */}
         {error && <div className="auth__error">{error}</div>}
 
         <form className="auth__form" onSubmit={handleSubmit}>
@@ -78,7 +76,7 @@ export default function Register() {
           </div>
 
           <button className="auth__submit" type="submit">
-            Sign Up
+            Log In
           </button>
         </form>
       </div>
