@@ -3,6 +3,7 @@ import { LayoutGrid, Compass, Calculator, Zap, Search, Bell, LogOut } from 'luci
 import { useUser } from '../contexts/UserContext';
 import './Header.css';
 import { useNavigate } from 'react-router-dom';
+import StreakCounter from './StreakCounter';
 
 const navigationItems = [
   { id: 'modules', label: 'Modules', icon: LayoutGrid },
@@ -59,6 +60,7 @@ function Header() {
             <button type="button" className="header__icon-btn header__icon-btn--badge" aria-label="Notifications">
               <Bell size={20} />
             </button>
+            <StreakCounter />
             <div className="header__actions-divider" aria-hidden="true" />
             <div className="header__user">
               <div className="header__user-info">

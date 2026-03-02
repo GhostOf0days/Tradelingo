@@ -6,12 +6,13 @@ import { MODULE_1_PRETEST } from '../data/module1';
 export default function Pretest() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, setUser, updateStreak } = useUser();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
 
   const currentQuestion = MODULE_1_PRETEST[currentIndex];
   const progressPercent = Math.round((currentIndex / MODULE_1_PRETEST.length) * 100);
@@ -41,6 +42,7 @@ export default function Pretest() {
           if (response.ok) {
             const data = await response.json();
             setUser({ ...user, experiencePoints: data.experiencePoints });
+            updateStreak();
           }
         } catch (err) {
           console.error("Failed to save pre-test", err);
@@ -48,6 +50,32 @@ export default function Pretest() {
       }
       setIsComplete(true);
     }
+  };
+
+  const handleSkipModule = async () => {
+    // User chose to skip and go straight to lessons (not pass via pretest)
+    if (user) {
+      try {
+        // Give them a small XP bonus for attempting the pretest
+        const response = await fetch('http://localhost:3000/api/update-xp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email: user.email, 
+            xpToAdd: 25 
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUser({ ...user, experiencePoints: data.experiencePoints });
+          updateStreak();
+        }
+      } catch (err) {
+        console.error("Failed to update XP", err);
+      }
+    }
+    // Redirect to lessons
+    navigate(`/lesson/${id}`);
   };
 
   if (isComplete) {
@@ -74,15 +102,33 @@ export default function Pretest() {
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
           <span style={{ color: 'var(--text-muted)' }}>Pre-Test Progress</span>
-          <span>{progressPercent}%</span>
+          <span style={{ fontWeight: '600' }}>{progressPercent}%</span>
         </div>
         <div style={{ height: '8px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${progressPercent}%`, background: '#eab308', transition: 'width 0.3s' }} />
+          <div style={{ height: '100%', width: `${progressPercent}%`, background: '#eab308', transition: 'width 0.3s ease' }} />
         </div>
       </div>
 
       <div className="modules__card" style={{ padding: '2.5rem' }}>
-        <h2 style={{ marginTop: 0, color: '#eab308' }}>Module {id} Pre-Test</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: 0, color: '#eab308' }}>Module {id} Pre-Test</h2>
+          <button 
+            onClick={() => setShowSkipDialog(true)}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              color: 'var(--text-muted)',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: '500'
+            }}
+          >
+            Skip
+          </button>
+        </div>
+
         <p style={{ marginBottom: '2rem', fontSize: '1.125rem' }}>{currentQuestion.question}</p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -111,6 +157,61 @@ export default function Pretest() {
       >
         {currentIndex === MODULE_1_PRETEST.length - 1 ? 'Submit Exam' : 'Next Question'}
       </button>
+
+      {/* Skip Dialog Modal */}
+      {showSkipDialog && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modules__card" style={{ padding: '2rem', maxWidth: '400px', margin: '1rem' }}>
+            <h2 style={{ marginTop: 0 }}>Skip Pre-Test?</h2>
+            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>
+              You can skip the pre-test and go straight to the lessons. You'll earn +25 XP for trying, but you won't unlock the next module until you complete all lessons or pass the post-test.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+              <button 
+                onClick={() => setShowSkipDialog(false)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  background: 'transparent',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSkipModule}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  background: 'var(--accent)',
+                  border: 'none',
+                  color: 'black',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                Skip & Learn
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

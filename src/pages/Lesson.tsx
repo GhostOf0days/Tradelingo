@@ -6,7 +6,7 @@ import { MODULE_1_LESSONS } from '../data/module1';
 export default function Lesson() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, setUser, updateStreak } = useUser();
   
   const [lessonData, setLessonData] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
@@ -66,6 +66,7 @@ export default function Lesson() {
           });
           const data = await res.json();
           setUser({ ...user, experiencePoints: data.experiencePoints });
+          updateStreak(); // Update streak when lesson is completed
         }
         setCurrentStep('complete');
       } else {
