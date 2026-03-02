@@ -201,8 +201,30 @@ function ModulesPage() {
             <h3 className="modules__lightning-title">Lightning Round</h3>
             <p className="modules__lightning-subtitle">Play daily. Win up to 2,500 XP</p>
           </div>
-          <button type="button" className="modules__lightning-play" aria-label="Play Lightning Round">
+          <button 
+            type="button" 
+            className="modules__lightning-play" 
+            aria-label="Play Lightning Round"
+            onClick={() => navigate('/lightning-round')}
+          >
             <Play size={20} fill="currentColor" className="modules__lightning-play-icon" />
+          </button>
+        </div>
+      </section>
+      <section className="modules__review-wrap">
+        <div className="modules__review">
+          <div className="modules__review-icon" aria-hidden="true">📚</div>
+          <div className="modules__review-text">
+            <h3 className="modules__review-title">Review Completed Modules</h3>
+            <p className="modules__review-subtitle">Refresh your knowledge on mastered topics</p>
+          </div>
+          <button 
+            type="button" 
+            className="modules__review-btn" 
+            aria-label="Review completed modules"
+            onClick={() => navigate('/completed-modules')}
+          >
+            <Play size={20} fill="currentColor" className="modules__review-btn-icon" />
           </button>
         </div>
       </section>

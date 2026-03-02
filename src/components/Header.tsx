@@ -4,112 +4,164 @@ import { useUser } from '../contexts/UserContext';
 import './Header.css';
 import { useNavigate } from 'react-router-dom';
 import StreakCounter from './StreakCounter';
+import SearchModal from './SearchModal';
+import StreakNotification from './StreakNotification';
 
 const navigationItems = [
-  { id: 'modules', label: 'Modules', icon: LayoutGrid },
-  { id: 'explore', label: 'Explore', icon: Compass },
-  { id: 'calculator', label: 'Calculator', icon: Calculator },
-  { id: 'quizzes', label: 'Quizzes', icon: Zap },
+  { id: 'modules', label: 'Modules', icon: LayoutGrid, path: '/' },
+  { id: 'explore', label: 'Explore', icon: Compass, path: '/explore' },
+  { id: 'calculator', label: 'Calculator', icon: Calculator, path: '/calculator' },
+  { id: 'quizzes', label: 'Quizzes', icon: Zap, path: '/quizzes' },
 ];
 
 function Header() {
   const [activeItem, setActiveItem] = useState('modules');
-  // Grab both the user and the setUser function from context
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [showStreakInfo, setShowStreakInfo] = useState(false);
+  
   const { user, setUser } = useUser();
   const navigate = useNavigate();
 
+  const handleNavClick = (item: any) => {
+    setActiveItem(item.id);
+    navigate(item.path);
+  };
+
+  const handleNotificationClick = () => {
+    // Show streak warning notification via modal/toast
+    alert(`🔥 Streak Status: ${user?.streakDays || 0} days\n\nComplete a lesson today to keep it going!`);
+  };
+
+  const handleStreakClick = () => {
+    setShowStreakInfo(!showStreakInfo);
+  };
+
   return (
-    <header className="header">
-      <div className="header__left">
-        <div className="header__brand">
-          <div className="header__logo" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <span className="header__title">Tradelingo</span>
-        </div>
-        <nav className="header__nav" aria-label="Main navigation">
-          <ul className="header__nav-list">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <li key={item.id} className="header__nav-item">
-                  <button
-                    type="button"
-                    className={`header__nav-link ${activeItem === item.id ? 'header__nav-link--active' : ''}`}
-                    onClick={() => setActiveItem(item.id)}
-                  >
-                    <Icon size={18} strokeWidth={2.5} className="header__nav-icon-svg" />
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </div>
-      <div className="header__actions">
-        {user ? (
-          <>
-            <button type="button" className="header__icon-btn" aria-label="Search">
-              <Search size={20} />
-            </button>
-            <button type="button" className="header__icon-btn header__icon-btn--badge" aria-label="Notifications">
-              <Bell size={20} />
-            </button>
-            <StreakCounter />
-            <div className="header__actions-divider" aria-hidden="true" />
-            <div className="header__user">
-              <div className="header__user-info">
-                <span className="header__user-name">{user.displayName}</span>
-                <span className="header__user-xp">
-                  <span className="header__xp-icon" aria-hidden="true" />
-                  {user.experiencePoints.toLocaleString()} XP
-                </span>
-              </div>
-              <div className="header__avatar" aria-hidden="true">
-                <span className="header__avatar-inner" />
-              </div>
+    <>
+      <StreakNotification />
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      
+      <header className="header">
+        <div className="header__left">
+          <div className="header__brand">
+            <div className="header__logo" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-
-            {/* --- LOGOUT BUTTON --- */}
-            <button 
-              type="button" 
-              className="header__icon-btn" 
-              aria-label="Log out"
-              style={{ marginLeft: '0.5rem' }}
-              onClick={() => {
-                setUser(null); // Clears the state AND local storage
-                navigate('/');   // Send them back to the home view
-              }}
-            >
-              <LogOut size={20} />
-            </button>
-
-          </>
-        ) : (
-          <div className="header__auth">
-            <button
-              type="button"
-              className="header__auth-btn header__auth-btn--register"
-              onClick={() => navigate('/register')}
-            >
-              Register
-            </button>
-            <button 
-              type="button" 
-              className="header__auth-btn header__auth-btn--login"
-              onClick={() => navigate('/login')}
-            >
-              Log in
-            </button>
+            <span className="header__title">Tradelingo</span>
           </div>
-        )}
-      </div>
-    </header>
+          <nav className="header__nav" aria-label="Main navigation">
+            <ul className="header__nav-list">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.id} className="header__nav-item">
+                    <button
+                      type="button"
+                      className={`header__nav-link ${activeItem === item.id ? 'header__nav-link--active' : ''}`}
+                      onClick={() => handleNavClick(item)}
+                    >
+                      <Icon size={18} strokeWidth={2.5} className="header__nav-icon-svg" />
+                      {item.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+        <div className="header__actions">
+          {user ? (
+            <>
+              <button 
+                type="button" 
+                className="header__icon-btn" 
+                aria-label="Search"
+                onClick={() => setSearchOpen(true)}
+                title="Search modules and articles"
+              >
+                <Search size={20} />
+              </button>
+              
+              <button 
+                type="button" 
+                className="header__icon-btn header__icon-btn--badge" 
+                aria-label="Notifications"
+                onClick={handleNotificationClick}
+                title="Streak notification"
+              >
+                <Bell size={20} />
+              </button>
+
+              <div className="header__streak-wrapper">
+                <button
+                  type="button"
+                  className="header__streak-btn"
+                  onClick={handleStreakClick}
+                  title="View streak details"
+                >
+                  <StreakCounter />
+                </button>
+                {showStreakInfo && (
+                  <div className="header__streak-info">
+                    <p><strong>{user.streakDays || 0} Day Streak!</strong></p>
+                    <p>🔥 Keep it going!</p>
+                    <p style={{ fontSize: '0.85rem', color: '#999' }}>Complete 1 activity per day</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="header__actions-divider" aria-hidden="true" />
+              <div className="header__user">
+                <div className="header__user-info">
+                  <span className="header__user-name">{user.displayName}</span>
+                  <span className="header__user-xp">
+                    <span className="header__xp-icon" aria-hidden="true" />
+                    {user.experiencePoints.toLocaleString()} XP
+                  </span>
+                </div>
+                <div className="header__avatar" aria-hidden="true">
+                  <span className="header__avatar-inner" />
+                </div>
+              </div>
+
+              <button 
+                type="button" 
+                className="header__icon-btn" 
+                aria-label="Log out"
+                style={{ marginLeft: '0.5rem' }}
+                onClick={() => {
+                  setUser(null);
+                  navigate('/');
+                }}
+              >
+                <LogOut size={20} />
+              </button>
+            </>
+          ) : (
+            <div className="header__auth">
+              <button
+                type="button"
+                className="header__auth-btn header__auth-btn--register"
+                onClick={() => navigate('/register')}
+              >
+                Register
+              </button>
+              <button 
+                type="button" 
+                className="header__auth-btn header__auth-btn--login"
+                onClick={() => navigate('/login')}
+              >
+                Log in
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
+    </>
   );
 }
 

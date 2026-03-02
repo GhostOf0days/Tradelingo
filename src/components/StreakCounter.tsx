@@ -12,7 +12,7 @@ export default function StreakCounter() {
 
   return (
     <div className="streak-counter" title={`${streakDays} day streak! Keep it up!`}>
-      <Flame size={18} className="streak-counter__icon" />
+      <Flame size={18} className="streak-counter__icon" fill="currentColor" strokeWidth={0} />
       <span className="streak-counter__text">{streakDays}</span>
     </div>
   );
