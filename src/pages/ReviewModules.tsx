@@ -25,8 +25,6 @@ export default function ReviewModules() {
   const { user } = useUser();
   const navigate = useNavigate();
   const [completedModules, setCompletedModules] = useState<CompletedModule[]>([]);
-  const [selectedModule, setSelectedModule] = useState<CompletedModule | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -61,11 +59,6 @@ export default function ReviewModules() {
 
     fetchProgress();
   }, [user]);
-
-  const handleSelectModule = (module: CompletedModule) => {
-    setSelectedModule(module);
-    setShowDetails(true);
-  };
 
   const handleReviewLesson = (moduleId: number) => {
     // Add ?review=true to the URL so the Lesson component knows to enter Review Mode!

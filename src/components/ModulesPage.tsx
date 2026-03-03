@@ -8,7 +8,7 @@ import './ModulesPage.css';
 const MODULES = [
   { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600 },
   { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800 },
-  { id: 3, title: 'Cryptocurrencies', lessonTotal: 21, experiencePoints: 700 },
+  { id: 3, title: 'Cryptocurrencies', lessonTotal: 15, experiencePoints: 700 },
   { id: 4, title: 'Brokers', lessonTotal: 10, experiencePoints: 600 },
 ];
 

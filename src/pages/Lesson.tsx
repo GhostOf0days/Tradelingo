@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULE_1_LESSONS } from '../data/module1';
+import { MODULE_2_LESSONS } from '../data/module2';
+import { MODULE_3_LESSONS } from '../data/module3';
+import { MODULE_4_LESSONS } from '../data/module4';
+
+// Module data mapping
+const MODULE_LESSONS: Record<number, any[]> = {
+  1: MODULE_1_LESSONS,
+  2: MODULE_2_LESSONS,
+  3: MODULE_3_LESSONS,
+  4: MODULE_4_LESSONS,
+};
 
 export default function Lesson() {
   const { id } = useParams();
@@ -13,6 +24,9 @@ export default function Lesson() {
   const queryParams = new URLSearchParams(location.search);
   const isReviewMode = queryParams.get('review') === 'true';
   
+  const moduleId = Number(id) || 1;
+  const moduleLessons = MODULE_LESSONS[moduleId] || MODULE_1_LESSONS;
+  
   const [lessonData, setLessonData] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -21,12 +35,12 @@ export default function Lesson() {
 
   // Separate function to load a specific lesson from local array
   const loadLocalLesson = (index: number) => {
-    if (index >= MODULE_1_LESSONS.length) {
+    if (index >= moduleLessons.length) {
       navigate('/review'); // Go back to review page when done
       return;
     }
     setLessonNumber(index);
-    setLessonData(MODULE_1_LESSONS[index]);
+    setLessonData(moduleLessons[index]);
     setCurrentStep('info');
     setSelectedAnswer(null);
   };
@@ -48,9 +62,9 @@ export default function Lesson() {
         if (!res.ok) throw new Error("Failed to reach database");
         
         const data = await res.json();
-        const currentIdx = data.progressByModuleId?.[id || "1"]?.lessonCurrent || 0;
+        const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
         
-        if (currentIdx >= MODULE_1_LESSONS.length) {
+        if (currentIdx >= moduleLessons.length) {
           navigate('/'); // Normal mode kick-out if already finished
         } else {
           loadLocalLesson(currentIdx);
@@ -77,11 +91,44 @@ export default function Lesson() {
           const res = await fetch('http://localhost:3000/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, moduleId: Number(id), xpToAdd: 50 })
+            body: JSON.stringify({ email: user.email, moduleId: moduleId, xpToAdd: 50 })
           });
           const data = await res.json();
           setUser({ ...user, experiencePoints: data.experiencePoints });
           updateStreak(); 
+        }
+        
+        // Check if this is the final lesson
+        if (lessonNumber === moduleLessons.length - 1) {
+          // This is the last lesson, call the module completion endpoint
+          if (user && !isReviewMode) {
+            const moduleNames: Record<number, string> = {
+              1: "Stock Market Fundamentals",
+              2: "Retirement Planning",
+              3: "Cryptocurrencies",
+              4: "Brokers and Trading Platforms"
+            };
+            
+            try {
+              console.log("Calling complete-module endpoint for module:", moduleId);
+              const completeRes = await fetch('http://localhost:3000/api/complete-module', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: user.email,
+                  moduleId: moduleId,
+                  title: moduleNames[moduleId] || `Module ${moduleId}`,
+                  score: 100,
+                  xpEarned: 500,
+                  lessonsTotal: moduleLessons.length
+                })
+              });
+              const completeData = await completeRes.json();
+              console.log("Complete module response:", completeData);
+            } catch (err) {
+              console.error("Error completing module:", err);
+            }
+          }
         }
         
         setCurrentStep('complete');
@@ -101,7 +148,7 @@ export default function Lesson() {
 
   if (isLoading || !lessonData) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
 
-  const progressPercent = Math.round((lessonNumber / 15) * 100);
+  const progressPercent = Math.round(((lessonNumber + 1) / moduleLessons.length) * 100);
 
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>

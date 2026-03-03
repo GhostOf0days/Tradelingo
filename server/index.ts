@@ -53,7 +53,10 @@ app.post('/api/register', async (req, res) => {
     res.status(201).json({ 
       email: newUser.email,
       displayName: newUser.displayName, 
-      experiencePoints: newUser.experiencePoints 
+      experiencePoints: newUser.experiencePoints,
+      streakDays: newUser.streakDays,
+      lastActivityDate: newUser.lastActivityDate,
+      lastUnlockedModuleId: newUser.lastUnlockedModuleId
     });
 
   } catch (error) {
@@ -81,7 +84,10 @@ app.post('/api/login', async (req, res) => {
     res.status(200).json({ 
       email: user.email,
       displayName: user.displayName, 
-      experiencePoints: user.experiencePoints 
+      experiencePoints: user.experiencePoints,
+      streakDays: user.streakDays || 0,
+      lastActivityDate: user.lastActivityDate,
+      lastUnlockedModuleId: user.lastUnlockedModuleId || 1
     });
   } catch (error) {
     console.error(error);
@@ -289,10 +295,18 @@ app.post('/api/complete-module', async (req, res) => {
       lessons: lessonsTotal || 0
     };
 
+    // First, fetch the user to get the current lastUnlockedModuleId
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Calculate the new lastUnlockedModuleId (use the max)
+    const newUnlockedId = Math.max(user.lastUnlockedModuleId || 1, moduleId + 1);
+
     const result = await usersCollection.findOneAndUpdate(
       { email },
       {
-        $push: { completedModules: completedModule as any }
+        $push: { completedModules: completedModule as any },
+        $set: { lastUnlockedModuleId: newUnlockedId }
       },
       { returnDocument: 'after' }
     );
@@ -301,7 +315,8 @@ app.post('/api/complete-module', async (req, res) => {
 
     res.status(200).json({
       message: 'Module marked as completed',
-      completedModules: result.completedModules
+      completedModules: result.completedModules,
+      lastUnlockedModuleId: result.lastUnlockedModuleId
     });
   } catch (error) {
     console.error(error);
@@ -331,10 +346,53 @@ app.get('/api/user/:email', async (req, res) => {
   }
 });
 
+// Migration: Update existing users to have required fields
+async function runMigrations() {
+  try {
+    console.log("🔄 Running schema migrations...");
+
+    // 1. Add lastUnlockedModuleId to users who don't have it
+    const updateUnlockedId = await usersCollection.updateMany(
+      { lastUnlockedModuleId: { $exists: false } },
+      { $set: { lastUnlockedModuleId: 1 } }
+    );
+    if (updateUnlockedId.modifiedCount > 0) {
+      console.log(`✅ Migration: Added lastUnlockedModuleId to ${updateUnlockedId.modifiedCount} users`);
+    }
+
+    // 2. Ensure progressByModuleId exists
+    const updateProgress = await usersCollection.updateMany(
+      { progressByModuleId: { $exists: false } },
+      { $set: { progressByModuleId: {} } }
+    );
+    if (updateProgress.modifiedCount > 0) {
+      console.log(`✅ Migration: Added progressByModuleId to ${updateProgress.modifiedCount} users`);
+    }
+
+    // 3. Ensure completedModules array exists
+    const updateCompleted = await usersCollection.updateMany(
+      { completedModules: { $exists: false } },
+      { $set: { completedModules: [] } }
+    );
+    if (updateCompleted.modifiedCount > 0) {
+      console.log(`✅ Migration: Added completedModules to ${updateCompleted.modifiedCount} users`);
+    }
+
+    console.log("✅ Schema migrations completed");
+
+  } catch (error) {
+    console.error("❌ Migration error:", error);
+  }
+}
+
 // Start the server
 const PORT = 3000;
-client.connect().then(() => {
+client.connect().then(async () => {
   console.log("✅ Connected to MongoDB");
+  
+  // Run migrations before starting the server
+  await runMigrations();
+  
   app.listen(PORT, () => {
     console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   });

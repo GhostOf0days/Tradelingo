@@ -11,6 +11,9 @@
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
   cursor: help;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  outline: none;
+  margin: 0;
 }
 
 .streak-counter:hover {
@@ -20,6 +23,11 @@
 
 .streak-counter__icon {
   animation: flicker 1.5s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
 }
 
 .streak-counter__text {
