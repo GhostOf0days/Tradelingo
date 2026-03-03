@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { MODULE_1_PRETEST } from '../data/module1';
+import { TRADING_PRETEST } from '../data/trading';
 
 export default function Pretest() {
   const { id } = useParams();
@@ -14,15 +14,15 @@ export default function Pretest() {
   const [isComplete, setIsComplete] = useState(false);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
 
-  const currentQuestion = MODULE_1_PRETEST[currentIndex];
-  const progressPercent = Math.round((currentIndex / MODULE_1_PRETEST.length) * 100);
+  const currentQuestion = TRADING_PRETEST[currentIndex];
+  const progressPercent = Math.round((currentIndex / TRADING_PRETEST.length) * 100);
 
   const handleNext = async () => {
     const isCorrect = selectedAnswer === currentQuestion.correctIndex;
     const newScore = isCorrect ? score + 1 : score;
     setScore(newScore);
 
-    if (currentIndex < MODULE_1_PRETEST.length - 1) {
+    if (currentIndex < TRADING_PRETEST.length - 1) {
       setCurrentIndex(curr => curr + 1);
       setSelectedAnswer(null);
     } else {
@@ -86,7 +86,7 @@ export default function Pretest() {
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{passed ? '🏆' : '📚'}</div>
           <h2>{passed ? 'You Tested Out!' : 'Keep Learning!'}</h2>
           <p style={{ color: 'var(--text-muted)' }}>
-            You scored {score} out of {MODULE_1_PRETEST.length}.
+            You scored {score} out of {TRADING_PRETEST.length}.
             {passed ? " The next module is now unlocked and you earned +500 XP!" : " You need 12 correct to test out. Head back to take the regular lessons."}
           </p>
           <button className="modules__card-btn" style={{ marginTop: '2rem' }} onClick={() => navigate('/')}>
@@ -155,7 +155,7 @@ export default function Pretest() {
         onClick={handleNext}
         disabled={selectedAnswer === null}
       >
-        {currentIndex === MODULE_1_PRETEST.length - 1 ? 'Submit Exam' : 'Next Question'}
+        {currentIndex === TRADING_PRETEST.length - 1 ? 'Submit Exam' : 'Next Question'}
       </button>
 
       {/* Skip Dialog Modal */}

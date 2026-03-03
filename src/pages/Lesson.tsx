@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { MODULE_1_LESSONS } from '../data/module1';
+import { TRADING_LESSONS } from '../data/trading';
 
 export default function Lesson() {
   const { id } = useParams();
@@ -32,11 +32,11 @@ export default function Lesson() {
       // Get current lesson index, safely defaulting to 0
       const currentIdx = data.progressByModuleId?.[id || "1"]?.lessonCurrent || 0;
       
-      if (currentIdx >= MODULE_1_LESSONS.length) {
+      if (currentIdx >= TRADING_LESSONS.length) {
         navigate('/'); // Module already finished
       } else {
         setLessonNumber(currentIdx);
-        setLessonData(MODULE_1_LESSONS[currentIdx]);
+        setLessonData(TRADING_LESSONS[currentIdx]);
         setCurrentStep('info');
         setSelectedAnswer(null);
       }
@@ -44,7 +44,7 @@ export default function Lesson() {
       console.error("Error loading lesson:", err);
       // Fallback: If the database connection blips, safely load Lesson 1 anyway
       setLessonNumber(0);
-      setLessonData(MODULE_1_LESSONS[0]);
+      setLessonData(TRADING_LESSONS[0]);
     } finally {
       // ALWAYS turn off the loading screen, no matter what happens
       setIsLoading(false);
