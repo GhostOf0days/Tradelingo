@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULE_1_LESSONS } from '../data/module1';
 
 export default function Lesson() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, setUser, updateStreak } = useUser();
+  
+  // Check if we are in review mode
+  const queryParams = new URLSearchParams(location.search);
+  const isReviewMode = queryParams.get('review') === 'true';
   
   const [lessonData, setLessonData] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
@@ -14,8 +19,19 @@ export default function Lesson() {
   const [lessonNumber, setLessonNumber] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Separate function to load a specific lesson from local array
+  const loadLocalLesson = (index: number) => {
+    if (index >= MODULE_1_LESSONS.length) {
+      navigate('/review'); // Go back to review page when done
+      return;
+    }
+    setLessonNumber(index);
+    setLessonData(MODULE_1_LESSONS[index]);
+    setCurrentStep('info');
+    setSelectedAnswer(null);
+  };
+
   const fetchCurrentProgress = async () => {
-    // 1. If they aren't logged in, redirect them to login so they don't get stuck!
     if (!user) {
       navigate('/login');
       return;
@@ -23,30 +39,27 @@ export default function Lesson() {
     
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/progress/${user.email}`);
-      
-      if (!res.ok) throw new Error("Failed to reach database");
-      
-      const data = await res.json();
-      
-      // Get current lesson index, safely defaulting to 0
-      const currentIdx = data.progressByModuleId?.[id || "1"]?.lessonCurrent || 0;
-      
-      if (currentIdx >= MODULE_1_LESSONS.length) {
-        navigate('/'); // Module already finished
+      if (isReviewMode) {
+        // If reviewing, just start at lesson index 0 locally!
+        loadLocalLesson(0);
       } else {
-        setLessonNumber(currentIdx);
-        setLessonData(MODULE_1_LESSONS[currentIdx]);
-        setCurrentStep('info');
-        setSelectedAnswer(null);
+        // Normal mode: Fetch real progress
+        const res = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+        if (!res.ok) throw new Error("Failed to reach database");
+        
+        const data = await res.json();
+        const currentIdx = data.progressByModuleId?.[id || "1"]?.lessonCurrent || 0;
+        
+        if (currentIdx >= MODULE_1_LESSONS.length) {
+          navigate('/'); // Normal mode kick-out if already finished
+        } else {
+          loadLocalLesson(currentIdx);
+        }
       }
     } catch (err) {
       console.error("Error loading lesson:", err);
-      // Fallback: If the database connection blips, safely load Lesson 1 anyway
-      setLessonNumber(0);
-      setLessonData(MODULE_1_LESSONS[0]);
+      loadLocalLesson(0);
     } finally {
-      // ALWAYS turn off the loading screen, no matter what happens
       setIsLoading(false);
     }
   };
@@ -58,7 +71,9 @@ export default function Lesson() {
       setCurrentStep('quiz');
     } else if (currentStep === 'quiz') {
       if (selectedAnswer === lessonData.question.correctIndex) {
-        if (user) {
+        
+        // ONLY update DB if we are NOT in review mode
+        if (user && !isReviewMode) {
           const res = await fetch('http://localhost:3000/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -66,12 +81,21 @@ export default function Lesson() {
           });
           const data = await res.json();
           setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak(); // Update streak when lesson is completed
+          updateStreak(); 
         }
+        
         setCurrentStep('complete');
       } else {
         alert("Incorrect! Try again.");
       }
+    }
+  };
+
+  const handleNextLesson = () => {
+    if (isReviewMode) {
+      loadLocalLesson(lessonNumber + 1); // Progress locally
+    } else {
+      fetchCurrentProgress(); // Fetch next from DB
     }
   };
 
@@ -82,38 +106,22 @@ export default function Lesson() {
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
       
-      {/* Header Area with Progress Bar AND Test Out Button */}
+      {/* Header Area */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Module Progress</span>
+            <span style={{ color: 'var(--text-muted)' }}>
+              {isReviewMode ? 'Review Progress' : 'Module Progress'}
+            </span>
             <span style={{ fontWeight: 'bold' }}>{progressPercent}%</span>
           </div>
           <div style={{ height: '12px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-            <div style={{ 
-              height: '100%', width: `${progressPercent}%`, 
-              background: 'var(--accent)', transition: 'width 0.6s ease' 
-            }} />
+            <div style={{ height: '100%', width: `${progressPercent}%`, background: isReviewMode ? '#22c55e' : 'var(--accent)', transition: 'width 0.6s ease' }} />
           </div>
         </div>
         
-        {/* NEW: Test Out Button */}
-        {currentStep !== 'complete' && (
-          <button 
-            onClick={() => navigate(`/pretest/${id}`)}
-            style={{
-              padding: '0.5rem 1rem',
-              background: 'transparent',
-              border: '2px solid #eab308',
-              color: '#eab308',
-              borderRadius: '0.5rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            Test Out
-          </button>
+        {!isReviewMode && currentStep !== 'complete' && (
+          <button onClick={() => navigate(`/pretest/${id}`)} style={{ padding: '0.5rem 1rem', background: 'transparent', border: '2px solid #eab308', color: '#eab308', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>Test Out</button>
         )}
       </div>
 
@@ -148,12 +156,12 @@ export default function Lesson() {
 
         {currentStep === 'complete' && (
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem' }}>🎉</div>
-            <h2>Excellent Work!</h2>
-            <p>You earned +50 XP.</p>
+            <div style={{ fontSize: '3rem' }}>{isReviewMode ? '🔁' : '🎉'}</div>
+            <h2>{isReviewMode ? 'Review Complete!' : 'Excellent Work!'}</h2>
+            <p>{isReviewMode ? 'Great job refreshing your memory.' : 'You earned +50 XP.'}</p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
-               <button className="modules__card-btn" onClick={() => navigate('/')} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'white' }}>Map</button>
-               <button className="modules__card-btn" onClick={fetchCurrentProgress}>Next Lesson</button>
+               <button className="modules__card-btn" onClick={() => navigate('/')} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'white' }}>{isReviewMode ? 'Exit Review' : 'Map'}</button>
+               <button className="modules__card-btn" onClick={handleNextLesson}>Next Lesson</button>
             </div>
           </div>
         )}
@@ -162,7 +170,7 @@ export default function Lesson() {
       {currentStep !== 'complete' && (
         <button 
           className="modules__card-btn" 
-          style={{ width: '100%', marginTop: '2rem', justifyContent: 'center' }}
+          style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: isReviewMode ? '#22c55e' : '' }}
           onClick={handleNext}
           disabled={currentStep === 'quiz' && selectedAnswer === null}
         >

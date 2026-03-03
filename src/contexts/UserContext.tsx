@@ -68,16 +68,29 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   // Function to update streak (called when user completes a lesson)
-  const updateStreak = () => {
+  const updateStreak = async () => {
     if (user) {
       const today = new Date().toISOString().split('T')[0];
       // Only increment if we haven't updated streak today
       if (user.lastActivityDate !== today) {
-        setUserState({
+        // Update locally
+        const updatedUser = {
           ...user,
           streakDays: (user.streakDays || 1) + 1,
           lastActivityDate: today,
-        });
+        };
+        setUserState(updatedUser);
+
+        // Also sync to backend
+        try {
+          await fetch('http://localhost:3000/api/update-streak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email })
+          });
+        } catch (err) {
+          console.error('Failed to update streak on backend:', err);
+        }
       }
     }
   };
