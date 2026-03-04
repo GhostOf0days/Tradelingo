@@ -136,7 +136,7 @@ app.post('/api/complete-lesson', async (req, res) => {
   try {
     const { email, moduleId, xpToAdd } = req.body;
     
-    if (!email || !moduleId) {
+    if (!email || moduleId === undefined || moduleId === null) {
       return res.status(400).json({ error: 'Email and moduleId are required' });
     }
 
