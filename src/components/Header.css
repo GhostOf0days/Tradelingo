@@ -139,6 +139,20 @@
   height: 1.25rem;
 }
 
+.header__streak-wrapper {
+  position: relative;
+}
+
+.header__streak-btn {
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .header__user {
   display: flex;
   align-items: center;
@@ -229,4 +243,25 @@
 
 .header__auth-btn--login:hover {
   background: var(--accent-hover);
+}
+
+.header__streak-info {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.header__streak-info p {
+  margin: 0.25rem 0;
+  line-height: 1.4;
 }

@@ -42,6 +42,9 @@ app.post('/api/register', async (req, res) => {
       experiencePoints: 0,
       lastUnlockedModuleId: 1, // Start at module 1
       progressByModuleId: {},  // Empty object to track lesson progress
+      streakDays: 0, // Track daily streak
+      lastActivityDate: null, // For streak reset logic
+      completedModules: [], // Array of completed modules with details
       createdAt: new Date()
     };
 
@@ -50,7 +53,10 @@ app.post('/api/register', async (req, res) => {
     res.status(201).json({ 
       email: newUser.email,
       displayName: newUser.displayName, 
-      experiencePoints: newUser.experiencePoints 
+      experiencePoints: newUser.experiencePoints,
+      streakDays: newUser.streakDays,
+      lastActivityDate: newUser.lastActivityDate,
+      lastUnlockedModuleId: newUser.lastUnlockedModuleId
     });
 
   } catch (error) {
@@ -78,7 +84,10 @@ app.post('/api/login', async (req, res) => {
     res.status(200).json({ 
       email: user.email,
       displayName: user.displayName, 
-      experiencePoints: user.experiencePoints 
+      experiencePoints: user.experiencePoints,
+      streakDays: user.streakDays || 0,
+      lastActivityDate: user.lastActivityDate,
+      lastUnlockedModuleId: user.lastUnlockedModuleId || 1
     });
   } catch (error) {
     console.error(error);
@@ -200,10 +209,190 @@ app.post('/api/pass-module', async (req, res) => {
   }
 });
 
+// 7. Update Streak
+app.post('/api/update-streak', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const today = new Date().toISOString().split('T')[0];
+    const lastActivity = user.lastActivityDate;
+
+    // Check if streak should be updated
+    let newStreakDays = user.streakDays || 0;
+    
+    if (lastActivity !== today) {
+      // Check if it's a new day
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      if (lastActivity === yesterdayStr) {
+        // Streak continues
+        newStreakDays += 1;
+      } else if (!lastActivity) {
+        // First activity
+        newStreakDays = 1;
+      } else {
+        // Streak broken (more than 1 day gap)
+        newStreakDays = 1;
+      }
+    }
+
+    const result = await usersCollection.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          lastActivityDate: today,
+          streakDays: newStreakDays
+        }
+      },
+      { returnDocument: 'after' }
+    );
+
+    res.status(200).json({
+      streakDays: result?.streakDays,
+      lastActivityDate: result?.lastActivityDate
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error updating streak' });
+  }
+});
+
+// 8. Get Completed Modules
+app.get('/api/completed-modules/:email', async (req, res) => {
+  try {
+    const user = await usersCollection.findOne({ email: req.params.email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.status(200).json(user.completedModules || []);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error fetching completed modules' });
+  }
+});
+
+// 9. Mark Module as Completed
+app.post('/api/complete-module', async (req, res) => {
+  try {
+    const { email, moduleId, title, score, xpEarned, lessonsTotal } = req.body;
+    
+    if (!email || !moduleId) {
+      return res.status(400).json({ error: 'Email and moduleId are required' });
+    }
+
+    const completedDate = new Date().toISOString().split('T')[0];
+    
+    const completedModule = {
+      moduleId,
+      title,
+      description: `Completed module for ${title}`,
+      completedDate,
+      xpEarned: xpEarned || 0,
+      score: score || 0,
+      lessons: lessonsTotal || 0
+    };
+
+    // First, fetch the user to get the current lastUnlockedModuleId
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Calculate the new lastUnlockedModuleId (use the max)
+    const newUnlockedId = Math.max(user.lastUnlockedModuleId || 1, moduleId + 1);
+
+    const result = await usersCollection.findOneAndUpdate(
+      { email },
+      {
+        $push: { completedModules: completedModule as any },
+        $set: { lastUnlockedModuleId: newUnlockedId }
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) return res.status(404).json({ error: 'User not found' });
+
+    res.status(200).json({
+      message: 'Module marked as completed',
+      completedModules: result.completedModules,
+      lastUnlockedModuleId: result.lastUnlockedModuleId
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error completing module' });
+  }
+});
+
+// 10. Get User Full Profile (including streak and completed modules)
+app.get('/api/user/:email', async (req, res) => {
+  try {
+    const user = await usersCollection.findOne({ email: req.params.email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.status(200).json({
+      email: user.email,
+      displayName: user.displayName,
+      experiencePoints: user.experiencePoints,
+      streakDays: user.streakDays || 0,
+      lastActivityDate: user.lastActivityDate,
+      lastUnlockedModuleId: user.lastUnlockedModuleId,
+      progressByModuleId: user.progressByModuleId || {},
+      completedModules: user.completedModules || []
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error fetching user profile' });
+  }
+});
+
+// Migration: Update existing users to have required fields
+async function runMigrations() {
+  try {
+    console.log("🔄 Running schema migrations...");
+
+    // 1. Add lastUnlockedModuleId to users who don't have it
+    const updateUnlockedId = await usersCollection.updateMany(
+      { lastUnlockedModuleId: { $exists: false } },
+      { $set: { lastUnlockedModuleId: 1 } }
+    );
+    if (updateUnlockedId.modifiedCount > 0) {
+      console.log(`✅ Migration: Added lastUnlockedModuleId to ${updateUnlockedId.modifiedCount} users`);
+    }
+
+    // 2. Ensure progressByModuleId exists
+    const updateProgress = await usersCollection.updateMany(
+      { progressByModuleId: { $exists: false } },
+      { $set: { progressByModuleId: {} } }
+    );
+    if (updateProgress.modifiedCount > 0) {
+      console.log(`✅ Migration: Added progressByModuleId to ${updateProgress.modifiedCount} users`);
+    }
+
+    // 3. Ensure completedModules array exists
+    const updateCompleted = await usersCollection.updateMany(
+      { completedModules: { $exists: false } },
+      { $set: { completedModules: [] } }
+    );
+    if (updateCompleted.modifiedCount > 0) {
+      console.log(`✅ Migration: Added completedModules to ${updateCompleted.modifiedCount} users`);
+    }
+
+    console.log("✅ Schema migrations completed");
+
+  } catch (error) {
+    console.error("❌ Migration error:", error);
+  }
+}
+
 // Start the server
 const PORT = 3000;
-client.connect().then(() => {
+client.connect().then(async () => {
   console.log("✅ Connected to MongoDB");
+  
+  // Run migrations before starting the server
+  await runMigrations();
+  
   app.listen(PORT, () => {
     console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   });
