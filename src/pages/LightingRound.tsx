@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { MODULE_1_PRETEST } from '../data/module1';
-import { MODULE_2_PRETEST } from '../data/module2';
-import { MODULE_3_PRETEST } from '../data/module3';
-import { MODULE_4_PRETEST } from '../data/module4';
+import { TRADING_PRETEST } from '../data/trading';
+import { RETIREMENT_PRETEST } from '../data/retirement';
+import { CRYPTOCURRENCIES_PRETEST } from '../data/Cryptocurrencies';
+import { BROKERS_PRETEST } from '../data/Brokers';
 import '../styles/LightingRound.css';
 
 const QUESTION_TIME = 10;
@@ -22,10 +22,10 @@ type Question = {
 type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
 
 const ALL_QUESTIONS: Question[] = [
-  ...MODULE_1_PRETEST.map(q => ({ ...q, category: 'Trading' })),
-  ...MODULE_2_PRETEST.map(q => ({ ...q, category: 'Retirement' })),
-  ...MODULE_3_PRETEST.map(q => ({ ...q, category: 'Crypto' })),
-  ...MODULE_4_PRETEST.map(q => ({ ...q, category: 'Brokers' })),
+  ...TRADING_PRETEST.map(q => ({ ...q, category: 'Trading' })),
+  ...RETIREMENT_PRETEST.map(q => ({ ...q, category: 'Retirement' })),
+  ...CRYPTOCURRENCIES_PRETEST.map(q => ({ ...q, category: 'Crypto' })),
+  ...BROKERS_PRETEST.map(q => ({ ...q, category: 'Brokers' })),
 ];
 
 function shuffle<T>(arr: T[]): T[] {

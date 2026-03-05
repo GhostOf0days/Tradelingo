@@ -1,6 +1,4 @@
-// src/data/module3.ts - Cryptocurrencies
-
-export const MODULE_3_PRETEST = [
+export const CRYPTOCURRENCIES_PRETEST = [
   { question: "What is blockchain?", options: ["A type of stock market", "A distributed ledger technology that records transactions across many computers", "A block of currencies", "A bank's security system"], correctIndex: 1 },
   { question: "What is Bitcoin?", options: ["A currency used in banks", "The first and largest cryptocurrency", "A type of blockchain", "A payment method"], correctIndex: 1 },
   { question: "Who created Bitcoin?", options: ["The Federal Reserve", "A mysterious person or group named Satoshi Nakamoto", "Mark Zuckerberg", "Elon Musk"], correctIndex: 1 },
@@ -24,7 +22,7 @@ export const MODULE_3_PRETEST = [
   { question: "What is the total supply of Bitcoin?", options: ["Unlimited", "1 million coins", "21 million coins", "100 million coins"], correctIndex: 2 }
 ];
 
-export const MODULE_3_LESSONS = [
+export const CRYPTOCURRENCIES_LESSONS = [
   {
     title: "Lesson 1: What is Cryptocurrency?",
     content: `Cryptocurrency is digital money that uses cryptography (encryption) to secure transactions and control the creation of new units. It exists only on the internet, not as physical coins or bills.
@@ -58,7 +56,7 @@ Risks:
 • Regulatory uncertainty (laws still being written)
 • Scams and fraud are common
 • Technology is complex for beginners`,
-    question: MODULE_3_PRETEST[0]
+    question: CRYPTOCURRENCIES_PRETEST[0]
   },
   {
     title: "Lesson 2: Bitcoin - The First Cryptocurrency",
@@ -113,7 +111,7 @@ Cons:
 • Slow transactions (10 min average)
 • Energy-intensive mining
 • Irreversible transactions (can't dispute charges)`,
-    question: MODULE_3_PRETEST[1]
+    question: CRYPTOCURRENCIES_PRETEST[1]
   },
   {
     title: "Lesson 3: Ethereum and Smart Contracts",
@@ -169,7 +167,7 @@ Layer 2 solutions process thousands of transactions/second with lower fees:
 ETH vs BTC:
 Bitcoin: Fixed supply, limited functionality, "store of value"
 Ethereum: Complex applications, growing uses, constantly evolving`,
-    question: MODULE_3_PRETEST[2]
+    question: CRYPTOCURRENCIES_PRETEST[2]
   },
   {
     title: "Lesson 4: How Blockchain Works",
@@ -242,7 +240,7 @@ With thousands of nodes, how do they agree on truth?
 • Proof of Work (Bitcoin): Majority of computing power validates
 • Proof of Stake (Ethereum 2.0): Owners of coins validate (more energy efficient)
 • Other mechanisms: Proof of Authority, Proof of History, etc.`,
-    question: MODULE_3_PRETEST[3]
+    question: CRYPTOCURRENCIES_PRETEST[3]
   },
   {
     title: "Lesson 5: Cryptocurrency Wallets",
@@ -309,7 +307,7 @@ Never:
 • Keep only on exchange
 
 Security tip: Use a 12-24 word seed phrase (backup). If you lose your device, you can recover with seed phrase on any wallet.`,
-    question: MODULE_3_PRETEST[4]
+    question: CRYPTOCURRENCIES_PRETEST[4]
   },
   {
     title: "Lesson 6: Altcoins and Tokens",
@@ -384,7 +382,7 @@ Red flags (potential scams):
 • High fees or locked liquidity
 
 Remember: Most altcoins fail. Bitcoin has survived 14+ years. Most new projects die within 1-2 years.`,
-    question: MODULE_3_PRETEST[5]
+    question: CRYPTOCURRENCIES_PRETEST[5]
   },
   {
     title: "Lesson 7: Decentralized Finance (DeFi)",
@@ -458,7 +456,7 @@ Best practices:
 • Understand what you're doing
 • Don't use leverage until experienced
 • Diversify across protocols`,
-    question: MODULE_3_PRETEST[6]
+    question: CRYPTOCURRENCIES_PRETEST[6]
   },
   {
     title: "Lesson 8: Trading and Volatility",
@@ -558,7 +556,7 @@ Leverage (margin) trading:
 • Amplifies both gains and losses
 • One mistake = total loss + you owe money
 • Not recommended unless professional`,
-    question: MODULE_3_PRETEST[7]
+    question: CRYPTOCURRENCIES_PRETEST[7]
   },
   {
     title: "Lesson 9: Crypto Exchanges and Security",
@@ -677,7 +675,7 @@ Benefits of KYC:
 Drawbacks:
 • Privacy concerns
 • Kyc required before you can withdraw to bank`,
-    question: MODULE_3_PRETEST[8]
+    question: CRYPTOCURRENCIES_PRETEST[8]
   },
   {
     title: "Lesson 10: Crypto Regulations and Tax",
@@ -763,7 +761,7 @@ Compliance for serious investors:
 • Report income from mining/staking
 • Report capital gains/losses
 • File timely returns`,
-    question: MODULE_3_PRETEST[9]
+    question: CRYPTOCURRENCIES_PRETEST[9]
   },
   {
     title: "Lesson 11: Risks and Scams",
@@ -887,7 +885,7 @@ Cold reality:
 • Once money is gone, it's gone
 
 Prevention is your only protection.`,
-    question: MODULE_3_PRETEST[10]
+    question: CRYPTOCURRENCIES_PRETEST[10]
   },
   {
     title: "Lesson 12: Crypto Investment Strategy",
@@ -1014,7 +1012,7 @@ The most important rule:
 Only invest what you can afford to lose. If you lose 100%, would it significantly impact your life? If yes, you're investing too much.
 
 Crypto is high-risk. Balance with traditional investments (stocks, bonds, real estate).`,
-    question: MODULE_3_PRETEST[11]
+    question: CRYPTOCURRENCIES_PRETEST[11]
   },
   {
     title: "Lesson 13: NFTs and Web3",
@@ -1144,7 +1142,7 @@ Do:
 • Support artists you genuinely like
 • Understand you likely lose money
 • Use for real utility (gaming, collectibles, credentials)`,
-    question: MODULE_3_PRETEST[12]
+    question: CRYPTOCURRENCIES_PRETEST[12]
   },
   {
     title: "Lesson 14: Crypto Fundamentals & Future",
@@ -1308,7 +1306,7 @@ Remember:
 • Long-term holding most reliable
 • Volatility tests your emotions
 • Only invest what you can afford to lose`,
-    question: MODULE_3_PRETEST[13]
+    question: CRYPTOCURRENCIES_PRETEST[13]
   },
   {
     title: "Lesson 15: Building Your Crypto Strategy",
@@ -1492,6 +1490,6 @@ Remember:
 • Only risk what you can afford to lose
 
 You've completed the Cryptocurrencies module! You now understand blockchain technology, investment strategies, and risks. Use this knowledge wisely.`,
-    question: MODULE_3_PRETEST[14]
+    question: CRYPTOCURRENCIES_PRETEST[14]
   }
 ];
