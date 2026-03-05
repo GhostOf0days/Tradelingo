@@ -1,6 +1,4 @@
-// src/data/module2.ts - Retirement Planning
-
-export const MODULE_2_PRETEST = [
+export const RETIREMENT_PRETEST = [
   { question: "What is a 401(k)?", options: ["A type of savings account", "An employer-sponsored retirement plan with tax advantages", "A government pension", "A type of stock"], correctIndex: 1 },
   { question: "What does an IRA stand for?", options: ["Individual Retirement Account", "International Revenue Administration", "Institutional Risk Assessment", "Investment Rate Agreement"], correctIndex: 0 },
   { question: "What is the advantage of a Roth IRA?", options: ["Higher contribution limits", "Tax-free withdrawals in retirement", "Government contributions match", "Immediate cash back"], correctIndex: 1 },
@@ -15,7 +13,7 @@ export const MODULE_2_PRETEST = [
   { question: "What is pension?", options: ["A type of punishment", "Regular payments made by an employer to an employee after retirement", "A government tax", "Life insurance"], correctIndex: 1 }
 ];
 
-export const MODULE_2_LESSONS = [
+export const RETIREMENT_LESSONS = [
   {
     title: "Lesson 1: Why Retire?",
     content: `Retirement is one of life's most important financial goals. It's the period when you stop working full-time and live off your savings, investments, and/or government benefits.
@@ -35,7 +33,7 @@ Three sources of retirement income:
 3. Personal savings and investments (401k, IRA, brokerage accounts)
 
 Starting early matters because of compound interest. Someone who starts saving at 25 can retire comfortably with modest contributions. Someone starting at 45 needs to save much more aggressively.`,
-    question: MODULE_2_PRETEST[0]
+    question: RETIREMENT_PRETEST[0]
   },
   {
     title: "Lesson 2: 401(k) Plans Basics",
@@ -63,7 +61,7 @@ Example: You earn $50,000/year. Employer matches 100% up to 3%.
 Not taking advantage of employer matching is leaving free money on the table.
 
 2024 limits: You can contribute up to $23,500/year to a traditional 401(k).`,
-    question: MODULE_2_PRETEST[1]
+    question: RETIREMENT_PRETEST[1]
   },
   {
     title: "Lesson 3: Traditional vs Roth 401(k)",
@@ -95,7 +93,7 @@ Choose Roth if:
 - You want more flexibility (can withdraw contributions anytime)
 
 Key advantage of Roth for young people: You contribute $20,000 now, it grows to $200,000 by retirement. You pay ZERO taxes on that $180,000 gain. That's enormous!`,
-    question: MODULE_2_PRETEST[2]
+    question: RETIREMENT_PRETEST[2]
   },
   {
     title: "Lesson 4: IRA Accounts",
@@ -128,7 +126,7 @@ IRA withdrawal penalties:
 • After age 73: Must take Required Minimum Distributions or face 25% penalty
 
 Strategy: Maximize 401(k) for employer match, then max out Roth IRA ($7,000), then save more in 401(k) or taxable brokerage.`,
-    question: MODULE_2_PRETEST[3]
+    question: RETIREMENT_PRETEST[3]
   },
   {
     title: "Lesson 5: Employer Matching",
@@ -156,7 +154,7 @@ The critical point: Contribute at least enough to get the full employer match. T
 Vesting schedules: Some employers have vesting schedules, meaning you don't own the match immediately. You have to work there for 1-5 years to own it fully. Always check your employer's vesting schedule!
 
 Pro tip: If you change jobs, maximize your 401(k) before leaving. Some employers stop contributions if you leave.`,
-    question: MODULE_2_PRETEST[4]
+    question: RETIREMENT_PRETEST[4]
   },
   {
     title: "Lesson 6: Early Withdrawals & Penalties",
@@ -193,7 +191,7 @@ After age 73, you must start withdrawing from Traditional 401(k)s and IRAs. The 
 Example: At age 73, if your account has $500,000, you might have to withdraw $18,000-20,000 that year.
 
 Strategy: Plan withdrawals carefully in retirement to minimize taxes and penalties.`,
-    question: MODULE_2_PRETEST[5]
+    question: RETIREMENT_PRETEST[5]
   },
   {
     title: "Lesson 7: Retirement Savings Goals",
@@ -230,7 +228,7 @@ Key variables:
 • Your investment returns (historically 7-10% for stocks)
 • How long you invest (time horizon)
 • How much you need in retirement`,
-    question: MODULE_2_PRETEST[6]
+    question: RETIREMENT_PRETEST[6]
   },
   {
     title: "Lesson 8: Social Security Basics",
@@ -260,7 +258,7 @@ If you live to 80+, waiting to claim pays off significantly.
 The reality: Social Security is designed to replace 40% of your pre-retirement income, not 100%. You need other sources.
 
 Benefit for retirement planning: Don't count on more than 30-40% of your current income from Social Security. Plan for the rest through personal savings.`,
-    question: MODULE_2_PRETEST[7]
+    question: RETIREMENT_PRETEST[7]
   },
   {
     title: "Lesson 9: Tax-Advantaged Strategies",
@@ -293,7 +291,7 @@ Tax-loss harvesting:
 In taxable accounts, sell losing positions to offset gains, reducing taxes. You can deduct up to $3,000 of losses against other income.
 
 State income tax: Some states have no income tax (Florida, Texas, Nevada). Retiring there can save significant taxes!`,
-    question: MODULE_2_PRETEST[8]
+    question: RETIREMENT_PRETEST[8]
   },
   {
     title: "Lesson 10: Healthcare & Long-Term Care",
@@ -325,7 +323,7 @@ Long-term care insurance:
 • Buy young (50s) before health issues
 
 The strategy: Budget $400-700/month for Medicare, $150-300/month for supplement, and consider long-term care insurance to protect your nest egg.`,
-    question: MODULE_2_PRETEST[9]
+    question: RETIREMENT_PRETEST[9]
   },
   {
     title: "Lesson 11: Retirement Lifestyle Planning",
@@ -367,7 +365,7 @@ Annual spending estimate: $55,000
 Target nest egg: $55,000 × 25 = $1,375,000
 
 Plan adjustments: Revisit your retirement plan every 5 years. If your investments outperform, you can increase spending. If underperform, adjust.`,
-    question: MODULE_2_PRETEST[10]
+    question: RETIREMENT_PRETEST[10]
   },
   {
     title: "Lesson 12: Putting It All Together",
@@ -414,6 +412,6 @@ Retirement (Age 65+):
 • Use 4% rule for annual withdrawals
 
 This plan results in comfortable retirement with $50,000+/year income, requires starting young, and relies on compound growth.`,
-    question: MODULE_2_PRETEST[11]
+    question: RETIREMENT_PRETEST[11]
   }
 ];

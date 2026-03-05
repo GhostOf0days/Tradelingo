@@ -1,6 +1,4 @@
-// src/data/module1.ts
-
-export const MODULE_1_PRETEST = [
+export const TRADING_PRETEST = [
   { question: "What does a stock represent?", options: ["A loan", "Fractional ownership", "A physical product", "Nothing"], correctIndex: 1 },
   { question: "What is a stock exchange?", options: ["A digital market to trade stocks", "A bank for companies", "A government tax agency", "A private club"], correctIndex: 0 },
   { question: "What is a 'Bear Market'?", options: ["Prices are rising", "Trading is paused", "Prices are falling", "Only animals can trade"], correctIndex: 2 },
@@ -18,7 +16,7 @@ export const MODULE_1_PRETEST = [
   { question: "What is Risk Tolerance?", options: ["How much market risk you can comfortably handle", "A legal document", "The maximum you can invest", "A guarantee against loss"], correctIndex: 0 }
 ];
 
-export const MODULE_1_LESSONS = [
+export const TRADING_LESSONS = [
   { 
     title: "Lesson 1: What is a Stock?", 
     content: `A stock represents a fractional ownership stake in a corporation. When you buy shares of a company, you become a part-owner of that business, no matter how small your stake.
@@ -28,7 +26,7 @@ Example: If a company has 1 million shares outstanding and you own 100 shares, y
 Why buy stocks? When companies are successful, their stock value increases, allowing you to profit. Some stocks also pay dividends (quarterly cash payments) to shareholders. Historically, stocks have returned about 10% annually on average over the long term, making them a key tool for wealth building.
 
 Common misconception: You don't need a lot of money to start. Many brokers let you buy fractional shares, meaning you can invest just $10 if you want.`, 
-    question: MODULE_1_PRETEST[0] 
+    question: TRADING_PRETEST[0] 
   },
   { 
     title: "Lesson 2: Stock Exchanges", 
@@ -41,7 +39,7 @@ The two largest US stock exchanges are:
 Other major exchanges worldwide include the LSE (London), Tokyo Stock Exchange, and Shanghai Stock Exchange.
 
 How it works: When you place an order to buy or sell a stock, it goes to the exchange where a matching buyer or seller is found. This happens in milliseconds! The exchange ensures fair pricing and transparent trading for all participants.`, 
-    question: MODULE_1_PRETEST[1] 
+    question: TRADING_PRETEST[1] 
   },
   { 
     title: "Lesson 3: Bulls vs. Bears", 
@@ -52,7 +50,7 @@ Bull Market: A period where stock prices are generally rising and investors are 
 Bear Market: A period where stock prices are falling 20% or more from recent highs, and investors are pessimistic. Bears are pessimistic because they "swat the market downward" with their paws. During bear markets, unemployment rises, profits decline, and people are afraid to invest. The 2008 financial crisis was a severe bear market where stocks lost 50%+ of their value.
 
 Important perspective: Even in bear markets, long-term investors who keep buying are actually getting deals on stocks. Think of it like a sale – lower prices mean better value.`, 
-    question: MODULE_1_PRETEST[2] 
+    question: TRADING_PRETEST[2] 
   },
   { 
     title: "Lesson 4: Dividends", 
@@ -68,7 +66,7 @@ Types of dividends:
 Why companies pay dividends: Mature, stable companies (like Coca-Cola, Pepsi, utilities) often use dividends to attract investors seeking steady income. Younger growth companies (like Apple, Microsoft) typically reinvest profits to expand rather than pay dividends.
 
 Pro tip: Dividend aristocrats are companies that have increased dividends for 25+ consecutive years – historically reliable investments.`, 
-    question: MODULE_1_PRETEST[3] 
+    question: TRADING_PRETEST[3] 
   },
   { 
     title: "Lesson 5: Market Capitalization", 
@@ -86,7 +84,7 @@ Market Cap categories:
 • Micro-cap (<$300M): Very small companies, very risky, very high growth potential
 
 Why it matters: Market cap helps you understand company size and risk. Large-cap stocks are generally safer, while small-cap stocks offer more growth potential but with more volatility.`, 
-    question: MODULE_1_PRETEST[4] 
+    question: TRADING_PRETEST[4] 
   },
   { 
     title: "Lesson 6: IPOs", 
@@ -104,7 +102,7 @@ Famous IPOs:
 • Airbnb (2020): IPO price $68, now worth $250+
 
 Why go public? IPOs raise massive capital for expansion, provide liquidity for early investors, and increase brand visibility. But companies must give up some privacy and autonomy.`, 
-    question: MODULE_1_PRETEST[5] 
+    question: TRADING_PRETEST[5] 
   },
   { 
     title: "Lesson 7: Ticker Symbols", 
@@ -125,7 +123,7 @@ How to find ticker symbols: Search Google "Apple ticker symbol" or use financial
 Why they matter: When you want to buy a stock, you search by ticker symbol. Charts, quotes, news, and research are organized by ticker. Knowing the ticker is essential for any trader.
 
 Pro tip: Some tickers are memorable acronyms. Netflix is NFLX, PayPal is PYPL, and Amazon is AMZN – they're designed to be easy to remember.`, 
-    question: MODULE_1_PRETEST[6] 
+    question: TRADING_PRETEST[6] 
   },
   { 
     title: "Lesson 8: Market Orders", 
@@ -148,7 +146,7 @@ Cons of Market Orders:
 • Not ideal for large trades – Buying 1 million shares at market price could move the market against you
 
 When to use: Market orders are ideal when you want to quickly enter or exit a position and price isn't critically important. Great for beginners.`, 
-    question: MODULE_1_PRETEST[7] 
+    question: TRADING_PRETEST[7] 
   },
   { 
     title: "Lesson 9: Limit Orders", 
@@ -174,7 +172,7 @@ Cons of Limit Orders:
 • Better for patient investors
 
 When to use: Limit orders are for investors with specific price targets or those wanting to buy during dips. Popular with experienced traders.`, 
-    question: MODULE_1_PRETEST[8] 
+    question: TRADING_PRETEST[8] 
   },
   { 
     title: "Lesson 10: Portfolios", 
@@ -202,7 +200,7 @@ Portfolio concepts:
 • Sector allocation – How much in technology vs healthcare vs energy, etc.
 
 Your first portfolio might be simple: Just a few stocks or an ETF. As it grows, you'll add more complexity and diversification.`, 
-    question: MODULE_1_PRETEST[9] 
+    question: TRADING_PRETEST[9] 
   },
   { 
     title: "Lesson 11: Diversification", 
@@ -228,7 +226,7 @@ How to diversify easily:
 Historical perspective: In the 2008 financial crisis, investors with diversified portfolios lost about 30-40%. Those with only stocks lost 50%+. Those with bonds and stocks lost only 20-30%. Diversification saved portfolios.
 
 Rule of thumb: You need at least 15-20 stocks to be truly diversified. With fewer, a single company's collapse can devastate your portfolio.`, 
-    question: MODULE_1_PRETEST[10] 
+    question: TRADING_PRETEST[10] 
   },
   { 
     title: "Lesson 12: Volatility", 
@@ -264,7 +262,7 @@ Common volatility measurement: Beta
 • Beta = 1.0 means the stock moves with the market
 • Beta < 1.0 means the stock is less volatile than the market
 • Beta > 1.0 means the stock is more volatile than the market (riskier)`, 
-    question: MODULE_1_PRETEST[11] 
+    question: TRADING_PRETEST[11] 
   },
   { 
     title: "Lesson 13: Blue Chip Stocks", 
@@ -296,7 +294,7 @@ Blue Chip downside:
 • Higher prices: Already well-priced, less room for upside surprise
 
 Strategy: Many investors build a foundation with Blue Chips and add growth stocks for potential home runs. Blue Chips provide the stability while growth stocks provide the excitement.`, 
-    question: MODULE_1_PRETEST[12] 
+    question: TRADING_PRETEST[12] 
   },
   { 
     title: "Lesson 14: ETFs", 
@@ -326,7 +324,7 @@ ETF disadvantages:
 • Can't pick winners: Own the losers too
 
 ETF strategy: Many beginners start with ETFs because they're safe, easy, and diversified. As you learn, you can pick individual stocks while keeping ETFs as your core holdings.`, 
-    question: MODULE_1_PRETEST[13] 
+    question: TRADING_PRETEST[13] 
   },
   { 
     title: "Lesson 15: Risk Tolerance", 
@@ -364,6 +362,6 @@ How to determine your tolerance:
 Critical insight: Risk tolerance is NOT about how smart you are – it's about your personality and life situation. Even smart investors with low tolerance shouldn't be 100% stocks. Conversely, young investors can afford high volatility.
 
 Action: Match your portfolio to your tolerance, not some generic advice. Losing sleep over investments is a sign your allocation doesn't match your tolerance.`, 
-    question: MODULE_1_PRETEST[14] 
+    question: TRADING_PRETEST[14] 
   }
 ];

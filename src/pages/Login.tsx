@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
-import "./Register.css"; // We can reuse the exact same sleek styles!
+import '../styles/Register.css';
 
 export default function Login() {
   const [email, setEmail] = useState("");

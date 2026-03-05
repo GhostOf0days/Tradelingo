@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { MODULE_1_LESSONS } from '../data/module1';
-import { MODULE_2_LESSONS } from '../data/module2';
-import { MODULE_3_LESSONS } from '../data/module3';
-import { MODULE_4_LESSONS } from '../data/module4';
+import { TRADING_LESSONS } from '../data/trading';
+import { RETIREMENT_LESSONS } from '../data/retirement';
+import { CRYPTOCURRENCIES_LESSONS } from '../data/Cryptocurrencies';
+import { BROKERS_LESSONS } from '../data/Brokers';
 
 // Module data mapping
 const MODULE_LESSONS: Record<number, any[]> = {
-  1: MODULE_1_LESSONS,
-  2: MODULE_2_LESSONS,
-  3: MODULE_3_LESSONS,
-  4: MODULE_4_LESSONS,
+  1: TRADING_LESSONS,
+  2: RETIREMENT_LESSONS,
+  3: CRYPTOCURRENCIES_LESSONS,
+  4: BROKERS_LESSONS,
 };
 
 export default function Lesson() {
@@ -25,7 +25,7 @@ export default function Lesson() {
   const isReviewMode = queryParams.get('review') === 'true';
   
   const moduleId = Number(id) || 1;
-  const moduleLessons = MODULE_LESSONS[moduleId] || MODULE_1_LESSONS;
+  const moduleLessons = MODULE_LESSONS[moduleId] || TRADING_LESSONS;
   
   const [lessonData, setLessonData] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
@@ -33,7 +33,7 @@ export default function Lesson() {
   const [lessonNumber, setLessonNumber] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Separate function to load a specific lesson from local array
+  // Separate function to load a specific lesson from local array 
   const loadLocalLesson = (index: number) => {
     if (index >= moduleLessons.length) {
       navigate('/review'); // Go back to review page when done

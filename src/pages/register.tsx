@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
-import "./Register.css";
+import '../styles/Register.css';
 
 export default function Register() {
   const [email, setEmail] = useState("");

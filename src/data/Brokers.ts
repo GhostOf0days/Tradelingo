@@ -1,6 +1,4 @@
-// src/data/module4.ts - Brokers and Trading Platforms
-
-export const MODULE_4_PRETEST = [
+export const BROKERS_PRETEST = [
   { question: "What is a broker?", options: ["A bank", "An intermediary that executes trades on your behalf", "A type of stock", "An investment advisor"], correctIndex: 1 },
   { question: "What are the main types of brokers?", options: ["Full-service only", "Discount and full-service", "Government brokers", "Bank brokers"], correctIndex: 1 },
   { question: "What is a commission in trading?", options: ["Government tax", "Fee charged by broker for executing trades", "Profit from your trades", "A type of stock"], correctIndex: 1 },
@@ -18,7 +16,7 @@ export const MODULE_4_PRETEST = [
   { question: "What is short selling?", options: ["Selling small amounts", "Borrowing shares to sell, then buying back cheaper", "Quick profit strategy", "Selling before buying"], correctIndex: 1 }
 ];
 
-export const MODULE_4_LESSONS = [
+export const BROKERS_LESSONS = [
   {
     title: "Lesson 1: What is a Broker?",
     content: `A broker is an intermediary that executes trades on your behalf. Think of them as a middleman between you and the stock exchange.
@@ -197,7 +195,7 @@ Remember:
 • All major brokers similar quality
 • Fee difference minimal now
 • Focus on ease of use and education`,
-    question: MODULE_4_PRETEST[0]
+    question: BROKERS_PRETEST[0]
   },
   {
     title: "Lesson 2: Broker Types and Models",
@@ -387,7 +385,7 @@ Choose robo-advisor if:
 
 Key takeaway:
 Model matters less than total costs. Compare all-in costs (fees + execution quality) when choosing.`,
-    question: MODULE_4_PRETEST[1]
+    question: BROKERS_PRETEST[1]
   },
   {
     title: "Lesson 3: Order Types and Execution",
@@ -596,7 +594,7 @@ Different orders suit different situations. Master these 4:
 2. Limit (price control)
 3. Stop-loss (downside protection)
 4. Trailing stop (profit protection)`,
-    question: MODULE_4_PRETEST[3]
+    question: BROKERS_PRETEST[3]
   },
   {
     title: "Lesson 4: Trading Hours and Execution",
@@ -816,7 +814,7 @@ For most traders:
 • Wait for settlement before relying on funds
 • Never use leverage if inexperienced
 • Plan trades with 2-day settlement in mind`,
-    question: MODULE_4_PRETEST[6]
+    question: BROKERS_PRETEST[6]
   },
   {
     title: "Lesson 5: Margin and Leverage",
@@ -1037,7 +1035,7 @@ Most successful investors rarely use margin. Warren Buffett uses minimal leverag
 
 Key takeaway:
 Margin amplifies both gains and losses. Most retail traders lose money with margin. Only use if you understand the risks and have specific strategy. Better to trade with cash and grow slowly than to blow up account with leverage.`,
-    question: MODULE_4_PRETEST[4]
+    question: BROKERS_PRETEST[4]
   },
   {
     title: "Lesson 6: Broker Tools and Research",
@@ -1281,7 +1279,7 @@ Advanced:
 
 Remember:
 More tools don't equal better results. Focus on understanding few tools well rather than mastering many poorly.`,
-    question: MODULE_4_PRETEST[9]
+    question: BROKERS_PRETEST[9]
   },
   {
     title: "Lesson 7: Risk Management and Psychology",
@@ -1520,7 +1518,7 @@ The failed traders:
 Emotional, overconfident, undisciplined, chasing.
 
 Which will you be?`,
-    question: MODULE_4_PRETEST[11]
+    question: BROKERS_PRETEST[11]
   },
   {
     title: "Lesson 8: Account Types and Taxes",
@@ -1786,7 +1784,7 @@ Tax planning tips:
 Most important:
 Many traders ignore taxes and blow up when tax bills come due.
 Plan for taxes when planning trades.`,
-    question: MODULE_4_PRETEST[12]
+    question: BROKERS_PRETEST[12]
   },
   {
     title: "Lesson 9: Getting Started as a Trader",
@@ -2143,7 +2141,7 @@ Learn from mistakes.
 Enjoy the journey.
 
 Welcome to the trading journey!`,
-    question: MODULE_4_PRETEST[14]
+    question: BROKERS_PRETEST[14]
   },
   {
     title: "Lesson 10: Advanced Trading Strategies",
@@ -2450,6 +2448,6 @@ Now comes the hard part: Executing with discipline.
 Most traders have knowledge.
 Few have discipline.
 Be the few.`,
-    question: MODULE_4_PRETEST[13]
+    question: BROKERS_PRETEST[13]
   }
 ];
