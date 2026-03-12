@@ -10,6 +10,7 @@ import Calculator from "./pages/Calculator";
 import Explore from "./pages/Explore";
 import Quizzes from "./pages/Quizzes";
 import LightingRound from "./pages/LightingRound";
+import LightningRoundMock from "./pages/LightningRoundMock";
 import ReviewModules from "./pages/ReviewModules";
 import './App.css';
 
@@ -30,6 +31,7 @@ function App() {
               <Route path="/explore" element={<Explore />} />
               <Route path="/quizzes" element={<Quizzes />} />
               <Route path="/lightning-round" element={<LightingRound />} />
+              <Route path="/lightning-round-mock" element={<LightningRoundMock />} />
               <Route path="/completed-modules" element={<ReviewModules />} />
             </Routes>
           </main>
