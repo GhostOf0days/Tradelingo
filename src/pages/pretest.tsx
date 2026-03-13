@@ -28,7 +28,7 @@ export default function Pretest() {
     } else {
       if (newScore >= 12 && user) { // pass threshold 12/15
         try {
-          const response = await fetch('http://localhost:3000/api/pass-module', {
+          const response = await fetch('/api/pass-module', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -54,7 +54,7 @@ export default function Pretest() {
   const handleSkipModule = async () => {
     if (user) {
       try {
-        const response = await fetch('http://localhost:3000/api/update-xp', {
+        const response = await fetch('/api/update-xp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

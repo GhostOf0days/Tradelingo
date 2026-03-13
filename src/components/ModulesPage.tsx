@@ -29,7 +29,7 @@ function ModulesPage() {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+        const response = await fetch(`/api/progress/${user.email}`);
         if (response.ok) {
           const data = await response.json();
           setLastUnlockedModuleId(data.lastUnlockedModuleId);
@@ -46,10 +46,10 @@ function ModulesPage() {
   const filteredModules = MODULES.filter((module, index) => {
     const moduleNumber = index + 1;
     const isUnlocked = moduleNumber <= lastUnlockedModuleId;
-    const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
-    const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
+    const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0 };
+    const lessonCurrent = isUnlocked ? (progress.lessonCurrent ?? 0) : 0;
     const isCompleted = lessonCurrent >= module.lessonTotal && module.lessonTotal > 0;
-    
+
     if (filter === 'completed') return isCompleted;
     return !isCompleted;
   });
@@ -92,12 +92,12 @@ function ModulesPage() {
         {filteredModules.map((module) => {
           const moduleNumber = MODULES.findIndex((m) => m.id === module.id) + 1;
           const isUnlocked = moduleNumber <= lastUnlockedModuleId;
-          const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
-          const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
+          const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0 };
+          const lessonCurrent = isUnlocked ? (progress.lessonCurrent ?? 0) : 0;
           const progressPercent =
-            module.lessonTotal > 0 ? Math.round((lessonCurrent / module.lessonTotal) * 100) : 0;
+            module.lessonTotal > 0 ? Math.round(((lessonCurrent ?? 0) / module.lessonTotal) * 100) : 0;
           const showProgressAndButton = isUnlocked;
-          const isCompleted = lessonCurrent >= module.lessonTotal && module.lessonTotal > 0;
+          const isCompleted = (lessonCurrent ?? 0) >= module.lessonTotal && module.lessonTotal > 0;
           const actionLabel =
             lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? null : 'Continue';
 
@@ -149,7 +149,7 @@ function ModulesPage() {
                           {[1, 2, 3].map((i) => (
                             <div key={i} className="modules__streak-dot" />
                           ))}
-                          <div className="modules__streak-badge">+{progress.streakBonus}</div>
+                          <div className="modules__streak-badge">+{(progress as { streakBonus?: number }).streakBonus ?? 0}</div>
                         </div>
                         
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

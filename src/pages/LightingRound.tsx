@@ -158,7 +158,7 @@ export default function LightingRound() {
     setXpEarned(totalXp);
 
     if (user && totalXp > 0) {
-      fetch('http://localhost:3000/api/complete-lesson', {
+      fetch('/api/complete-lesson', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }), // 0 = lightning round

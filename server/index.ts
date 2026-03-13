@@ -1,10 +1,14 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 
 dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(cors());
@@ -278,10 +282,8 @@ app.post('/api/complete-module', async (req, res) => {
 
     const result = await usersCollection.findOneAndUpdate(
       { email },
-      {
-        $push: { completedModules: completedModule },
-        $set: { lastUnlockedModuleId: newUnlockedId }
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { $push: { completedModules: completedModule }, $set: { lastUnlockedModuleId: newUnlockedId } } as any,
       { returnDocument: 'after' }
     );
 
@@ -319,6 +321,13 @@ app.get('/api/user/:email', async (req, res) => {
   }
 });
 
+// production: serve frontend and SPA fallback
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.join(__dirname, '..', 'dist');
+  app.use(express.static(distPath));
+  app.get('*', (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
+}
+
 // add missing fields for legacy users
 async function runMigrations() {
   try {
@@ -339,13 +348,13 @@ async function runMigrations() {
   }
 }
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 if (process.env.NODE_ENV !== 'test') { // skip listen in test so supertest can use app
   client.connect().then(async () => {
     console.log('✅ Connected to MongoDB');
     await runMigrations();
     app.listen(PORT, () => {
-      console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   });
 }

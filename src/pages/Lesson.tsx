@@ -57,7 +57,7 @@ export default function Lesson() {
       if (isReviewMode) {
         loadLocalLesson(0); // no API, start at 0
       } else {
-        const res = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+        const res = await fetch(`/api/progress/${user.email}`);
         if (!res.ok) throw new Error("Failed to reach database");
         
         const data = await res.json();
@@ -82,10 +82,10 @@ export default function Lesson() {
   const handleNext = async () => {
     if (currentStep === 'info') {
       setCurrentStep('quiz');
-    } else if (currentStep === 'quiz') {
+    } else if (currentStep === 'quiz' && lessonData) {
       if (selectedAnswer === lessonData.question.correctIndex) {
         if (user && !isReviewMode) { // don't write progress in review mode
-          const res = await fetch('http://localhost:3000/api/complete-lesson', {
+          const res = await fetch('/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: user.email, moduleId: moduleId, xpToAdd: 50 })
@@ -105,7 +105,7 @@ export default function Lesson() {
             
             try {
               console.log("Calling complete-module endpoint for module:", moduleId);
-              const completeRes = await fetch('http://localhost:3000/api/complete-module', {
+              const completeRes = await fetch('/api/complete-module', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

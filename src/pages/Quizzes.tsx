@@ -132,7 +132,7 @@ export default function Quizzes() {
       if (user && selectedQuiz) {
         try {
           const xpToAdd = Math.floor((score / quizQuestions.length) * selectedQuiz.xpReward);
-          const response = await fetch('http://localhost:3000/api/update-xp', {
+          const response = await fetch('/api/update-xp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

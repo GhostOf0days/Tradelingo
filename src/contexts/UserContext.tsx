@@ -69,7 +69,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         };
         setUserState(updatedUser);
         try {
-          await fetch('http://localhost:3000/api/update-streak', {
+          await fetch('/api/update-streak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: user.email })
