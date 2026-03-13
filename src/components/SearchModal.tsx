@@ -21,7 +21,6 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
   const [hasSearched, setHasSearched] = useState(false);
 
   const allContent: SearchResult[] = [
-    // Module content from lessons
     { id: '1', title: 'What is a Stock?', description: 'Learn about stock ownership and fractional stakes', source: 'module', category: 'Stocks' },
     { id: '2', title: 'Stock Exchanges', description: 'How stocks are traded on NYSE and NASDAQ', source: 'module', category: 'Stocks' },
     { id: '3', title: 'Bulls vs Bears', description: 'Market sentiment and price trends explained', source: 'module', category: 'Markets' },
@@ -37,14 +36,12 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
     { id: '13', title: 'Blue Chip Stocks', description: 'Large, established, financially sound companies', source: 'module', category: 'Stocks' },
     { id: '14', title: 'ETFs', description: 'Exchange-traded funds for instant diversification', source: 'module', category: 'Funds' },
     { id: '15', title: 'Risk Tolerance', description: 'How much market risk you can handle emotionally', source: 'module', category: 'Strategy' },
-    // Articles
     { id: '16', title: 'How to Start Investing with Just $100', description: 'A beginner\'s guide to fractional shares and low-cost ETFs', source: 'article', category: 'Learning' },
     { id: '17', title: 'Understanding Stock Market Crashes', description: 'Historical perspective on market crashes and staying calm', source: 'article', category: 'Analysis' },
     { id: '18', title: 'The Power of Dollar-Cost Averaging', description: 'Reduce risk by investing fixed amounts regularly', source: 'article', category: 'Strategy' },
     { id: '19', title: 'Tax-Loss Harvesting Strategies', description: 'Maximize returns by offsetting capital gains with losses', source: 'article', category: 'Taxes' },
     { id: '20', title: 'Introduction to Bonds and Fixed Income', description: 'Understand bonds and why they matter in your portfolio', source: 'article', category: 'Learning' },
     { id: '21', title: 'Behavioral Finance: Why We Make Bad Decisions', description: 'Learn about cognitive biases in investing', source: 'article', category: 'Psychology' },
-    // Quizzes
     { id: '22', title: 'Stock Basics Challenge', description: 'Test your knowledge of stock market fundamentals', source: 'quiz', category: 'Assessment' },
     { id: '23', title: 'Market Volatility Quiz', description: 'Understand price fluctuations and market risk', source: 'quiz', category: 'Assessment' },
     { id: '24', title: 'Portfolio Strategy Exam', description: 'Master diversification and asset allocation', source: 'quiz', category: 'Assessment' },
@@ -142,7 +139,6 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     onClose();
-                    // Navigate based on source
                     if (result.source === 'module') {
                       window.location.href = `/`;
                     } else if (result.source === 'article') {

@@ -119,6 +119,14 @@ A Duolingo-style financial education platform that teaches users about trading, 
 - `GET /api/completed-modules/:email` - Get list of completed modules
 - `POST /api/update-streak` - Update daily streak
 
+## Development
+
+- `bun run lint` — ESLint (src, server, tests)
+- `bun run lint:fix`
+- `bun run format` — Prettier
+- `bun run test` / `bun run test:run` — Vitest (mocked DB in `tests/mockDb.ts`)
+- `bun run test:coverage`
+
 ## Project Structure 
 
 ```
@@ -133,7 +141,10 @@ Tradelingo/
 ├── server/
 │   ├── index.ts         # Express server & API endpoints
 │   └── db.ts            # Database utilities
+├── tests/               # Unit tests and mock data (api.test.ts, mockDb.ts)
 ├── vite.config.ts       # Vite configuration
+├── vitest.config.ts     # Vitest configuration
+├── eslint.config.js     # ESLint flat config
 ├── tsconfig.json        # TypeScript configuration
 └── package.json
 ```

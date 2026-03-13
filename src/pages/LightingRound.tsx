@@ -78,7 +78,6 @@ export default function LightingRound() {
     });
   }, []);
 
-  // Countdown before game starts
   useEffect(() => {
     if (gameState !== 'countdown') return;
     setCountdown(3);
@@ -95,7 +94,6 @@ export default function LightingRound() {
     return () => clearTimers();
   }, [gameState]);
 
-  // Question timer
   useEffect(() => {
     if (gameState !== 'playing' || isAnswered) return;
     setTimeLeft(QUESTION_TIME);
@@ -153,7 +151,6 @@ export default function LightingRound() {
     setTimeout(() => advanceQuestion(), 1200);
   };
 
-  // Award XP when game finishes
   useEffect(() => {
     if (gameState !== 'finished') return;
     const isPerfect = correctCount === TOTAL_QUESTIONS;
@@ -164,7 +161,7 @@ export default function LightingRound() {
       fetch('http://localhost:3000/api/complete-lesson', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }),
+        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }), // 0 = lightning round
       })
         .then(res => res.json())
         .then(data => {
@@ -180,7 +177,6 @@ export default function LightingRound() {
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;
   const timerColor = timeLeft > 5 ? 'var(--accent)' : '#ef4444';
 
-  // LOBBY
   if (gameState === 'lobby') {
     return (
       <div className="lr">
@@ -222,7 +218,6 @@ export default function LightingRound() {
     );
   }
 
-  // COUNTDOWN
   if (gameState === 'countdown') {
     return (
       <div className="lr">
@@ -234,7 +229,6 @@ export default function LightingRound() {
     );
   }
 
-  // FINISHED
   if (gameState === 'finished') {
     const isPerfect = correctCount === TOTAL_QUESTIONS;
     const pct = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
@@ -264,7 +258,6 @@ export default function LightingRound() {
     );
   }
 
-  // PLAYING
   if (!currentQ) return null;
 
   return (

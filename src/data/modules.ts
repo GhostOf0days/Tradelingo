@@ -1,7 +1,7 @@
-// This file serves as a central registry for all modules in the app, mapping module IDs to their respective lessons and pretests.
 import { TRADING_LESSONS, TRADING_PRETEST } from './trading';
 import { RETIREMENT_LESSONS, RETIREMENT_PRETEST } from './retirement';
 
+// module id -> lessons + pretest
 export const MODULES = {
   1: {
     lessons: TRADING_LESSONS,

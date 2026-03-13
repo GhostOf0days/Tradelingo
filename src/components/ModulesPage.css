@@ -1,5 +1,3 @@
-/* we used BEM (Block, Element, Modifier)*/
-
 .modules__head {
   display: flex;
   justify-content: space-between;

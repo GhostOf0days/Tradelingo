@@ -11,41 +11,36 @@ app.use(cors());
 app.use(express.json());
 
 const uri = process.env.MONGODB_URI;
-if (!uri) throw new Error("Please add your MONGODB_URI to the .env file");
+if (!uri) throw new Error('Please add your MONGODB_URI to the .env file');
 
 const client = new MongoClient(uri);
-// FIXED: Now targets the correct 'tradelingo' database
 const db = client.db('tradelingo');
 const usersCollection = db.collection('users');
 
-// --- API ROUTES ---
-
-// 1. Register a new user
+// register: hash password, init progress/streak
 app.post('/api/register', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     const existingUser = await usersCollection.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // SECURITY: Hash the password before saving it to MongoDB
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Initialize the user with default progress data
     const newUser = {
       email,
-      password: hashedPassword, // Store the encrypted string
-      displayName: email.split('@')[0], 
+      password: hashedPassword,
+      displayName: email.split('@')[0],
       experiencePoints: 0,
-      lastUnlockedModuleId: 1, // Start at module 1
-      progressByModuleId: {},  // Empty object to track lesson progress
-      streakDays: 0, // Track daily streak
-      lastActivityDate: null, // For streak reset logic
-      completedModules: [], // Array of completed modules with details
-      createdAt: new Date()
+      lastUnlockedModuleId: 1,
+      progressByModuleId: {},
+      streakDays: 0,
+      lastActivityDate: null,
+      completedModules: [],
+      createdAt: new Date(),
     };
 
     await usersCollection.insertOne(newUser);
@@ -65,17 +60,16 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// 2. Log in
+// login: compare with hashed password
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await usersCollection.findOne({ email });
-    
+
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // SECURITY: Compare the typed password with the hashed password in the DB
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -95,7 +89,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// 3. Update XP
 app.post('/api/update-xp', async (req, res) => {
   try {
     const { email, xpToAdd } = req.body;
@@ -115,7 +108,7 @@ app.post('/api/update-xp', async (req, res) => {
   }
 });
 
-// 4. Get User Progress
+// progress: lastUnlockedModuleId, progressByModuleId per module
 app.get('/api/progress/:email', async (req, res) => {
   try {
     const user = await usersCollection.findOne({ email: req.params.email });
@@ -131,27 +124,20 @@ app.get('/api/progress/:email', async (req, res) => {
   }
 });
 
-// 5. Complete a Lesson & Update Progress
+// complete-lesson: bump lesson index for this module, add XP
 app.post('/api/complete-lesson', async (req, res) => {
   try {
     const { email, moduleId, xpToAdd } = req.body;
-    
+
     if (!email || !moduleId) {
       return res.status(400).json({ error: 'Email and moduleId are required' });
     }
 
-    // This dynamically targets the specific module in the database 
-    // e.g., progressByModuleId.1.lessonCurrent
-    const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
+    const progressField = `progressByModuleId.${moduleId}.lessonCurrent`; // dotted key for $inc
 
     const result = await usersCollection.findOneAndUpdate(
-      { email: email },
-      { 
-        $inc: { 
-          experiencePoints: xpToAdd,
-          [progressField]: 1 // Increment the lesson count by 1
-        } 
-      },
+      { email },
+      { $inc: { experiencePoints: xpToAdd, [progressField]: 1 } },
       { returnDocument: 'after' }
     );
 
@@ -170,7 +156,7 @@ app.post('/api/complete-lesson', async (req, res) => {
   }
 });
 
-// 6. Pass Module (Pre-Test Success)
+// pass-module: pretest passed — set lesson count to total, unlock next module
 app.post('/api/pass-module', async (req, res) => {
   try {
     const { email, moduleId, xpToAdd, totalLessons } = req.body;
@@ -178,11 +164,9 @@ app.post('/api/pass-module', async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
-    
-    // Unlock the next module
     let newUnlocked = user.lastUnlockedModuleId;
     if (moduleId == user.lastUnlockedModuleId) {
-      newUnlocked = moduleId + 1;
+      newUnlocked = moduleId + 1; // unlock next
     }
 
     const result = await usersCollection.findOneAndUpdate(
@@ -209,7 +193,7 @@ app.post('/api/pass-module', async (req, res) => {
   }
 });
 
-// 7. Update Streak
+// update-streak: yesterday -> +1, gap or first time -> 1
 app.post('/api/update-streak', async (req, res) => {
   try {
     const { email } = req.body;
@@ -218,25 +202,19 @@ app.post('/api/update-streak', async (req, res) => {
 
     const today = new Date().toISOString().split('T')[0];
     const lastActivity = user.lastActivityDate;
-
-    // Check if streak should be updated
     let newStreakDays = user.streakDays || 0;
-    
+
     if (lastActivity !== today) {
-      // Check if it's a new day
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
 
       if (lastActivity === yesterdayStr) {
-        // Streak continues
-        newStreakDays += 1;
+        newStreakDays += 1; // continue streak
       } else if (!lastActivity) {
-        // First activity
-        newStreakDays = 1;
+        newStreakDays = 1; // first activity
       } else {
-        // Streak broken (more than 1 day gap)
-        newStreakDays = 1;
+        newStreakDays = 1; // gap, reset
       }
     }
 
@@ -261,7 +239,6 @@ app.post('/api/update-streak', async (req, res) => {
   }
 });
 
-// 8. Get Completed Modules
 app.get('/api/completed-modules/:email', async (req, res) => {
   try {
     const user = await usersCollection.findOne({ email: req.params.email });
@@ -274,17 +251,16 @@ app.get('/api/completed-modules/:email', async (req, res) => {
   }
 });
 
-// 9. Mark Module as Completed
+// complete-module: push to completedModules, unlock next
 app.post('/api/complete-module', async (req, res) => {
   try {
     const { email, moduleId, title, score, xpEarned, lessonsTotal } = req.body;
-    
+
     if (!email || !moduleId) {
       return res.status(400).json({ error: 'Email and moduleId are required' });
     }
 
     const completedDate = new Date().toISOString().split('T')[0];
-    
     const completedModule = {
       moduleId,
       title,
@@ -292,20 +268,18 @@ app.post('/api/complete-module', async (req, res) => {
       completedDate,
       xpEarned: xpEarned || 0,
       score: score || 0,
-      lessons: lessonsTotal || 0
+      lessons: lessonsTotal || 0,
     };
 
-    // First, fetch the user to get the current lastUnlockedModuleId
     const user = await usersCollection.findOne({ email });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Calculate the new lastUnlockedModuleId (use the max)
     const newUnlockedId = Math.max(user.lastUnlockedModuleId || 1, moduleId + 1);
 
     const result = await usersCollection.findOneAndUpdate(
       { email },
       {
-        $push: { completedModules: completedModule as any },
+        $push: { completedModules: completedModule },
         $set: { lastUnlockedModuleId: newUnlockedId }
       },
       { returnDocument: 'after' }
@@ -324,7 +298,6 @@ app.post('/api/complete-module', async (req, res) => {
   }
 });
 
-// 10. Get User Full Profile (including streak and completed modules)
 app.get('/api/user/:email', async (req, res) => {
   try {
     const user = await usersCollection.findOne({ email: req.params.email });
@@ -346,54 +319,35 @@ app.get('/api/user/:email', async (req, res) => {
   }
 });
 
-// Migration: Update existing users to have required fields
+// add missing fields for legacy users
 async function runMigrations() {
   try {
-    console.log("🔄 Running schema migrations...");
-
-    // 1. Add lastUnlockedModuleId to users who don't have it
-    const updateUnlockedId = await usersCollection.updateMany(
+    await usersCollection.updateMany(
       { lastUnlockedModuleId: { $exists: false } },
       { $set: { lastUnlockedModuleId: 1 } }
     );
-    if (updateUnlockedId.modifiedCount > 0) {
-      console.log(`✅ Migration: Added lastUnlockedModuleId to ${updateUnlockedId.modifiedCount} users`);
-    }
-
-    // 2. Ensure progressByModuleId exists
-    const updateProgress = await usersCollection.updateMany(
+    await usersCollection.updateMany(
       { progressByModuleId: { $exists: false } },
       { $set: { progressByModuleId: {} } }
     );
-    if (updateProgress.modifiedCount > 0) {
-      console.log(`✅ Migration: Added progressByModuleId to ${updateProgress.modifiedCount} users`);
-    }
-
-    // 3. Ensure completedModules array exists
-    const updateCompleted = await usersCollection.updateMany(
+    await usersCollection.updateMany(
       { completedModules: { $exists: false } },
       { $set: { completedModules: [] } }
     );
-    if (updateCompleted.modifiedCount > 0) {
-      console.log(`✅ Migration: Added completedModules to ${updateCompleted.modifiedCount} users`);
-    }
-
-    console.log("✅ Schema migrations completed");
-
   } catch (error) {
-    console.error("❌ Migration error:", error);
+    console.error(error);
   }
 }
 
-// Start the server
 const PORT = 3000;
-client.connect().then(async () => {
-  console.log("✅ Connected to MongoDB");
-  
-  // Run migrations before starting the server
-  await runMigrations();
-  
-  app.listen(PORT, () => {
-    console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+if (process.env.NODE_ENV !== 'test') { // skip listen in test so supertest can use app
+  client.connect().then(async () => {
+    console.log('✅ Connected to MongoDB');
+    await runMigrations();
+    app.listen(PORT, () => {
+      console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+    });
   });
-});
+}
+
+export { app };

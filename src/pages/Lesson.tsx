@@ -6,8 +6,13 @@ import { RETIREMENT_LESSONS } from '../data/retirement';
 import { CRYPTOCURRENCIES_LESSONS } from '../data/Cryptocurrencies';
 import { BROKERS_LESSONS } from '../data/Brokers';
 
-// Module data mapping
-const MODULE_LESSONS: Record<number, any[]> = {
+export interface LessonItem {
+  title: string;
+  content: string;
+  question: { question: string; options: string[]; correctIndex: number };
+}
+
+const MODULE_LESSONS: Record<number, LessonItem[]> = {
   1: TRADING_LESSONS,
   2: RETIREMENT_LESSONS,
   3: CRYPTOCURRENCIES_LESSONS,
@@ -19,24 +24,21 @@ export default function Lesson() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser, updateStreak } = useUser();
-  
-  // Check if we are in review mode
+
   const queryParams = new URLSearchParams(location.search);
-  const isReviewMode = queryParams.get('review') === 'true';
-  
+  const isReviewMode = queryParams.get('review') === 'true'; // from Review page
   const moduleId = Number(id) || 1;
   const moduleLessons = MODULE_LESSONS[moduleId] || TRADING_LESSONS;
   
-  const [lessonData, setLessonData] = useState<any>(null);
+  const [lessonData, setLessonData] = useState<LessonItem | null>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [lessonNumber, setLessonNumber] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Separate function to load a specific lesson from local array 
   const loadLocalLesson = (index: number) => {
     if (index >= moduleLessons.length) {
-      navigate('/review'); // Go back to review page when done
+      navigate('/review');
       return;
     }
     setLessonNumber(index);
@@ -50,14 +52,11 @@ export default function Lesson() {
       navigate('/login');
       return;
     }
-    
     setIsLoading(true);
     try {
       if (isReviewMode) {
-        // If reviewing, just start at lesson index 0 locally!
-        loadLocalLesson(0);
+        loadLocalLesson(0); // no API, start at 0
       } else {
-        // Normal mode: Fetch real progress
         const res = await fetch(`http://localhost:3000/api/progress/${user.email}`);
         if (!res.ok) throw new Error("Failed to reach database");
         
@@ -65,7 +64,7 @@ export default function Lesson() {
         const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
         
         if (currentIdx >= moduleLessons.length) {
-          navigate('/'); // Normal mode kick-out if already finished
+          navigate('/');
         } else {
           loadLocalLesson(currentIdx);
         }
@@ -85,9 +84,7 @@ export default function Lesson() {
       setCurrentStep('quiz');
     } else if (currentStep === 'quiz') {
       if (selectedAnswer === lessonData.question.correctIndex) {
-        
-        // ONLY update DB if we are NOT in review mode
-        if (user && !isReviewMode) {
+        if (user && !isReviewMode) { // don't write progress in review mode
           const res = await fetch('http://localhost:3000/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -95,13 +92,10 @@ export default function Lesson() {
           });
           const data = await res.json();
           setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak(); 
+          updateStreak();
         }
-        
-        // Check if this is the final lesson
-        if (lessonNumber === moduleLessons.length - 1) {
-          // This is the last lesson, call the module completion endpoint
-          if (user && !isReviewMode) {
+
+        if (lessonNumber === moduleLessons.length - 1 && user && !isReviewMode) {
             const moduleNames: Record<number, string> = {
               1: "Stock Market Fundamentals",
               2: "Retirement Planning",
@@ -128,9 +122,8 @@ export default function Lesson() {
             } catch (err) {
               console.error("Error completing module:", err);
             }
-          }
         }
-        
+
         setCurrentStep('complete');
       } else {
         alert("Incorrect! Try again.");
@@ -140,9 +133,9 @@ export default function Lesson() {
 
   const handleNextLesson = () => {
     if (isReviewMode) {
-      loadLocalLesson(lessonNumber + 1); // Progress locally
+      loadLocalLesson(lessonNumber + 1);
     } else {
-      fetchCurrentProgress(); // Fetch next from DB
+      fetchCurrentProgress();
     }
   };
 
@@ -152,8 +145,6 @@ export default function Lesson() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
-      
-      {/* Header Area */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>

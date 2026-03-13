@@ -26,8 +26,7 @@ export default function Pretest() {
       setCurrentIndex(curr => curr + 1);
       setSelectedAnswer(null);
     } else {
-      // PRETEST FINISHED! Check if they passed (12 out of 15)
-      if (newScore >= 12 && user) {
+      if (newScore >= 12 && user) { // pass threshold 12/15
         try {
           const response = await fetch('http://localhost:3000/api/pass-module', {
             method: 'POST',
@@ -35,7 +34,7 @@ export default function Pretest() {
             body: JSON.stringify({ 
               email: user.email, 
               moduleId: Number(id),
-              xpToAdd: 500, // Massive XP bonus
+              xpToAdd: 500,
               totalLessons: 15
             })
           });
@@ -53,10 +52,8 @@ export default function Pretest() {
   };
 
   const handleSkipModule = async () => {
-    // User chose to skip and go straight to lessons (not pass via pretest)
     if (user) {
       try {
-        // Give them a small XP bonus for attempting the pretest
         const response = await fetch('http://localhost:3000/api/update-xp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -74,7 +71,6 @@ export default function Pretest() {
         console.error("Failed to update XP", err);
       }
     }
-    // Redirect to lessons
     navigate(`/lesson/${id}`);
   };
 

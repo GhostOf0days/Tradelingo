@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import './ModulesPage.css';
 
-// The source of truth for the curriculum
+// id, lesson count, XP for display and progress
 const MODULES = [
   { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600 },
   { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800 },
@@ -15,16 +15,14 @@ const MODULES = [
 function ModulesPage() {
   const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
   const [lastUnlockedModuleId, setLastUnlockedModuleId] = useState(1);
-  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, any>>({});
+  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, { lessonCurrent?: number }>>({});
   
   const navigate = useNavigate();
   const { user } = useUser();
 
-  // Fetch progress from MongoDB when the component loads or the user logs in
   useEffect(() => {
     const fetchProgress = async () => {
       if (!user) {
-        // Reset to defaults if logged out
         setLastUnlockedModuleId(1);
         setProgressByModuleId({});
         return;

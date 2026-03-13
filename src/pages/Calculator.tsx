@@ -3,8 +3,6 @@ import '../styles/Calculator.css';
 
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'retirement' | 'compound' | 'savings'>('retirement');
-  
-  // Retirement Account Selector
   const [selectedAccount, setSelectedAccount] = useState<string>('401k');
   const [accountDetails, setAccountDetails] = useState({
     annualContribution: 22500,
@@ -12,16 +10,12 @@ export default function Calculator() {
     currentBalance: 0,
     years: 30,
   });
-
-  // Compound Interest Calculator
   const [compoundData, setCompoundData] = useState({
     principal: 10000,
     annualRate: 7,
     years: 20,
     compoundFreq: 12,
   });
-
-  // Retirement Savings Calculator
   const [savingsData, setSavingsData] = useState({
     currentAge: 30,
     retirementAge: 65,
@@ -30,7 +24,6 @@ export default function Calculator() {
     annualReturn: 7,
   });
 
-  // Calculate compound interest
   const calculateCompound = () => {
     const p = parseFloat(compoundData.principal.toString());
     const r = parseFloat(compoundData.annualRate.toString()) / 100;
@@ -40,7 +33,6 @@ export default function Calculator() {
     return amount.toFixed(2);
   };
 
-  // Calculate retirement savings
   const calculateRetirement = () => {
     const currentAge = parseInt(savingsData.currentAge.toString());
     const retirementAge = parseInt(savingsData.retirementAge.toString());
@@ -56,7 +48,6 @@ export default function Calculator() {
     return futureValue.toFixed(2);
   };
 
-  // Calculate 401k projection
   const calculate401k = () => {
     const contribution = parseFloat(accountDetails.annualContribution.toString());
     const match = parseFloat(accountDetails.employerMatch.toString());

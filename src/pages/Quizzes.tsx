@@ -78,7 +78,6 @@ export default function Quizzes() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
-  // Sample questions for demo (in real app, would be fetched from backend)
   const quizQuestions = [
     {
       question: 'What does diversification help reduce?',
@@ -129,10 +128,7 @@ export default function Quizzes() {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
     } else {
-      // Quiz complete
       setShowResults(true);
-
-      // Award XP
       if (user && selectedQuiz) {
         try {
           const xpToAdd = Math.floor((score / quizQuestions.length) * selectedQuiz.xpReward);
