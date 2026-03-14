@@ -1,18 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { TRADING_LESSONS } from '../data/trading';
-import { RETIREMENT_LESSONS } from '../data/retirement';
-import { CRYPTOCURRENCIES_LESSONS } from '../data/Cryptocurrencies';
-import { BROKERS_LESSONS } from '../data/Brokers';
-
-// Module data mapping
-const MODULE_LESSONS: Record<number, any[]> = {
-  1: TRADING_LESSONS,
-  2: RETIREMENT_LESSONS,
-  3: CRYPTOCURRENCIES_LESSONS,
-  4: BROKERS_LESSONS,
-};
+import { MODULES } from '../data/modules';
 
 export default function Lesson() {
   const { id } = useParams();
@@ -25,7 +14,7 @@ export default function Lesson() {
   const isReviewMode = queryParams.get('review') === 'true';
   
   const moduleId = Number(id) || 1;
-  const moduleLessons = MODULE_LESSONS[moduleId] || TRADING_LESSONS;
+  const moduleLessons = MODULES[moduleId as keyof typeof MODULES]?.lessons || MODULES[1].lessons;;
   
   const [lessonData, setLessonData] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
