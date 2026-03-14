@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import tls from 'tls';
 import { fileURLToPath } from 'url';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
@@ -17,7 +18,19 @@ app.use(express.json());
 const uri = process.env.MONGODB_URI;
 if (!uri) throw new Error('Please add your MONGODB_URI to the .env file');
 
-const client = new MongoClient(uri);
+// when running under Bun, TLS can pass null cert into checkServerIdentity. TLS bug. guard so don't throw.
+function checkServerIdentitySafe(
+  hostname: string,
+  cert: tls.PeerCertificate | undefined | null
+): Error | undefined {
+  if (cert == null) return undefined;
+  return tls.checkServerIdentity(hostname, cert);
+}
+
+const client = new MongoClient(uri, {
+  serverSelectionTimeoutMS: 15000,
+  checkServerIdentity: checkServerIdentitySafe,
+});
 const db = client.db('tradelingo');
 const usersCollection = db.collection('users');
 
@@ -48,16 +61,15 @@ app.post('/api/register', async (req, res) => {
     };
 
     await usersCollection.insertOne(newUser);
-    
-    res.status(201).json({ 
+
+    res.status(201).json({
       email: newUser.email,
-      displayName: newUser.displayName, 
+      displayName: newUser.displayName,
       experiencePoints: newUser.experiencePoints,
       streakDays: newUser.streakDays,
       lastActivityDate: newUser.lastActivityDate,
-      lastUnlockedModuleId: newUser.lastUnlockedModuleId
+      lastUnlockedModuleId: newUser.lastUnlockedModuleId,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error during registration' });
@@ -79,13 +91,13 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       email: user.email,
-      displayName: user.displayName, 
+      displayName: user.displayName,
       experiencePoints: user.experiencePoints,
       streakDays: user.streakDays || 0,
       lastActivityDate: user.lastActivityDate,
-      lastUnlockedModuleId: user.lastUnlockedModuleId || 1
+      lastUnlockedModuleId: user.lastUnlockedModuleId || 1,
     });
   } catch (error) {
     console.error(error);
@@ -120,7 +132,7 @@ app.get('/api/progress/:email', async (req, res) => {
 
     res.status(200).json({
       lastUnlockedModuleId: user.lastUnlockedModuleId || 1,
-      progressByModuleId: user.progressByModuleId || {}
+      progressByModuleId: user.progressByModuleId || {},
     });
   } catch (error) {
     console.error(error);
@@ -149,11 +161,10 @@ app.post('/api/complete-lesson', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       experiencePoints: result.experiencePoints,
-      progressByModuleId: result.progressByModuleId 
+      progressByModuleId: result.progressByModuleId,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error updating lesson progress' });
@@ -175,22 +186,21 @@ app.post('/api/pass-module', async (req, res) => {
 
     const result = await usersCollection.findOneAndUpdate(
       { email: email },
-      { 
-        $set: { 
+      {
+        $set: {
           [progressField]: totalLessons,
-          lastUnlockedModuleId: newUnlocked
+          lastUnlockedModuleId: newUnlocked,
         },
-        $inc: { experiencePoints: xpToAdd }
+        $inc: { experiencePoints: xpToAdd },
       },
       { returnDocument: 'after' }
     );
 
-    res.status(200).json({ 
+    res.status(200).json({
       experiencePoints: result?.experiencePoints,
       lastUnlockedModuleId: result?.lastUnlockedModuleId,
-      progressByModuleId: result?.progressByModuleId 
+      progressByModuleId: result?.progressByModuleId,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error updating pre-test progress' });
@@ -227,15 +237,15 @@ app.post('/api/update-streak', async (req, res) => {
       {
         $set: {
           lastActivityDate: today,
-          streakDays: newStreakDays
-        }
+          streakDays: newStreakDays,
+        },
       },
       { returnDocument: 'after' }
     );
 
     res.status(200).json({
       streakDays: result?.streakDays,
-      lastActivityDate: result?.lastActivityDate
+      lastActivityDate: result?.lastActivityDate,
     });
   } catch (error) {
     console.error(error);
@@ -283,7 +293,10 @@ app.post('/api/complete-module', async (req, res) => {
     const result = await usersCollection.findOneAndUpdate(
       { email },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { $push: { completedModules: completedModule }, $set: { lastUnlockedModuleId: newUnlockedId } } as any,
+      {
+        $push: { completedModules: completedModule },
+        $set: { lastUnlockedModuleId: newUnlockedId },
+      } as any,
       { returnDocument: 'after' }
     );
 
@@ -292,7 +305,7 @@ app.post('/api/complete-module', async (req, res) => {
     res.status(200).json({
       message: 'Module marked as completed',
       completedModules: result.completedModules,
-      lastUnlockedModuleId: result.lastUnlockedModuleId
+      lastUnlockedModuleId: result.lastUnlockedModuleId,
     });
   } catch (error) {
     console.error(error);
@@ -313,7 +326,7 @@ app.get('/api/user/:email', async (req, res) => {
       lastActivityDate: user.lastActivityDate,
       lastUnlockedModuleId: user.lastUnlockedModuleId,
       progressByModuleId: user.progressByModuleId || {},
-      completedModules: user.completedModules || []
+      completedModules: user.completedModules || [],
     });
   } catch (error) {
     console.error(error);
@@ -349,7 +362,8 @@ async function runMigrations() {
 }
 
 const PORT = Number(process.env.PORT) || 3000;
-if (process.env.NODE_ENV !== 'test') { // skip listen in test so supertest can use app
+if (process.env.NODE_ENV !== 'test') {
+  // skip listen in test so supertest can use app
   client.connect().then(async () => {
     console.log('✅ Connected to MongoDB');
     await runMigrations();
