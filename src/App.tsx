@@ -1,8 +1,8 @@
 import { UserProvider } from './contexts/UserContext';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import ModulesPage from './components/ModulesPage';
-import Register from './pages/register';
+import Modules from './pages/Modules';
+import Register from "./pages/register";
 import Lesson from "./pages/Lesson"; 
 import Login from "./pages/Login";
 import PreTest from "./pages/pretest";
@@ -21,7 +21,7 @@ function App() {
           <Header />
           <main className="app__main">
             <Routes>
-              <Route path="/" element={<ModulesPage />} />
+              <Route path="/" element={<Modules />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/lesson/:id" element={<Lesson />} />

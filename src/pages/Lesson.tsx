@@ -1,34 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { TRADING_LESSONS } from '../data/trading';
-import { RETIREMENT_LESSONS } from '../data/retirement';
-import { CRYPTOCURRENCIES_LESSONS } from '../data/Cryptocurrencies';
-import { BROKERS_LESSONS } from '../data/Brokers';
-
+import { MODULES } from '../data/modules';
 export interface LessonItem {
   title: string;
   content: string;
   question: { question: string; options: string[]; correctIndex: number };
 }
 
-const MODULE_LESSONS: Record<number, LessonItem[]> = {
-  1: TRADING_LESSONS,
-  2: RETIREMENT_LESSONS,
-  3: CRYPTOCURRENCIES_LESSONS,
-  4: BROKERS_LESSONS,
-};
-
 export default function Lesson() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser, updateStreak } = useUser();
-
+  
+  // Check if we are in review modes
   const queryParams = new URLSearchParams(location.search);
-  const isReviewMode = queryParams.get('review') === 'true'; // from Review page
+  const isReviewMode = queryParams.get('review') === 'true';
+  
   const moduleId = Number(id) || 1;
-  const moduleLessons = MODULE_LESSONS[moduleId] || TRADING_LESSONS;
+  const moduleLessons = MODULES[moduleId as keyof typeof MODULES]?.lessons || MODULES[1].lessons;;
   
   const [lessonData, setLessonData] = useState<LessonItem | null>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
@@ -36,9 +27,10 @@ export default function Lesson() {
   const [lessonNumber, setLessonNumber] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Separate function to load a specific lesson from local array 
   const loadLocalLesson = (index: number) => {
     if (index >= moduleLessons.length) {
-      navigate('/review');
+      navigate('/review'); // Go back to review page when done
       return;
     }
     setLessonNumber(index);
@@ -52,11 +44,14 @@ export default function Lesson() {
       navigate('/login');
       return;
     }
+    
     setIsLoading(true);
     try {
       if (isReviewMode) {
-        loadLocalLesson(0); // no API, start at 0
+        // If reviewing, just start at lesson index 0 locally!
+        loadLocalLesson(0);
       } else {
+        // Normal mode: Fetch real progress
         const res = await fetch(`/api/progress/${user.email}`);
         if (!res.ok) throw new Error("Failed to reach database");
         
@@ -64,7 +59,7 @@ export default function Lesson() {
         const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
         
         if (currentIdx >= moduleLessons.length) {
-          navigate('/');
+          navigate('/'); // Normal mode kick-out if already finished
         } else {
           loadLocalLesson(currentIdx);
         }
@@ -82,9 +77,11 @@ export default function Lesson() {
   const handleNext = async () => {
     if (currentStep === 'info') {
       setCurrentStep('quiz');
-    } else if (currentStep === 'quiz' && lessonData) {
+    } else if (currentStep === 'quiz') {
       if (selectedAnswer === lessonData.question.correctIndex) {
-        if (user && !isReviewMode) { // don't write progress in review mode
+        
+        // ONLY update DB if we are NOT in review mode
+        if (user && !isReviewMode) {
           const res = await fetch('/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -92,17 +89,13 @@ export default function Lesson() {
           });
           const data = await res.json();
           setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak();
+          updateStreak(); 
         }
-
-        if (lessonNumber === moduleLessons.length - 1 && user && !isReviewMode) {
-            const moduleNames: Record<number, string> = {
-              1: "Stock Market Fundamentals",
-              2: "Retirement Planning",
-              3: "Cryptocurrencies",
-              4: "Brokers and Trading Platforms"
-            };
-            
+        
+        // Check if this is the final lesson
+        if (lessonNumber === moduleLessons.length - 1) {
+          // This is the last lesson, call the module completion endpoint
+          if (user && !isReviewMode) {
             try {
               console.log("Calling complete-module endpoint for module:", moduleId);
               const completeRes = await fetch('/api/complete-module', {
@@ -111,7 +104,7 @@ export default function Lesson() {
                 body: JSON.stringify({
                   email: user.email,
                   moduleId: moduleId,
-                  title: moduleNames[moduleId] || `Module ${moduleId}`,
+                  title: MODULES[moduleId as keyof typeof MODULES]?.title || `Module ${moduleId}`,
                   score: 100,
                   xpEarned: 500,
                   lessonsTotal: moduleLessons.length
@@ -122,8 +115,9 @@ export default function Lesson() {
             } catch (err) {
               console.error("Error completing module:", err);
             }
+          }
         }
-
+        
         setCurrentStep('complete');
       } else {
         alert("Incorrect! Try again.");
@@ -145,6 +139,8 @@ export default function Lesson() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
+      
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
