@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { TRADING_PRETEST } from '../data/trading';
+import { MODULES } from '../data/modules';
 
 export default function Pretest() {
   const { id } = useParams();
+  const moduleId = Number(id) || 1;
+  const module = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
+  const pretest = module.pretest;
   const navigate = useNavigate();
   const { user, setUser, updateStreak } = useUser();
   
@@ -14,20 +17,20 @@ export default function Pretest() {
   const [isComplete, setIsComplete] = useState(false);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
 
-  const currentQuestion = TRADING_PRETEST[currentIndex];
-  const progressPercent = Math.round((currentIndex / TRADING_PRETEST.length) * 100);
+  const currentQuestion = pretest[currentIndex];
+  const progressPercent = Math.round((currentIndex / pretest.length) * 100);
 
   const handleNext = async () => {
     const isCorrect = selectedAnswer === currentQuestion.correctIndex;
     const newScore = isCorrect ? score + 1 : score;
     setScore(newScore);
 
-    if (currentIndex < TRADING_PRETEST.length - 1) {
+    if (currentIndex < pretest.length - 1) {
       setCurrentIndex(curr => curr + 1);
       setSelectedAnswer(null);
     } else {
-      // PRETEST FINISHED! Check if they passed (12 out of 15)
-      if (newScore >= 12 && user) {
+      // Pretest finished and Check if they passed >= 80%
+      if (newScore / pretest.length >= 0.8 && user) {
         try {
           const response = await fetch('http://localhost:3000/api/pass-module', {
             method: 'POST',
@@ -35,8 +38,8 @@ export default function Pretest() {
             body: JSON.stringify({ 
               email: user.email, 
               moduleId: Number(id),
-              xpToAdd: 500, // Massive XP bonus
-              totalLessons: 15
+              xpToAdd: 500, // XP bonus
+              totalLessons: module.lessons.length,
             })
           });
           if (response.ok) {
@@ -79,15 +82,15 @@ export default function Pretest() {
   };
 
   if (isComplete) {
-    const passed = score >= 12;
+    const passed = score / pretest.length >= 0.8;
     return (
       <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
         <div className="modules__card" style={{ padding: '3rem 2rem' }}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{passed ? '🏆' : '📚'}</div>
           <h2>{passed ? 'You Tested Out!' : 'Keep Learning!'}</h2>
           <p style={{ color: 'var(--text-muted)' }}>
-            You scored {score} out of {TRADING_PRETEST.length}.
-            {passed ? " The next module is now unlocked and you earned +500 XP!" : " You need 12 correct to test out. Head back to take the regular lessons."}
+            You scored {score} out of {pretest.length}.
+            {passed ? " The next module is now unlocked and you earned +500 XP!" : " You need 80% correct to test out. Head back to take the regular lessons."}
           </p>
           <button className="modules__card-btn" style={{ marginTop: '2rem' }} onClick={() => navigate('/')}>
             Return to Dashboard
@@ -155,7 +158,7 @@ export default function Pretest() {
         onClick={handleNext}
         disabled={selectedAnswer === null}
       >
-        {currentIndex === TRADING_PRETEST.length - 1 ? 'Submit Exam' : 'Next Question'}
+        {currentIndex === pretest.length - 1 ? 'Submit Exam' : 'Next Question'}
       </button>
 
       {/* Skip Dialog Modal */}

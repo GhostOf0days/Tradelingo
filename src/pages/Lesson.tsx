@@ -91,13 +91,6 @@ export default function Lesson() {
         if (lessonNumber === moduleLessons.length - 1) {
           // This is the last lesson, call the module completion endpoint
           if (user && !isReviewMode) {
-            const moduleNames: Record<number, string> = {
-              1: "Stock Market Fundamentals",
-              2: "Retirement Planning",
-              3: "Cryptocurrencies",
-              4: "Brokers and Trading Platforms"
-            };
-            
             try {
               console.log("Calling complete-module endpoint for module:", moduleId);
               const completeRes = await fetch('http://localhost:3000/api/complete-module', {
@@ -106,7 +99,7 @@ export default function Lesson() {
                 body: JSON.stringify({
                   email: user.email,
                   moduleId: moduleId,
-                  title: moduleNames[moduleId] || `Module ${moduleId}`,
+                  title: MODULES[moduleId as keyof typeof MODULES]?.title || `Module ${moduleId}`,
                   score: 100,
                   xpEarned: 500,
                   lessonsTotal: moduleLessons.length

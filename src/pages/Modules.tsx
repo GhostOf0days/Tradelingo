@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { Play, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import './ModulesPage.css';
+import { MODULES } from '../data/modules';
+import '../styles/modules.css';
 
-// The source of truth for the curriculum
-const MODULES = [
-  { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600 },
-  { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800 },
-  { id: 3, title: 'Cryptocurrencies', lessonTotal: 15, experiencePoints: 700 },
-  { id: 4, title: 'Brokers', lessonTotal: 10, experiencePoints: 600 },
-];
 
-function ModulesPage() {
+// Importing modules as an array for easier mapping
+const MODULE_LIST = Object.entries(MODULES).map(([id, data]) => ({
+  id: Number(id),
+  ...data
+}));
+
+function Modules() {
   const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
   const [lastUnlockedModuleId, setLastUnlockedModuleId] = useState(1);
   const [progressByModuleId, setProgressByModuleId] = useState<Record<number, any>>({});
@@ -45,13 +45,13 @@ function ModulesPage() {
     fetchProgress();
   }, [user]);
 
-  const filteredModules = MODULES.filter((module, index) => {
+  const filteredModules = MODULE_LIST.filter((module, index) => {
     const moduleNumber = index + 1;
     const isUnlocked = moduleNumber <= lastUnlockedModuleId;
     const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
     const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
-    const isCompleted = lessonCurrent >= module.lessonTotal && module.lessonTotal > 0;
-    
+    const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
+
     if (filter === 'completed') return isCompleted;
     return !isCompleted;
   });
@@ -92,16 +92,14 @@ function ModulesPage() {
       ) : (
       <ul className="modules__timeline">
         {filteredModules.map((module) => {
-          const moduleNumber = MODULES.findIndex((m) => m.id === module.id) + 1;
+          const moduleNumber = MODULE_LIST.findIndex((m) => m.id === module.id) + 1;
           const isUnlocked = moduleNumber <= lastUnlockedModuleId;
           const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
           const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
-          const progressPercent =
-            module.lessonTotal > 0 ? Math.round((lessonCurrent / module.lessonTotal) * 100) : 0;
+          const progressPercent = module.lessons.length > 0 ? Math.round((lessonCurrent / module.lessons.length) * 100) : 0;
           const showProgressAndButton = isUnlocked;
-          const isCompleted = lessonCurrent >= module.lessonTotal && module.lessonTotal > 0;
-          const actionLabel =
-            lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? null : 'Continue';
+          const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
+          const actionLabel = lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? null : 'Continue';
 
           return (
             <li key={module.id} className="modules__item">
@@ -123,7 +121,7 @@ function ModulesPage() {
                       </span>
                     </div>
                     <p className="modules__card-lessons">
-                      Lesson {lessonCurrent} of {module.lessonTotal}
+                      Lesson {lessonCurrent} of {module.lessons.length}
                     </p>
                   </div>
                   {showProgressAndButton && (
@@ -232,4 +230,4 @@ function ModulesPage() {
   );
 }
 
-export default ModulesPage;
+export default Modules;
