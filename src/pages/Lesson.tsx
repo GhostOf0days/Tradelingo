@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
-
-
 export interface LessonItem {
   title: string;
   content: string;
@@ -15,9 +13,11 @@ export default function Lesson() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser, updateStreak } = useUser();
-
+  
+  // Check if we are in review modes
   const queryParams = new URLSearchParams(location.search);
-  const isReviewMode = queryParams.get('review') === 'true'; // from Review page
+  const isReviewMode = queryParams.get('review') === 'true';
+  
   const moduleId = Number(id) || 1;
   const moduleLessons = MODULES[moduleId as keyof typeof MODULES]?.lessons || MODULES[1].lessons;;
   
@@ -27,9 +27,10 @@ export default function Lesson() {
   const [lessonNumber, setLessonNumber] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Separate function to load a specific lesson from local array 
   const loadLocalLesson = (index: number) => {
     if (index >= moduleLessons.length) {
-      navigate('/review');
+      navigate('/review'); // Go back to review page when done
       return;
     }
     setLessonNumber(index);
@@ -43,11 +44,14 @@ export default function Lesson() {
       navigate('/login');
       return;
     }
+    
     setIsLoading(true);
     try {
       if (isReviewMode) {
-        loadLocalLesson(0); // no API, start at 0
+        // If reviewing, just start at lesson index 0 locally!
+        loadLocalLesson(0);
       } else {
+        // Normal mode: Fetch real progress
         const res = await fetch(`/api/progress/${user.email}`);
         if (!res.ok) throw new Error("Failed to reach database");
         
@@ -55,7 +59,7 @@ export default function Lesson() {
         const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
         
         if (currentIdx >= moduleLessons.length) {
-          navigate('/');
+          navigate('/'); // Normal mode kick-out if already finished
         } else {
           loadLocalLesson(currentIdx);
         }
@@ -73,9 +77,11 @@ export default function Lesson() {
   const handleNext = async () => {
     if (currentStep === 'info') {
       setCurrentStep('quiz');
-    } else if (currentStep === 'quiz' && lessonData) {
+    } else if (currentStep === 'quiz') {
       if (selectedAnswer === lessonData.question.correctIndex) {
-        if (user && !isReviewMode) { // don't write progress in review mode
+        
+        // ONLY update DB if we are NOT in review mode
+        if (user && !isReviewMode) {
           const res = await fetch('/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -83,7 +89,7 @@ export default function Lesson() {
           });
           const data = await res.json();
           setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak();
+          updateStreak(); 
         }
         
         // Check if this is the final lesson
@@ -109,8 +115,9 @@ export default function Lesson() {
             } catch (err) {
               console.error("Error completing module:", err);
             }
+          }
         }
-
+        
         setCurrentStep('complete');
       } else {
         alert("Incorrect! Try again.");
@@ -132,6 +139,8 @@ export default function Lesson() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
+      
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -204,4 +213,4 @@ export default function Lesson() {
       )}
     </div>
   );
-}}
+}

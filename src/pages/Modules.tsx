@@ -39,16 +39,16 @@ function Modules() {
       }
     };
 
-    fetchProgress();
+    fetchProgress();  
   }, [user]);
 
   const filteredModules = MODULE_LIST.filter((module, index) => {
     const moduleNumber = index + 1;
     const isUnlocked = moduleNumber <= lastUnlockedModuleId;
     const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
-    const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
+    const lessonCurrent = isUnlocked ? (progress.lessonCurrent ?? 0) : 0;
     const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
-
+    
     if (filter === 'completed') return isCompleted;
     return !isCompleted;
   });
@@ -92,7 +92,7 @@ function Modules() {
           const moduleNumber = MODULE_LIST.findIndex((m) => m.id === module.id) + 1;
           const isUnlocked = moduleNumber <= lastUnlockedModuleId;
           const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
-          const lessonCurrent = isUnlocked ? progress.lessonCurrent : 0;
+          const lessonCurrent = isUnlocked ? (progress.lessonCurrent ?? 0) : 0;
           const progressPercent = module.lessons.length > 0 ? Math.round((lessonCurrent / module.lessons.length) * 100) : 0;
           const showProgressAndButton = isUnlocked;
           const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
