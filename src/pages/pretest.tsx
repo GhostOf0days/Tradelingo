@@ -32,7 +32,7 @@ export default function Pretest() {
       // Pretest finished and Check if they passed >= 80%
       if (newScore / pretest.length >= 0.8 && user) {
         try {
-          const response = await fetch('http://localhost:3000/api/pass-module', {
+          const response = await fetch('/api/pass-module', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -56,11 +56,9 @@ export default function Pretest() {
   };
 
   const handleSkipModule = async () => {
-    // User chose to skip and go straight to lessons (not pass via pretest)
     if (user) {
       try {
-        // Give them a small XP bonus for attempting the pretest
-        const response = await fetch('http://localhost:3000/api/update-xp', {
+        const response = await fetch('/api/update-xp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -77,7 +75,6 @@ export default function Pretest() {
         console.error("Failed to update XP", err);
       }
     }
-    // Redirect to lessons
     navigate(`/lesson/${id}`);
   };
 

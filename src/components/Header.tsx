@@ -22,13 +22,12 @@ function Header() {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
 
-  const handleNavClick = (item: any) => {
+  const handleNavClick = (item: (typeof navigationItems)[number]) => {
     setActiveItem(item.id);
     navigate(item.path);
   };
 
   const handleNotificationClick = () => {
-    // Show streak warning notification via modal/toast
     alert(`🔥 Streak Status: ${user?.streakDays || 0} days\n\nComplete a lesson today to keep it going!`);
   };
 

@@ -10,13 +10,9 @@ export default function StreakNotification() {
 
   useEffect(() => {
     if (!user || !user.lastActivityDate) return;
-
-    // Check if user is about to lose their streak
     const today = new Date().toISOString().split('T')[0];
     const lastActivity = user.lastActivityDate;
-
-    // If last activity was yesterday and it's a new day, warn user
-    const yesterday = new Date();
+    const yesterday = new Date(); // last activity yesterday -> warn
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 

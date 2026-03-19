@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import '../styles/ReviewModules.css';
 
-// The source of truth for your curriculum
+// same shape as ModulesPage for progress lookup
 const MODULES = [
   { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600, description: "Master the fundamentals of the stock market." },
   { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800, description: "Learn about 401ks, IRAs, and long-term growth." },
@@ -30,13 +30,10 @@ export default function ReviewModules() {
     const fetchProgress = async () => {
       if (!user) return;
       try {
-        // Fetch the raw progress instead of the brittle completed array
-        const res = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+        const res = await fetch(`/api/progress/${user.email}`);
         if (res.ok) {
           const data = await res.json();
           const progressMap = data.progressByModuleId || {};
-
-          // Dynamically calculate which modules are finished
           const finishedModules = MODULES.filter(m => {
             const currentLesson = progressMap[m.id]?.lessonCurrent || 0;
             return currentLesson >= m.lessonTotal && m.lessonTotal > 0;
@@ -44,9 +41,9 @@ export default function ReviewModules() {
             moduleId: m.id,
             title: m.title,
             description: m.description,
-            completedDate: new Date().toISOString(), // Fallback for display
+            completedDate: new Date().toISOString(),
             xpEarned: m.experiencePoints,
-            score: 100, // They finished it, give them 100%!
+            score: 100,
             lessons: m.lessonTotal
           }));
 
@@ -61,8 +58,7 @@ export default function ReviewModules() {
   }, [user]);
 
   const handleReviewLesson = (moduleId: number) => {
-    // Add ?review=true to the URL so the Lesson component knows to enter Review Mode!
-    navigate(`/lesson/${moduleId}?review=true`);
+    navigate(`/lesson/${moduleId}?review=true`); // review mode, no progress write
   };
 
   const formatDate = (dateString: string) => {

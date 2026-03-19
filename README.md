@@ -119,6 +119,24 @@ A Duolingo-style financial education platform that teaches users about trading, 
 - `GET /api/completed-modules/:email` - Get list of completed modules
 - `POST /api/update-streak` - Update daily streak
 
+## Deploy to Railway
+
+1. Create a project at [railway.app](https://railway.app) and connect this repo.
+2. In the service, set **Build Command**: `bun run build` (or leave default).
+3. Set **Start Command**: `bun run start` (or leave default; `package.json` `start` is used).
+4. Add **Variables**: `MONGODB_URI` = your MongoDB Atlas connection string, and set `NODE_ENV=production` (Railway often sets this automatically).
+5. Deploy; Railway will run `bun run build` then `bun run start`. The server serves the built frontend from `dist/` and the API at `/api`.
+
+Optional: use the [Railway CLI](https://docs.railway.app/develop/cli): `railway login`, `railway link`, then `railway up`. Add `MONGODB_URI` in the dashboard or with `railway variables set MONGODB_URI=...`.
+
+## Development
+
+- `bun run lint` — ESLint (src, server, tests)
+- `bun run lint:fix`
+- `bun run format` — Prettier
+- `bun run test` / `bun run test:run` — Vitest (mocked DB in `tests/mockDb.ts`)
+- `bun run test:coverage`
+
 ## Project Structure 
 
 ```
@@ -133,7 +151,10 @@ Tradelingo/
 ├── server/
 │   ├── index.ts         # Express server & API endpoints
 │   └── db.ts            # Database utilities
+├── tests/               # Unit tests and mock data (api.test.ts, mockDb.ts)
 ├── vite.config.ts       # Vite configuration
+├── vitest.config.ts     # Vitest configuration
+├── eslint.config.js     # ESLint flat config
 ├── tsconfig.json        # TypeScript configuration
 └── package.json
 ```

@@ -5,7 +5,6 @@ import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
 import '../styles/modules.css';
 
-
 // Importing modules as an array for easier mapping
 const MODULE_LIST = Object.entries(MODULES).map(([id, data]) => ({
   id: Number(id),
@@ -15,23 +14,21 @@ const MODULE_LIST = Object.entries(MODULES).map(([id, data]) => ({
 function Modules() {
   const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
   const [lastUnlockedModuleId, setLastUnlockedModuleId] = useState(1);
-  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, any>>({});
+  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, { lessonCurrent?: number }>>({});
   
   const navigate = useNavigate();
   const { user } = useUser();
 
-  // Fetch progress from MongoDB when the component loads or the user logs in
   useEffect(() => {
     const fetchProgress = async () => {
       if (!user) {
-        // Reset to defaults if logged out
         setLastUnlockedModuleId(1);
         setProgressByModuleId({});
         return;
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/progress/${user.email}`);
+        const response = await fetch(`/api/progress/${user.email}`);
         if (response.ok) {
           const data = await response.json();
           setLastUnlockedModuleId(data.lastUnlockedModuleId);
@@ -149,7 +146,7 @@ function Modules() {
                           {[1, 2, 3].map((i) => (
                             <div key={i} className="modules__streak-dot" />
                           ))}
-                          <div className="modules__streak-badge">+{progress.streakBonus}</div>
+                          <div className="modules__streak-badge">+{(progress as { streakBonus?: number }).streakBonus ?? 0}</div>
                         </div>
                         
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

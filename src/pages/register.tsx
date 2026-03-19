@@ -13,11 +13,10 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear any previous errors
+    setError("");
 
     try {
-      // Send the data to your Express backend
-      const response = await fetch("http://localhost:3000/api/register", {
+      const response = await fetch('/api/register', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -29,18 +28,15 @@ export default function Register() {
         throw new Error(data.error || "Failed to register");
       }
 
-      // Update the global UserContext so the Header shows the new user's XP
       setUser({
-        email: email, 
+        email,
         displayName: data.displayName,
-        experiencePoints: data.experiencePoints
+        experiencePoints: data.experiencePoints,
       });
-
-      // Navigate back to the Modules page after successful registration
       navigate("/");
       
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 

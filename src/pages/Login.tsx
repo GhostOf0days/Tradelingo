@@ -16,7 +16,7 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      const response = await fetch('/api/login', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -28,18 +28,15 @@ export default function Login() {
         throw new Error(data.error || "Failed to log in");
       }
 
-      // Update global state and local storage
       setUser({
-        email: data.email, 
+        email: data.email,
         displayName: data.displayName,
-        experiencePoints: data.experiencePoints
+        experiencePoints: data.experiencePoints,
       });
-
-      // Send them to the modules page
       navigate("/");
       
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 

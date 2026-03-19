@@ -5,7 +5,7 @@ export type User = {
   displayName: string;
   experiencePoints: number;
   streakDays?: number;
-  lastActivityDate?: string; // ISO date string (e.g., "2026-03-02")
+  lastActivityDate?: string;
 };
 
 type UserContextValue = {
@@ -16,39 +16,31 @@ type UserContextValue = {
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-// Helper: Calculate if streak should reset (date has changed)
+// true if last activity was not today (YYYY-MM-DD)
 function shouldResetStreak(lastActivityDate: string | undefined): boolean {
   if (!lastActivityDate) return false;
-  const today = new Date().toISOString().split('T')[0]; // Get today's date as YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
   return lastActivityDate !== today;
 }
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  // 1. When the app loads, check if we saved a user in the browser previously
   const [user, setUserState] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('tradelingo_user');
     if (!savedUser) return null;
-    
     const parsed = JSON.parse(savedUser);
-    
-    // Check if streak should reset (user hasn't logged in since yesterday)
     if (shouldResetStreak(parsed.lastActivityDate)) {
-      // If yesterday was their last activity, increment streak. Otherwise, reset to 1.
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
-      
       if (parsed.lastActivityDate === yesterdayStr) {
-        parsed.streakDays = (parsed.streakDays || 0) + 1;
+        parsed.streakDays = (parsed.streakDays || 0) + 1; // continue streak
       } else {
-        parsed.streakDays = 1; // Reset to 1
+        parsed.streakDays = 1; // gap or first load
       }
     }
-    
     return parsed;
   });
 
-  // 2. Whenever the user gets XP or logs in, save the updated profile to the browser
   useEffect(() => {
     if (user) {
       localStorage.setItem('tradelingo_user', JSON.stringify(user));
@@ -57,7 +49,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // Helper function to update user and update today's activity date
   const setUser = (newUser: User | null) => {
     if (newUser) {
       const today = new Date().toISOString().split('T')[0];
@@ -67,23 +58,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUserState(newUser);
   };
 
-  // Function to update streak (called when user completes a lesson)
   const updateStreak = async () => {
     if (user) {
       const today = new Date().toISOString().split('T')[0];
-      // Only increment if we haven't updated streak today
-      if (user.lastActivityDate !== today) {
-        // Update locally
+      if (user.lastActivityDate !== today) { // once per day
         const updatedUser = {
           ...user,
           streakDays: (user.streakDays || 1) + 1,
           lastActivityDate: today,
         };
         setUserState(updatedUser);
-
-        // Also sync to backend
         try {
-          await fetch('http://localhost:3000/api/update-streak', {
+          await fetch('/api/update-streak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: user.email })
