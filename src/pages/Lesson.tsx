@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
+
 export interface LessonItem {
   title: string;
   content: string;
@@ -48,7 +49,7 @@ export default function Lesson() {
     setIsLoading(true);
     try {
       if (isReviewMode) {
-        // If reviewing, just start at lesson index 0 locally!
+        // If reviewing, just start at lesson index 0 locally
         loadLocalLesson(0);
       } else {
         // Normal mode: Fetch real progress

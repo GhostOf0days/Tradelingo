@@ -1,15 +1,105 @@
 import { useState } from 'react';
 import '../styles/Calculator.css';
 
+// Account class to represent different retirement accounts and their properties
+class Account {
+  id: string;
+  name: string;
+  desc: string;
+  hasEmployerMatch: boolean;
+  private _contributionLimit: number;
+  private _annualContribution: number;
+  private _currentBalance: number;
+  private _years: number;
+  private _employerMatch: number;
+
+  constructor(id: string, name: string, desc: string, contributionLimit: number, hasEmployerMatch: boolean = false, 
+    annualContribution: number = 0, currentBalance: number = 0, years: number = 30, employerMatch: number = 0) {
+    this.id = id;
+    this.name = name;
+    this.desc = desc;
+    this.hasEmployerMatch = hasEmployerMatch;
+    this._contributionLimit = contributionLimit;
+    this._annualContribution = annualContribution;
+    this._currentBalance = currentBalance;
+    this._years = years;
+    this._employerMatch = employerMatch;
+  }
+
+  // Getters and setters for private fields to allow controlled updates and React state management
+  get contributionLimit(): number { return this._contributionLimit; }
+
+  get annualContribution(): number { return this._annualContribution; }
+  set annualContribution(value: number) { this._annualContribution = value; }
+
+  get currentBalance(): number { return this._currentBalance; }
+  set currentBalance(value: number) { this._currentBalance = value; }
+
+  get years(): number { return this._years; }
+  set years(value: number) { this._years = value; }
+
+  get employerMatch(): number { return this._employerMatch; }
+  set employerMatch(value: number) { this._employerMatch = value; }
+
+  getFormattedLimit(): string {
+    return `$${this._contributionLimit.toLocaleString()}/year`;
+  }
+
+  // Returns a copy with updated fields
+  copyWith(updates: Partial<{ annualContribution: number; currentBalance: number; years: number; employerMatch: number;}>): Account {
+    return new Account(
+      this.id,
+      this.name,
+      this.desc,
+      this._contributionLimit,
+      this.hasEmployerMatch,
+      updates.annualContribution ?? this._annualContribution,
+      updates.currentBalance ?? this._currentBalance,
+      updates.years ?? this._years,
+      updates.employerMatch ?? this._employerMatch,
+    );
+  }
+}
+
+// Class containing methods for calculating projections
+class RetirementCalculator {
+  // Formatting numbers as currency for display
+  static format(value: number): string {
+    return value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  // Projections for retirement accounts
+  static project(account: Account, annualReturn: number = 7): number {
+    const r = annualReturn / 100;
+    return (account.currentBalance * Math.pow(1 + r, account.years) + (account.annualContribution + account.employerMatch) 
+    * (Math.pow(1 + r, account.years) - 1) / r);
+  }
+  // Compound interest calculation
+  static compound(principal: number, annualRate: number, years: number, compoundFreq: number): number {
+    const r = annualRate / 100;
+    return principal * Math.pow(1 + r / compoundFreq, compoundFreq * years);
+  }
+
+  // Savings projection with contributions and compounding
+  static projectSavings(currentSavings: number, annualContribution: number, annualReturn: number, years: number): number {
+    const r = annualReturn / 100;
+    return (currentSavings * Math.pow(1 + r, years) + annualContribution * (1 + r) * (Math.pow(1 + r, years) - 1) / r);
+  }
+}
+
+const ACCOUNT_COLORS: Record<string, string> = {'401k':'#3b82f6', 'ira':'#8b5cf6', 'roth':'#ec4899', 'sep':'#f59e0b'};
+
+const RETIREMENT_ACCOUNTS = [
+  new Account('401k', '401(k)', 'Employer-sponsored plan', 23500, true, 23500),
+  new Account('ira', 'Traditional IRA', 'Tax-deferred account', 7000, false, 7000),
+  new Account('roth', 'Roth IRA', 'Tax-free withdrawals', 7000, false, 7000),
+  new Account('sep', 'SEP IRA', 'For self-employed', 69000, false, 15000),
+];
+
+// Main Calculator component
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'retirement' | 'compound' | 'savings'>('retirement');
-  const [selectedAccount, setSelectedAccount] = useState<string>('401k');
-  const [accountDetails, setAccountDetails] = useState({
-    annualContribution: 22500,
-    employerMatch: 0,
-    currentBalance: 0,
-    years: 30,
-  });
+  const [selectedAccount, setSelectedAccount] = useState<Account>(RETIREMENT_ACCOUNTS[0]);
   const [compoundData, setCompoundData] = useState({
     principal: 10000,
     annualRate: 7,
@@ -24,70 +114,7 @@ export default function Calculator() {
     annualReturn: 7,
   });
 
-  const calculateCompound = () => {
-    const p = parseFloat(compoundData.principal.toString());
-    const r = parseFloat(compoundData.annualRate.toString()) / 100;
-    const n = parseFloat(compoundData.compoundFreq.toString());
-    const t = parseFloat(compoundData.years.toString());
-    const amount = p * Math.pow(1 + r / n, n * t);
-    return amount.toFixed(2);
-  };
-
-  const calculateRetirement = () => {
-    const currentAge = parseInt(savingsData.currentAge.toString());
-    const retirementAge = parseInt(savingsData.retirementAge.toString());
-    const years = retirementAge - currentAge;
-    const pv = parseFloat(savingsData.currentSavings.toString());
-    const pmt = parseFloat(savingsData.annualContribution.toString());
-    const r = parseFloat(savingsData.annualReturn.toString()) / 100;
-    
-    let futureValue = pv * Math.pow(1 + r, years);
-    for (let i = 0; i < years; i++) {
-      futureValue += pmt * Math.pow(1 + r, years - i);
-    }
-    return futureValue.toFixed(2);
-  };
-
-  const calculate401k = () => {
-    const contribution = parseFloat(accountDetails.annualContribution.toString());
-    const match = parseFloat(accountDetails.employerMatch.toString());
-    const balance = parseFloat(accountDetails.currentBalance.toString());
-    const years = parseFloat(accountDetails.years.toString());
-    const totalAnnual = contribution + match;
-    const fv = balance + (totalAnnual * years);
-    return fv.toFixed(2);
-  };
-
-  const retirementAccounts = [
-    {
-      id: '401k',
-      name: '401(k)',
-      desc: 'Employer-sponsored plan with employer match',
-      limit: '$23,500/year',
-      color: '#3b82f6',
-    },
-    {
-      id: 'ira',
-      name: 'Traditional IRA',
-      desc: 'Tax-deferred individual retirement account',
-      limit: '$7,000/year',
-      color: '#8b5cf6',
-    },
-    {
-      id: 'roth',
-      name: 'Roth IRA',
-      desc: 'Tax-free withdrawals in retirement',
-      limit: '$7,000/year',
-      color: '#ec4899',
-    },
-    {
-      id: 'sep',
-      name: 'SEP IRA',
-      desc: 'For self-employed individuals',
-      limit: '$69,000/year',
-      color: '#f59e0b',
-    },
-  ];
+  const compoundResult = RetirementCalculator.compound(compoundData.principal, compoundData.annualRate, compoundData.years, compoundData.compoundFreq);
 
   return (
     <div className="calculator">
@@ -123,42 +150,40 @@ export default function Calculator() {
           <div className="calculator__section">
             <h2>Which Retirement Account is Best for You?</h2>
             <div className="calculator__accounts-grid">
-              {retirementAccounts.map((account) => (
+              {RETIREMENT_ACCOUNTS.map((account) => (
                 <div
                   key={account.id}
-                  className={`calculator__account-card ${selectedAccount === account.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedAccount(account.id)}
-                  style={{ borderLeftColor: account.color }}
+                  className={`calculator__account-card ${selectedAccount.id === account.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedAccount(account)}
+                  style={{ borderLeftColor: ACCOUNT_COLORS[account.id] }}
                 >
                   <h3>{account.name}</h3>
                   <p className="calculator__account-desc">{account.desc}</p>
-                  <p className="calculator__account-limit">Annual Limit: {account.limit}</p>
-                  {selectedAccount === account.id && (
-                    <div className="calculator__account-details">
+                  <p className="calculator__account-limit">Annual Limit: {account.getFormattedLimit()}</p>
+                  {selectedAccount.id === account.id && (
+                    <div className="calculator__account-details" onClick={(e) => e.stopPropagation()} >
                       <div className="calculator__input-group">
                         <label>Annual Contribution ($)</label>
                         <input
                           type="number"
-                          value={accountDetails.annualContribution}
+                          value={selectedAccount.annualContribution}
                           onChange={(e) =>
-                            setAccountDetails({
-                              ...accountDetails,
+                            setSelectedAccount(selectedAccount.copyWith({
                               annualContribution: parseInt(e.target.value),
-                            })
+                            }))
                           }
                         />
                       </div>
-                      {account.id === '401k' && (
+                      {account.hasEmployerMatch && (
                         <div className="calculator__input-group">
                           <label>Employer Match ($)</label>
                           <input
                             type="number"
-                            value={accountDetails.employerMatch}
+                            value={selectedAccount.employerMatch}
                             onChange={(e) =>
-                              setAccountDetails({
-                                ...accountDetails,
+                              setSelectedAccount(selectedAccount.copyWith({
                                 employerMatch: parseInt(e.target.value),
-                              })
+                              }))
                             }
                           />
                         </div>
@@ -167,12 +192,11 @@ export default function Calculator() {
                         <label>Current Balance ($)</label>
                         <input
                           type="number"
-                          value={accountDetails.currentBalance}
+                          value={selectedAccount.currentBalance}
                           onChange={(e) =>
-                            setAccountDetails({
-                              ...accountDetails,
+                            setSelectedAccount(selectedAccount.copyWith({
                               currentBalance: parseInt(e.target.value),
-                            })
+                            }))
                           }
                         />
                       </div>
@@ -180,18 +204,19 @@ export default function Calculator() {
                         <label>Years Until Retirement</label>
                         <input
                           type="number"
-                          value={accountDetails.years}
+                          value={selectedAccount.years}
                           onChange={(e) =>
-                            setAccountDetails({
-                              ...accountDetails,
+                            setSelectedAccount(selectedAccount.copyWith({
                               years: parseInt(e.target.value),
-                            })
+                            }))
                           }
                         />
                       </div>
                       <div className="calculator__result">
                         <p>Projected Balance at Retirement:</p>
-                        <p className="calculator__result-value">${calculate401k()}</p>
+                        <p className="calculator__result-value">
+                          ${RetirementCalculator.format(RetirementCalculator.project(selectedAccount))}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -257,10 +282,8 @@ export default function Calculator() {
               </div>
               <div className="calculator__result">
                 <p>Final Amount:</p>
-                <p className="calculator__result-value">${calculateCompound()}</p>
-                <p className="calculator__result-gain">
-                  Gain: ${(parseFloat(calculateCompound()) - compoundData.principal).toFixed(2)}
-                </p>
+                <p className="calculator__result-value">${RetirementCalculator.format(compoundResult)}</p>
+                <p className="calculator__result-gain">Gain: ${RetirementCalculator.format(compoundResult - compoundData.principal)}</p>
               </div>
             </div>
           </div>
@@ -310,10 +333,7 @@ export default function Calculator() {
                   type="number"
                   value={savingsData.annualContribution}
                   onChange={(e) =>
-                    setSavingsData({
-                      ...savingsData,
-                      annualContribution: parseInt(e.target.value),
-                    })
+                    setSavingsData({ ...savingsData, annualContribution: parseInt(e.target.value) })
                   }
                 />
               </div>
@@ -330,10 +350,11 @@ export default function Calculator() {
               </div>
               <div className="calculator__result">
                 <p>Projected Retirement Savings:</p>
-                <p className="calculator__result-value">${calculateRetirement()}</p>
+                <p className="calculator__result-value">
+                  ${RetirementCalculator.format(RetirementCalculator.projectSavings(savingsData.currentSavings, savingsData.annualContribution, savingsData.annualReturn, savingsData.retirementAge - savingsData.currentAge))}
+                </p>
                 <p className="calculator__result-info">
-                  Years until retirement:{' '}
-                  {savingsData.retirementAge - savingsData.currentAge}
+                  Years until retirement: {savingsData.retirementAge - savingsData.currentAge}
                 </p>
               </div>
             </div>
