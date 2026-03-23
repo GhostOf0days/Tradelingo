@@ -76,6 +76,7 @@ export default function Lesson() {
   useEffect(() => { fetchCurrentProgress(); }, [user, id]);
 
   const handleNext = async () => {
+    if (!lessonData) return;
     if (currentStep === 'info') {
       setCurrentStep('quiz');
     } else if (currentStep === 'quiz') {
