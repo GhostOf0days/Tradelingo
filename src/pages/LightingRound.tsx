@@ -28,13 +28,25 @@ const ALL_QUESTIONS: Question[] = [
   ...BROKERS_PRETEST.map(q => ({ ...q, category: 'Brokers' })),
 ];
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+// Class to encapsulate game logic
+class GameManager {
+  static shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
-  return a;
+
+  static async submitScore(email: string, totalXp: number) {
+    const res = await fetch('/api/complete-lesson', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, moduleId: 0, xpToAdd: totalXp }), 
+    });
+    return await res.json();
+  }
 }
 
 export default function LightingRound() {
@@ -117,7 +129,7 @@ export default function LightingRound() {
 
   const startGame = () => {
     clearTimers();
-    const picked = shuffle(ALL_QUESTIONS).slice(0, TOTAL_QUESTIONS);
+    const picked = GameManager.shuffle(ALL_QUESTIONS).slice(0, TOTAL_QUESTIONS);
     setQuestions(picked);
     setCurrentIndex(0);
     setScore(0);
@@ -158,12 +170,7 @@ export default function LightingRound() {
     setXpEarned(totalXp);
 
     if (user && totalXp > 0) {
-      fetch('/api/complete-lesson', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }), // 0 = lightning round
-      })
-        .then(res => res.json())
+      GameManager.submitScore(user.email, totalXp)
         .then(data => {
           if (data.experiencePoints !== undefined) {
             setUser({ ...user, experiencePoints: data.experiencePoints });
@@ -171,7 +178,7 @@ export default function LightingRound() {
         })
         .catch(console.error);
     }
-  }, [gameState]);
+  }, [gameState, correctCount, score, user, setUser]);
 
   const currentQ = questions[currentIndex];
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;

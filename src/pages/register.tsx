@@ -1,7 +1,26 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import '../styles/Register.css';
+
+// Class to encapsulate registration logic
+class AuthManager {
+  static async register(email: string, password: string) {
+    const response = await fetch('/api/register', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to register");
+    }
+
+    return data;
+  }
+}
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -16,17 +35,7 @@ export default function Register() {
     setError("");
 
     try {
-      const response = await fetch('/api/register', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to register");
-      }
+      const data = await AuthManager.register(email, password);
 
       setUser({
         email,
@@ -45,7 +54,6 @@ export default function Register() {
       <div className="auth__card">
         <h1 className="auth__title">Create Account</h1>
         
-        {/* Display backend errors (like "User already exists") to the user */}
         {error && <div className="auth__error">{error}</div>}
 
         <form className="auth__form" onSubmit={handleSubmit}>

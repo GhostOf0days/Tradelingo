@@ -2,11 +2,35 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import '../styles/Explore.css';
 
+interface Article {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  author: string;
+  readTime: string;
+  likes: number;
+  url: string;
+}
+
+// Class to encapsulate explore logic
+class ExploreManager {
+  static filterArticles(articles: Article[], searchQuery: string, selectedCategory: string) {
+    return articles.filter((article) => {
+      const matchesSearch =
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }
+}
+
 export default function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'articles' | 'videos'>('all');
 
-  const articles = [
+  const articles: Article[] = [
     {
       id: 1,
       title: 'What is an ETF?',
@@ -69,13 +93,7 @@ export default function Explore() {
     },
   ];
 
-  const filteredArticles = articles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredArticles = ExploreManager.filterArticles(articles, searchQuery, selectedCategory);
 
   return (
     <div className="explore">

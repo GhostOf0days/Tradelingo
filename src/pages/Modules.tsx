@@ -3,17 +3,28 @@ import { Play, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
-import '../styles/modules.css';
+import '../styles/Modules.css';
 
 const MODULE_LIST = Object.entries(MODULES).map(([id, data]) => ({
   id: Number(id),
   ...data
 }));
 
-function Modules() {
-  const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
-  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, { lessonCurrent?: number; streakBonus?: number }>>({});
+// Class to encapsulate progress management
+class ProgressManager {
+  static async fetchProgress(email: string) {
+    const response = await fetch(`/api/progress/${email}`);
+    if (response.ok) {
+      return await response.json();
+    }
+    throw new Error("Failed to fetch progress");
+  }
+}
 
+export default function Modules() {
+  const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
+  const [progressByModuleId, setProgressByModuleId] = useState<Record<number, { lessonCurrent?: number }>>({});
+  
   const navigate = useNavigate();
   const { user } = useUser();
 
@@ -23,25 +34,23 @@ function Modules() {
         setProgressByModuleId({});
         return;
       }
+
       try {
-        const response = await fetch(`/api/progress/${user.email}`);
-        if (response.ok) {
-          const data = await response.json();
-          setProgressByModuleId(data.progressByModuleId);
-        }
+        const data = await ProgressManager.fetchProgress(user.email);
+        setProgressByModuleId(data.progressByModuleId || {});
       } catch (err) {
-        console.error('Failed to fetch progress', err);
+        console.error("Failed to fetch progress", err);
       }
     };
 
-    fetchProgress();
+    fetchProgress();  
   }, [user]);
 
   const filteredModules = MODULE_LIST.filter((module) => {
     const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0 };
     const lessonCurrent = progress.lessonCurrent ?? 0;
     const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
-
+    
     if (filter === 'completed') return isCompleted;
     return !isCompleted;
   });
@@ -74,98 +83,93 @@ function Modules() {
           </button>
         </div>
       </div>
-
+      
       {filteredModules.length === 0 ? (
         <p className="modules__empty">
           {filter === 'completed' ? 'No completed modules yet.' : 'No modules in progress.'}
         </p>
       ) : (
-        <ul className="modules__list">
-          {filteredModules.map((module) => {
-            const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
-            const lessonCurrent = progress.lessonCurrent ?? 0;
-            const progressPercent = module.lessons.length > 0
-              ? Math.round((lessonCurrent / module.lessons.length) * 100)
-              : 0;
-            const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
-            const actionLabel = lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? null : 'Continue';
+      <div className="modules__grid-layout">
+        {filteredModules.map((module) => {
+          const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0, streakBonus: 0 };
+          const lessonCurrent = progress.lessonCurrent ?? 0;
+          const progressPercent = module.lessons.length > 0 ? Math.round((lessonCurrent / module.lessons.length) * 100) : 0;
+          const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
+          const actionLabel = lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? 'Review' : 'Continue';
 
-            return (
-              <li key={module.id} className="modules__item">
-                <article className="modules__card">
-                  <div className="modules__card-inner">
-                    <div className="modules__card-head">
-                      <div className="modules__card-title-row">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {isCompleted && <CheckCircle2 size={18} strokeWidth={3} />}
-                          <h2 className="modules__card-title">{module.title}</h2>
-                        </div>
-                        <span className="modules__card-xp">
-                          <span className="modules__xp-icon" aria-hidden="true" />
-                          +{module.experiencePoints} XP
-                        </span>
-                      </div>
-                      <p className="modules__card-lessons">
-                        Lesson {lessonCurrent} of {module.lessons.length}
-                      </p>
-                    </div>
-
-                    <div className="modules__progress-block">
-                      <div className="modules__progress-header">
-                        <span className="modules__progress-label-text">Progress</span>
-                        <span className="modules__progress-percent">{progressPercent}%</span>
-                      </div>
-                      <div
-                        className="modules__progress-bar"
-                        role="progressbar"
-                        aria-valuenow={progressPercent}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      >
-                        <div
-                          className="modules__progress-fill"
-                          style={{ width: `${progressPercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="modules__card-footer">
-                      <div className="modules__streak-row">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="modules__streak-dot" />
-                        ))}
-                        <div className="modules__streak-badge">+{progress.streakBonus ?? 0}</div>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {lessonCurrent === 0 && (
-                          <button
-                            type="button"
-                            className="modules__card-btn"
-                            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
-                            onClick={() => navigate(`/pretest/${module.id}`)}
-                          >
-                            Test Out
-                          </button>
-                        )}
-                        {actionLabel !== null && (
-                          <button
-                            type="button"
-                            className="modules__card-btn"
-                            onClick={() => navigate(`/lesson/${module.id}`)}
-                          >
-                            {actionLabel}
-                            <Play size={12} fill="currentColor" className="modules__card-btn-icon" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
+          return (
+            <article key={module.id} className="modules__card">
+              <div className="modules__card-inner">
+                <div className="modules__card-head">
+                  <div className="modules__card-title-row">
+                    <h2 className="modules__card-title">
+                      {isCompleted && <CheckCircle2 size={18} style={{ marginRight: '8px', color: '#22c55e', verticalAlign: 'middle' }} />}
+                      {module.title}
+                    </h2>
+                    <span className="modules__card-xp">
+                      <span className="modules__xp-icon" aria-hidden="true" />
+                      +{module.experiencePoints} XP
+                    </span>
                   </div>
-                </article>
-              </li>
-            );
-          })}
-        </ul>
+                  <p className="modules__card-lessons">
+                    Lesson {lessonCurrent} of {module.lessons.length}
+                  </p>
+                </div>
+                
+                <div className="modules__progress-block">
+                  <div className="modules__progress-header">
+                    <span className="modules__progress-label-text">Progress</span>
+                    <span className="modules__progress-percent">{progressPercent}%</span>
+                  </div>
+                  <div
+                    className="modules__progress-bar"
+                    role="progressbar"
+                    aria-valuenow={progressPercent}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div
+                      className="modules__progress-fill"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="modules__card-footer">
+                  <div className="modules__streak-row">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="modules__streak-dot" />
+                    ))}
+                    <div className="modules__streak-badge">+{(progress as { streakBonus?: number }).streakBonus ?? 0}</div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {lessonCurrent === 0 && (
+                      <button 
+                        type="button" 
+                        className="modules__card-btn"
+                        style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+                        onClick={() => navigate(`/pretest/${module.id}`)}
+                      >
+                        Test Out
+                      </button>
+                    )}
+                    
+                    <button 
+                      type="button" 
+                      className="modules__card-btn"
+                      onClick={() => navigate(`/lesson/${module.id}${isCompleted ? '?review=true' : ''}`)}
+                    >
+                      {actionLabel}
+                      <Play size={12} fill="currentColor" className="modules__card-btn-icon" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
       )}
 
       <section className="modules__lightning-wrap">
@@ -179,9 +183,9 @@ function Modules() {
             <h3 className="modules__lightning-title">Lightning Round</h3>
             <p className="modules__lightning-subtitle">Play daily. Win up to 2,500 XP</p>
           </div>
-          <button
-            type="button"
-            className="modules__lightning-play"
+          <button 
+            type="button" 
+            className="modules__lightning-play" 
             aria-label="Play Lightning Round"
             onClick={() => navigate('/lightning-round')}
           >
@@ -197,9 +201,9 @@ function Modules() {
             <h3 className="modules__review-title">Review Completed Modules</h3>
             <p className="modules__review-subtitle">Refresh your knowledge on mastered topics</p>
           </div>
-          <button
-            type="button"
-            className="modules__review-btn"
+          <button 
+            type="button" 
+            className="modules__review-btn" 
             aria-label="Review completed modules"
             onClick={() => navigate('/completed-modules')}
           >
@@ -210,5 +214,3 @@ function Modules() {
     </div>
   );
 }
-
-export default Modules;

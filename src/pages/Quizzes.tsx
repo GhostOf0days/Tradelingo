@@ -12,63 +12,65 @@ interface Quiz {
   category: string;
 }
 
+// Class to encapsulate quiz logic
+class QuizManager {
+  static async updateXP(email: string, xpToAdd: number) {
+    const response = await fetch('/api/update-xp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, xpToAdd }),
+    });
+    if (!response.ok) throw new Error("Failed to update XP");
+    return await response.json();
+  }
+
+  static getDifficultyColor(difficulty: string) {
+    switch (difficulty) {
+      case 'Easy': return '#10b981';
+      case 'Medium': return '#f59e0b';
+      case 'Hard': return '#ef4444';
+      default: return '#6b7280';
+    }
+  }
+}
+
+const quizQuestions = [
+  {
+    question: 'What does diversification help reduce?',
+    options: ['Taxes', 'Risk', 'Fees', 'Returns'],
+    correct: 1,
+  },
+  {
+    question: 'Which is a low-cost investment vehicle?',
+    options: ['Hedge Fund', 'ETF', 'Penny Stock', 'Crypto'],
+    correct: 1,
+  },
+  {
+    question: 'What is a dividend?',
+    options: ['A loss', 'A payment to shareholders', 'A tax', 'A fee'],
+    correct: 1,
+  },
+  {
+    question: 'What does Beta measure?',
+    options: ['Company growth', 'Volatility', 'Profit', 'Size'],
+    correct: 1,
+  },
+  {
+    question: 'Which is the safest investment?',
+    options: ['Penny stocks', 'Blue-chip stocks', 'Options', 'Futures'],
+    correct: 1,
+  },
+];
+
 export default function Quizzes() {
   const { user, setUser, updateStreak } = useUser();
   const [quizzes] = useState<Quiz[]>([
-    {
-      id: 1,
-      title: 'Stock Basics Challenge',
-      description: 'Test your knowledge on stock market fundamentals',
-      difficulty: 'Easy',
-      xpReward: 100,
-      questions: 10,
-      category: 'Stocks',
-    },
-    {
-      id: 2,
-      title: 'Market Volatility Quiz',
-      description: 'Understand price fluctuations and market risk',
-      difficulty: 'Medium',
-      xpReward: 200,
-      questions: 15,
-      category: 'Risk',
-    },
-    {
-      id: 3,
-      title: 'Portfolio Strategy Exam',
-      description: 'Master diversification and asset allocation',
-      difficulty: 'Hard',
-      xpReward: 300,
-      questions: 20,
-      category: 'Strategy',
-    },
-    {
-      id: 4,
-      title: 'Dividend Investor Quiz',
-      description: 'Learn about dividend investing and income strategies',
-      difficulty: 'Medium',
-      xpReward: 150,
-      questions: 12,
-      category: 'Income',
-    },
-    {
-      id: 5,
-      title: 'ETF Master Class',
-      description: 'Become an expert on exchange-traded funds',
-      difficulty: 'Medium',
-      xpReward: 180,
-      questions: 14,
-      category: 'ETFs',
-    },
-    {
-      id: 6,
-      title: 'Retirement Planning Sprint',
-      description: 'Test your retirement account knowledge',
-      difficulty: 'Hard',
-      xpReward: 250,
-      questions: 18,
-      category: 'Retirement',
-    },
+    { id: 1, title: 'Stock Basics Challenge', description: 'Test your knowledge on stock market fundamentals', difficulty: 'Easy', xpReward: 100, questions: 10, category: 'Stocks' },
+    { id: 2, title: 'Market Volatility Quiz', description: 'Understand price fluctuations and market risk', difficulty: 'Medium', xpReward: 200, questions: 15, category: 'Risk' },
+    { id: 3, title: 'Portfolio Strategy Exam', description: 'Master diversification and asset allocation', difficulty: 'Hard', xpReward: 300, questions: 20, category: 'Strategy' },
+    { id: 4, title: 'Dividend Investor Quiz', description: 'Learn about dividend investing and income strategies', difficulty: 'Medium', xpReward: 150, questions: 12, category: 'Income' },
+    { id: 5, title: 'ETF Master Class', description: 'Become an expert on exchange-traded funds', difficulty: 'Medium', xpReward: 180, questions: 14, category: 'ETFs' },
+    { id: 6, title: 'Retirement Planning Sprint', description: 'Test your retirement account knowledge', difficulty: 'Hard', xpReward: 250, questions: 18, category: 'Retirement' },
   ]);
 
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
@@ -77,34 +79,6 @@ export default function Quizzes() {
   const [showResults, setShowResults] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-
-  const quizQuestions = [
-    {
-      question: 'What does diversification help reduce?',
-      options: ['Taxes', 'Risk', 'Fees', 'Returns'],
-      correct: 1,
-    },
-    {
-      question: 'Which is a low-cost investment vehicle?',
-      options: ['Hedge Fund', 'ETF', 'Penny Stock', 'Crypto'],
-      correct: 1,
-    },
-    {
-      question: 'What is a dividend?',
-      options: ['A loss', 'A payment to shareholders', 'A tax', 'A fee'],
-      correct: 1,
-    },
-    {
-      question: 'What does Beta measure?',
-      options: ['Company growth', 'Volatility', 'Profit', 'Size'],
-      correct: 1,
-    },
-    {
-      question: 'Which is the safest investment?',
-      options: ['Penny stocks', 'Blue-chip stocks', 'Options', 'Futures'],
-      correct: 1,
-    },
-  ];
 
   const handleStartQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
@@ -120,31 +94,21 @@ export default function Quizzes() {
   };
 
   const handleNextQuestion = async () => {
-    if (selectedAnswer === quizQuestions[currentQuestion].correct) {
-      setScore(score + 1);
-    }
+    const newScore = selectedAnswer === quizQuestions[currentQuestion].correct ? score + 1 : score;
 
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
+      setScore(newScore);
     } else {
       setShowResults(true);
+      setScore(newScore);
       if (user && selectedQuiz) {
         try {
-          const xpToAdd = Math.floor((score / quizQuestions.length) * selectedQuiz.xpReward);
-          const response = await fetch('/api/update-xp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: user.email,
-              xpToAdd: xpToAdd,
-            }),
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setUser({ ...user, experiencePoints: data.experiencePoints });
-            updateStreak();
-          }
+          const xpToAdd = Math.floor((newScore / quizQuestions.length) * selectedQuiz.xpReward);
+          const data = await QuizManager.updateXP(user.email, xpToAdd);
+          setUser({ ...user, experiencePoints: data.experiencePoints });
+          updateStreak();
         } catch (err) {
           console.error('Failed to update XP', err);
         }
@@ -159,19 +123,6 @@ export default function Quizzes() {
     setSelectedAnswer(null);
   };
 
-  const difficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy':
-        return '#10b981';
-      case 'Medium':
-        return '#f59e0b';
-      case 'Hard':
-        return '#ef4444';
-      default:
-        return '#6b7280';
-    }
-  };
-
   if (quizStarted && selectedQuiz && !showResults) {
     const question = quizQuestions[currentQuestion];
     const progress = Math.round(((currentQuestion + 1) / quizQuestions.length) * 100);
@@ -183,10 +134,7 @@ export default function Quizzes() {
           <div className="quizzes__progress">
             <span>{currentQuestion + 1} of 5</span>
             <div className="quizzes__progress-bar">
-              <div
-                className="quizzes__progress-fill"
-                style={{ width: `${progress}%` }}
-              />
+              <div className="quizzes__progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
         </div>
@@ -229,9 +177,7 @@ export default function Quizzes() {
           <h2>{selectedQuiz.title}</h2>
           <div className="quizzes__score">
             <p className="quizzes__score-text">Your Score</p>
-            <p className="quizzes__score-value">
-              {score} / {quizQuestions.length}
-            </p>
+            <p className="quizzes__score-value">{score} / {quizQuestions.length}</p>
             <p className="quizzes__score-percentage">{percentage}%</p>
           </div>
           <div className="quizzes__reward">
@@ -239,9 +185,7 @@ export default function Quizzes() {
             <p className="quizzes__xp-value">+{xpEarned} XP</p>
           </div>
           <div className="quizzes__actions">
-            <button className="quizzes__btn quizzes__btn--secondary" onClick={handleRetry}>
-              Try Again
-            </button>
+            <button className="quizzes__btn quizzes__btn--secondary" onClick={handleRetry}>Try Again</button>
             <button
               className="quizzes__btn quizzes__btn--primary"
               onClick={() => {
@@ -272,19 +216,14 @@ export default function Quizzes() {
         </div>
         <div className="quizzes__stat">
           <span className="quizzes__stat-label">XP Available</span>
-          <span className="quizzes__stat-value">
-            {quizzes.reduce((sum, q) => sum + q.xpReward, 0)}
-          </span>
+          <span className="quizzes__stat-value">{quizzes.reduce((sum, q) => sum + q.xpReward, 0)}</span>
         </div>
       </div>
 
       <div className="quizzes__grid">
         {quizzes.map((quiz) => (
           <div key={quiz.id} className="quizzes__card">
-            <div
-              className="quizzes__difficulty"
-              style={{ backgroundColor: difficultyColor(quiz.difficulty) }}
-            >
+            <div className="quizzes__difficulty" style={{ backgroundColor: QuizManager.getDifficultyColor(quiz.difficulty) }}>
               {quiz.difficulty}
             </div>
             <h3>{quiz.title}</h3>
@@ -293,9 +232,7 @@ export default function Quizzes() {
               <span>📝 {quiz.questions} questions</span>
               <span>⭐ {quiz.xpReward} XP</span>
             </div>
-            <button className="quizzes__start-btn" onClick={() => handleStartQuiz(quiz)}>
-              Start Quiz
-            </button>
+            <button className="quizzes__start-btn" onClick={() => handleStartQuiz(quiz)}>Start Quiz</button>
           </div>
         ))}
       </div>

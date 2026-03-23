@@ -1,7 +1,26 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import '../styles/Register.css';
+
+// Class to encapsulate login logic
+class AuthManager {
+  static async login(email: string, password: string) {
+    const response = await fetch('/api/login', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to log in");
+    }
+
+    return data;
+  }
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,17 +35,7 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await fetch('/api/login', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to log in");
-      }
+      const data = await AuthManager.login(email, password);
 
       setUser({
         email: data.email,

@@ -9,18 +9,51 @@ export interface LessonItem {
   question: { question: string; options: string[]; correctIndex: number };
 }
 
+// Class to encapsulate lesson logic
+class LessonManager {
+  static async fetchProgress(email: string) {
+    const res = await fetch(`/api/progress/${email}`);
+    if (!res.ok) throw new Error("Failed to reach database");
+    return await res.json();
+  }
+
+  static async completeLesson(email: string, moduleId: number, xpToAdd: number) {
+    const res = await fetch('/api/complete-lesson', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, moduleId, xpToAdd })
+    });
+    return await res.json();
+  }
+
+  static async completeModule(email: string, moduleId: number, title: string, lessonsTotal: number) {
+    await fetch('/api/complete-module', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        moduleId,
+        title,
+        score: 100,
+        xpEarned: 500,
+        lessonsTotal
+      })
+    });
+  }
+}
+
 export default function Lesson() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser, updateStreak } = useUser();
   
-  // Check if we are in review modes
   const queryParams = new URLSearchParams(location.search);
   const isReviewMode = queryParams.get('review') === 'true';
   
   const moduleId = Number(id) || 1;
-  const moduleLessons = MODULES[moduleId as keyof typeof MODULES]?.lessons || MODULES[1].lessons;;
+  const moduleInfo = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
+  const moduleLessons = moduleInfo.lessons;
   
   const [lessonData, setLessonData] = useState<LessonItem | null>(null);
   const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
@@ -28,10 +61,9 @@ export default function Lesson() {
   const [lessonNumber, setLessonNumber] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Separate function to load a specific lesson from local array 
   const loadLocalLesson = (index: number) => {
     if (index >= moduleLessons.length) {
-      navigate('/review'); // Go back to review page when done
+      navigate('/review'); 
       return;
     }
     setLessonNumber(index);
@@ -49,18 +81,13 @@ export default function Lesson() {
     setIsLoading(true);
     try {
       if (isReviewMode) {
-        // If reviewing, just start at lesson index 0 locally
         loadLocalLesson(0);
       } else {
-        // Normal mode: Fetch real progress
-        const res = await fetch(`/api/progress/${user.email}`);
-        if (!res.ok) throw new Error("Failed to reach database");
-        
-        const data = await res.json();
+        const data = await LessonManager.fetchProgress(user.email);
         const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
         
         if (currentIdx >= moduleLessons.length) {
-          navigate('/'); // Normal mode kick-out if already finished
+          navigate('/'); 
         } else {
           loadLocalLesson(currentIdx);
         }
@@ -78,41 +105,23 @@ export default function Lesson() {
   const handleNext = async () => {
     if (currentStep === 'info') {
       setCurrentStep('quiz');
-    } else if (currentStep === 'quiz') {
+    } else if (currentStep === 'quiz' && lessonData) {
       if (selectedAnswer === lessonData.question.correctIndex) {
         
-        // ONLY update DB if we are NOT in review mode
         if (user && !isReviewMode) {
-          const res = await fetch('/api/complete-lesson', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, moduleId: moduleId, xpToAdd: 50 })
-          });
-          const data = await res.json();
-          setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak(); 
+          try {
+            const data = await LessonManager.completeLesson(user.email, moduleId, 50);
+            setUser({ ...user, experiencePoints: data.experiencePoints });
+            updateStreak(); 
+          } catch (err) {
+            console.error("Error completing lesson:", err);
+          }
         }
         
-        // Check if this is the final lesson
         if (lessonNumber === moduleLessons.length - 1) {
-          // This is the last lesson, call the module completion endpoint
           if (user && !isReviewMode) {
             try {
-              console.log("Calling complete-module endpoint for module:", moduleId);
-              const completeRes = await fetch('/api/complete-module', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  email: user.email,
-                  moduleId: moduleId,
-                  title: MODULES[moduleId as keyof typeof MODULES]?.title || `Module ${moduleId}`,
-                  score: 100,
-                  xpEarned: 500,
-                  lessonsTotal: moduleLessons.length
-                })
-              });
-              const completeData = await completeRes.json();
-              console.log("Complete module response:", completeData);
+              await LessonManager.completeModule(user.email, moduleId, moduleInfo.title, moduleLessons.length);
             } catch (err) {
               console.error("Error completing module:", err);
             }
@@ -141,7 +150,6 @@ export default function Lesson() {
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
       
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import '../styles/ReviewModules.css';
 
-// same shape as ModulesPage for progress lookup
 const MODULES = [
   { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600, description: "Master the fundamentals of the stock market." },
   { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800, description: "Learn about 401ks, IRAs, and long-term growth." },
@@ -21,6 +20,22 @@ interface CompletedModule {
   lessons: number;
 }
 
+// Class to encapsulate review logic
+class ReviewManager {
+  static async fetchProgress(email: string) {
+    const res = await fetch(`/api/progress/${email}`);
+    if (res.ok) {
+      return await res.json();
+    }
+    throw new Error("Failed to fetch progress");
+  }
+
+  static formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+}
+
 export default function ReviewModules() {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -30,25 +45,22 @@ export default function ReviewModules() {
     const fetchProgress = async () => {
       if (!user) return;
       try {
-        const res = await fetch(`/api/progress/${user.email}`);
-        if (res.ok) {
-          const data = await res.json();
-          const progressMap = data.progressByModuleId || {};
-          const finishedModules = MODULES.filter(m => {
-            const currentLesson = progressMap[m.id]?.lessonCurrent || 0;
-            return currentLesson >= m.lessonTotal && m.lessonTotal > 0;
-          }).map(m => ({
-            moduleId: m.id,
-            title: m.title,
-            description: m.description,
-            completedDate: new Date().toISOString(),
-            xpEarned: m.experiencePoints,
-            score: 100,
-            lessons: m.lessonTotal
-          }));
+        const data = await ReviewManager.fetchProgress(user.email);
+        const progressMap = data.progressByModuleId || {};
+        const finishedModules = MODULES.filter(m => {
+          const currentLesson = progressMap[m.id]?.lessonCurrent || 0;
+          return currentLesson >= m.lessonTotal && m.lessonTotal > 0;
+        }).map(m => ({
+          moduleId: m.id,
+          title: m.title,
+          description: m.description,
+          completedDate: new Date().toISOString(),
+          xpEarned: m.experiencePoints,
+          score: 100,
+          lessons: m.lessonTotal
+        }));
 
-          setCompletedModules(finishedModules);
-        }
+        setCompletedModules(finishedModules);
       } catch (err) {
         console.error('Failed to fetch completed modules:', err);
       }
@@ -58,12 +70,7 @@ export default function ReviewModules() {
   }, [user]);
 
   const handleReviewLesson = (moduleId: number) => {
-    navigate(`/lesson/${moduleId}?review=true`); // review mode, no progress write
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    navigate(`/lesson/${moduleId}?review=true`); 
   };
 
   return (
@@ -100,7 +107,7 @@ export default function ReviewModules() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
                   <div>
                     <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Completed on</div>
-                    <div style={{ fontWeight: 'bold' }}>{formatDate(module.completedDate)}</div>
+                    <div style={{ fontWeight: 'bold' }}>{ReviewManager.formatDate(module.completedDate)}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Mastery</div>

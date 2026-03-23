@@ -3,11 +3,39 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
 
+// Class to encapsulate pretest logic
+class PretestManager {
+  static async passModule(email: string, moduleId: number, totalLessons: number) {
+    const response = await fetch('/api/pass-module', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        email, 
+        moduleId,
+        xpToAdd: 500, 
+        totalLessons,
+      })
+    });
+    if (!response.ok) throw new Error("Failed to save pre-test");
+    return await response.json();
+  }
+
+  static async skipModule(email: string) {
+    const response = await fetch('/api/update-xp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, xpToAdd: 25 })
+    });
+    if (!response.ok) throw new Error("Failed to update XP");
+    return await response.json();
+  }
+}
+
 export default function Pretest() {
   const { id } = useParams();
   const moduleId = Number(id) || 1;
-  const module = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
-  const pretest = module.pretest;
+  const moduleInfo = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
+  const pretest = moduleInfo.pretest;
   const navigate = useNavigate();
   const { user, setUser, updateStreak } = useUser();
   
@@ -29,24 +57,11 @@ export default function Pretest() {
       setCurrentIndex(curr => curr + 1);
       setSelectedAnswer(null);
     } else {
-      // Pretest finished and Check if they passed >= 80%
       if (newScore / pretest.length >= 0.8 && user) {
         try {
-          const response = await fetch('/api/pass-module', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: user.email, 
-              moduleId: Number(id),
-              xpToAdd: 500, // XP bonus
-              totalLessons: module.lessons.length,
-            })
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setUser({ ...user, experiencePoints: data.experiencePoints });
-            updateStreak();
-          }
+          const data = await PretestManager.passModule(user.email, moduleId, moduleInfo.lessons.length);
+          setUser({ ...user, experiencePoints: data.experiencePoints });
+          updateStreak();
         } catch (err) {
           console.error("Failed to save pre-test", err);
         }
@@ -58,19 +73,9 @@ export default function Pretest() {
   const handleSkipModule = async () => {
     if (user) {
       try {
-        const response = await fetch('/api/update-xp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            email: user.email, 
-            xpToAdd: 25 
-          })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak();
-        }
+        const data = await PretestManager.skipModule(user.email);
+        setUser({ ...user, experiencePoints: data.experiencePoints });
+        updateStreak();
       } catch (err) {
         console.error("Failed to update XP", err);
       }
@@ -158,7 +163,6 @@ export default function Pretest() {
         {currentIndex === pretest.length - 1 ? 'Submit Exam' : 'Next Question'}
       </button>
 
-      {/* Skip Dialog Modal */}
       {showSkipDialog && (
         <div style={{
           position: 'fixed',
