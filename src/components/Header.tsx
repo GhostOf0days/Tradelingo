@@ -19,7 +19,7 @@ function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [showStreakInfo, setShowStreakInfo] = useState(false);
   
-  const { user, setUser } = useUser();
+  const { user, setUser, level } = useUser();
   const navigate = useNavigate();
 
   const handleNavClick = (item: (typeof navigationItems)[number]) => {
@@ -116,7 +116,10 @@ function Header() {
               <div className="header__actions-divider" aria-hidden="true" />
               <div className="header__user">
                 <div className="header__user-info">
-                  <span className="header__user-name">{user.displayName}</span>
+                  <div className="header__user-name-wrapper">
+                    <span className="header__user-name">{user.displayName}</span>
+                    <span className="header__level-badge">Lvl {level}</span>
+                  </div>
                   <span className="header__user-xp">
                     <span className="header__xp-icon" aria-hidden="true" />
                     {user.experiencePoints.toLocaleString()} XP

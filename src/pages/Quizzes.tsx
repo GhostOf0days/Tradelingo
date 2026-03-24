@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import '../styles/Quizzes.css';
+import confetti from 'canvas-confetti';
 
 interface Quiz {
   id: number;
@@ -120,8 +121,10 @@ export default function Quizzes() {
   };
 
   const handleNextQuestion = async () => {
+    let newScore = score;
     if (selectedAnswer === quizQuestions[currentQuestion].correct) {
-      setScore(score + 1);
+      newScore = score + 1;
+      setScore(newScore);
     }
 
     if (currentQuestion < quizQuestions.length - 1) {
@@ -129,9 +132,19 @@ export default function Quizzes() {
       setSelectedAnswer(null);
     } else {
       setShowResults(true);
+      
+      const percentage = Math.round((newScore / quizQuestions.length) * 100);
+      if (percentage >= 60) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+
       if (user && selectedQuiz) {
         try {
-          const xpToAdd = Math.floor((score / quizQuestions.length) * selectedQuiz.xpReward);
+          const xpToAdd = Math.floor((newScore / quizQuestions.length) * selectedQuiz.xpReward);
           const response = await fetch('/api/update-xp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

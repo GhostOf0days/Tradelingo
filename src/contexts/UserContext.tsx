@@ -4,14 +4,25 @@ export type User = {
   email: string;
   displayName: string;
   experiencePoints: number;
+  level?: number;
   streakDays?: number;
   lastActivityDate?: string;
+};
+
+export const calculateLevel = (xp: number): number => {
+  if (xp < 1000) return 1;
+  if (xp < 2500) return 2;
+  if (xp < 4500) return 3;
+  if (xp < 7000) return 4;
+  if (xp < 10000) return 5;
+  return 5 + Math.floor((xp - 10000) / 5000);
 };
 
 type UserContextValue = {
   user: User | null;
   setUser: (user: User | null) => void;
   updateStreak: () => void;
+  level: number;
 };
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -54,6 +65,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const today = new Date().toISOString().split('T')[0];
       newUser.lastActivityDate = today;
       newUser.streakDays = newUser.streakDays || 1;
+      if (!newUser.level) {
+        newUser.level = calculateLevel(newUser.experiencePoints || 0);
+      }
     }
     setUserState(newUser);
   };
@@ -81,8 +95,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const level = user?.level || calculateLevel(user?.experiencePoints || 0);
+
   return (
-    <UserContext.Provider value={{ user, setUser, updateStreak }}>
+    <UserContext.Provider value={{ user, setUser, updateStreak, level }}>
       {children}
     </UserContext.Provider>
   );

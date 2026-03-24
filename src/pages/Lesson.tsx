@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
+import confetti from 'canvas-confetti';
 
 export interface LessonItem {
   title: string;
@@ -114,6 +115,14 @@ export default function Lesson() {
               });
               const completeData = await completeRes.json();
               console.log("Complete module response:", completeData);
+              
+              // Trigger confetti
+              confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#a855f7']
+              });
             } catch (err) {
               console.error("Error completing module:", err);
             }

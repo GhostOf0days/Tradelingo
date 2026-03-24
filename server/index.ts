@@ -34,6 +34,15 @@ const client = new MongoClient(uri, {
 const db = client.db('tradelingo');
 const usersCollection = db.collection('users');
 
+const calculateLevel = (xp: number): number => {
+  if (xp < 1000) return 1;
+  if (xp < 2500) return 2;
+  if (xp < 4500) return 3;
+  if (xp < 7000) return 4;
+  if (xp < 10000) return 5;
+  return 5 + Math.floor((xp - 10000) / 5000);
+};
+
 // register: hash password, init progress/streak
 app.post('/api/register', async (req, res) => {
   try {
@@ -52,6 +61,7 @@ app.post('/api/register', async (req, res) => {
       password: hashedPassword,
       displayName: email.split('@')[0],
       experiencePoints: 0,
+      level: 1,
       lastUnlockedModuleId: 1,
       progressByModuleId: {},
       streakDays: 0,
@@ -66,6 +76,7 @@ app.post('/api/register', async (req, res) => {
       email: newUser.email,
       displayName: newUser.displayName,
       experiencePoints: newUser.experiencePoints,
+      level: newUser.level,
       streakDays: newUser.streakDays,
       lastActivityDate: newUser.lastActivityDate,
       lastUnlockedModuleId: newUser.lastUnlockedModuleId,
@@ -95,6 +106,7 @@ app.post('/api/login', async (req, res) => {
       email: user.email,
       displayName: user.displayName,
       experiencePoints: user.experiencePoints,
+      level: user.level || calculateLevel(user.experiencePoints || 0),
       streakDays: user.streakDays || 0,
       lastActivityDate: user.lastActivityDate,
       lastUnlockedModuleId: user.lastUnlockedModuleId || 1,
@@ -110,14 +122,21 @@ app.post('/api/update-xp', async (req, res) => {
     const { email, xpToAdd } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
+    // We need to calculate level after XP increment
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const newXp = (user.experiencePoints || 0) + xpToAdd;
+    const newLevel = calculateLevel(newXp);
+
     const result = await usersCollection.findOneAndUpdate(
       { email: email },
-      { $inc: { experiencePoints: xpToAdd } },
+      { $set: { experiencePoints: newXp, level: newLevel } },
       { returnDocument: 'after' }
     );
 
     if (!result) return res.status(404).json({ error: 'User not found' });
-    res.status(200).json({ experiencePoints: result.experiencePoints });
+    res.status(200).json({ experiencePoints: result.experiencePoints, level: result.level });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error updating XP' });
@@ -149,11 +168,19 @@ app.post('/api/complete-lesson', async (req, res) => {
       return res.status(400).json({ error: 'Email and moduleId are required' });
     }
 
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const newXp = (user.experiencePoints || 0) + xpToAdd;
+    const newLevel = calculateLevel(newXp);
     const progressField = `progressByModuleId.${moduleId}.lessonCurrent`; // dotted key for $inc
 
     const result = await usersCollection.findOneAndUpdate(
       { email },
-      { $inc: { experiencePoints: xpToAdd, [progressField]: 1 } },
+      { 
+        $set: { experiencePoints: newXp, level: newLevel },
+        $inc: { [progressField]: 1 } 
+      },
       { returnDocument: 'after' }
     );
 
@@ -163,6 +190,7 @@ app.post('/api/complete-lesson', async (req, res) => {
 
     res.status(200).json({
       experiencePoints: result.experiencePoints,
+      level: result.level,
       progressByModuleId: result.progressByModuleId,
     });
   } catch (error) {
@@ -178,6 +206,8 @@ app.post('/api/pass-module', async (req, res) => {
     const user = await usersCollection.findOne({ email });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const newXp = (user.experiencePoints || 0) + xpToAdd;
+    const newLevel = calculateLevel(newXp);
     const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
     let newUnlocked = user.lastUnlockedModuleId;
     if (moduleId == user.lastUnlockedModuleId) {
@@ -190,14 +220,16 @@ app.post('/api/pass-module', async (req, res) => {
         $set: {
           [progressField]: totalLessons,
           lastUnlockedModuleId: newUnlocked,
+          experiencePoints: newXp,
+          level: newLevel
         },
-        $inc: { experiencePoints: xpToAdd },
       },
       { returnDocument: 'after' }
     );
 
     res.status(200).json({
       experiencePoints: result?.experiencePoints,
+      level: result?.level,
       lastUnlockedModuleId: result?.lastUnlockedModuleId,
       progressByModuleId: result?.progressByModuleId,
     });
