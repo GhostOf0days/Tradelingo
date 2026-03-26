@@ -1,77 +1,30 @@
 import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import '../styles/Quizzes.css';
+import { QuizQuestion } from '../models/QuizQuestion';
+import { Quiz } from '../models/Quizzes';
 import confetti from 'canvas-confetti';
 
-interface Quiz {
-  id: number;
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  xpReward: number;
-  questions: number;
-  category: string;
-}
+const QUIZZES: Quiz[] = [
+  new Quiz(1, 'Stock Basics Challenge', 'Test your knowledge on stock market fundamentals', 'Easy', 'Stocks', 100, 10),
+  new Quiz(2, 'Market Volatility Quiz', 'Understand price fluctuations and market risk', 'Medium', 'Risk', 200, 15),
+  new Quiz(3, 'Portfolio Strategy Exam', 'Master diversification and asset allocation', 'Hard', 'Strategy', 300, 20),
+  new Quiz(4, 'Dividend Investor Quiz', 'Learn about dividend investing and income strategies', 'Medium', 'Income', 150, 12),
+  new Quiz(5, 'ETF Master Class', 'Become an expert on exchange-traded funds', 'Medium', 'ETFs', 180, 14),
+  new Quiz(6, 'Retirement Planning Sprint', 'Test your retirement account knowledge', 'Hard', 'Retirement', 250, 18),
+];
+
+const QUIZ_QUESTIONS: QuizQuestion[] = [
+  new QuizQuestion('What does diversification help reduce?', ['Taxes', 'Risk', 'Fees', 'Returns'], 1),
+  new QuizQuestion('Which is a low-cost investment vehicle?', ['Hedge Fund', 'ETF', 'Penny Stock', 'Crypto'], 1),
+  new QuizQuestion('What is a dividend?', ['A loss', 'A payment to shareholders', 'A tax', 'A fee'], 1),
+  new QuizQuestion('What does Beta measure?', ['Company growth', 'Volatility', 'Profit', 'Size'], 1),
+  new QuizQuestion('Which is the safest investment?', ['Penny stocks', 'Blue-chip stocks', 'Options', 'Futures'], 1),
+];
 
 export default function Quizzes() {
   const { user, setUser, updateStreak } = useUser();
-  const [quizzes] = useState<Quiz[]>([
-    {
-      id: 1,
-      title: 'Stock Basics Challenge',
-      description: 'Test your knowledge on stock market fundamentals',
-      difficulty: 'Easy',
-      xpReward: 100,
-      questions: 10,
-      category: 'Stocks',
-    },
-    {
-      id: 2,
-      title: 'Market Volatility Quiz',
-      description: 'Understand price fluctuations and market risk',
-      difficulty: 'Medium',
-      xpReward: 200,
-      questions: 15,
-      category: 'Risk',
-    },
-    {
-      id: 3,
-      title: 'Portfolio Strategy Exam',
-      description: 'Master diversification and asset allocation',
-      difficulty: 'Hard',
-      xpReward: 300,
-      questions: 20,
-      category: 'Strategy',
-    },
-    {
-      id: 4,
-      title: 'Dividend Investor Quiz',
-      description: 'Learn about dividend investing and income strategies',
-      difficulty: 'Medium',
-      xpReward: 150,
-      questions: 12,
-      category: 'Income',
-    },
-    {
-      id: 5,
-      title: 'ETF Master Class',
-      description: 'Become an expert on exchange-traded funds',
-      difficulty: 'Medium',
-      xpReward: 180,
-      questions: 14,
-      category: 'ETFs',
-    },
-    {
-      id: 6,
-      title: 'Retirement Planning Sprint',
-      description: 'Test your retirement account knowledge',
-      difficulty: 'Hard',
-      xpReward: 250,
-      questions: 18,
-      category: 'Retirement',
-    },
-  ]);
-
+  const [quizzes] = useState<Quiz[]>(QUIZZES);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -79,33 +32,7 @@ export default function Quizzes() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
-  const quizQuestions = [
-    {
-      question: 'What does diversification help reduce?',
-      options: ['Taxes', 'Risk', 'Fees', 'Returns'],
-      correct: 1,
-    },
-    {
-      question: 'Which is a low-cost investment vehicle?',
-      options: ['Hedge Fund', 'ETF', 'Penny Stock', 'Crypto'],
-      correct: 1,
-    },
-    {
-      question: 'What is a dividend?',
-      options: ['A loss', 'A payment to shareholders', 'A tax', 'A fee'],
-      correct: 1,
-    },
-    {
-      question: 'What does Beta measure?',
-      options: ['Company growth', 'Volatility', 'Profit', 'Size'],
-      correct: 1,
-    },
-    {
-      question: 'Which is the safest investment?',
-      options: ['Penny stocks', 'Blue-chip stocks', 'Options', 'Futures'],
-      correct: 1,
-    },
-  ];
+  const quizQuestions = QUIZ_QUESTIONS;
 
   const handleStartQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);

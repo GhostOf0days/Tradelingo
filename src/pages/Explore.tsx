@@ -3,11 +3,7 @@ import { Search } from 'lucide-react';
 import '../styles/Explore.css';
 import { Article } from '../models/Explore';
 
-export default function Explore() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'articles' | 'videos'>('all');
-
-  const ARTICLES: Article[] = [
+const ARTICLES: Article[] = [
     new Article(1, 'What is an ETF?', 'articles', 'Learn how exchange-traded funds work, why they are popular with beginners, and how to start investing in them.', 'Investopedia', 'https://www.investopedia.com/terms/e/etf.asp', '8 min', 234),
     new Article(2, 'Understanding Stock Market Crashes', 'articles', 'Historical perspective on market crashes and how to stay calm during volatile periods.', 'Investopedia', 'https://www.investopedia.com/terms/s/stock-market-crash.asp', '12 min', 456),
     new Article(3, 'The Power of Dollar-Cost Averaging', 'articles', 'Reduce risk by investing fixed amounts regularly, regardless of market conditions.', 'Investopedia', 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp', '10 min', 312),
@@ -15,13 +11,28 @@ export default function Explore() {
     new Article(5, 'Introduction to Bonds and Fixed Income', 'articles', 'Understand how bonds work, different types, and why they matter in your portfolio.', 'Investopedia', 'https://www.investopedia.com/terms/b/bond.asp', '11 min', 278),
     new Article(6, 'Behavioral Finance: Why We Make Bad Decisions', 'articles', 'Learn about cognitive biases that influence investment decisions and how to overcome them.', 'Investopedia', 'https://www.investopedia.com/terms/b/behavioralfinance.asp', '13 min', 521)
   ];
-  const filteredArticles = ARTICLES.filter((article) => {
+
+export default function Explore() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [articles, setArticles] = useState<Article[]>(ARTICLES);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'articles' | 'videos'>('all');
+  const filteredArticles = articles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleLike = (id: number) => {
+    setArticles(prev =>
+      prev.map(article =>
+        article.id === id
+          ? article.copyWith({ likes: article.likes + 1 })
+          : article
+      )
+    );
+  };
 
   return (
     <div className="explore">
@@ -47,13 +58,13 @@ export default function Explore() {
           className={`explore__filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('all')}
         >
-          All ({ARTICLES.length})
+          All ({articles.length})
         </button>
         <button
           className={`explore__filter-btn ${selectedCategory === 'articles' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('articles')}
         >
-          Articles ({ARTICLES.filter((a) => a.category === 'articles').length})
+          Articles ({articles.filter((a) => a.category === 'articles').length})
         </button>
       </div>
 
@@ -71,7 +82,7 @@ export default function Explore() {
                 <span className="explore__read-time">📖 {article.readTime}</span>
               </div>
               <div className="explore__card-footer">
-                <button className="explore__like-btn">👍 {article.likes}</button>
+                <button onClick={() => handleLike(article.id)} className="explore__like-btn">👍 {article.likes}</button>
                 <a 
                   href={article.url}
                   target="_blank"

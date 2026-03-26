@@ -6,8 +6,8 @@ export class Article {
   description: string;
   author: string;
   url: string;
-  private _readTime: string;
-  private _likes: number;
+  readTime: string;
+  likes: number;
 
   constructor(
     id: number,
@@ -25,23 +25,12 @@ export class Article {
     this.description = description;
     this.author = author;
     this.url = url;
-    this._readTime = readTime;
-    this._likes = likes;
+    this.readTime = readTime;
+    this.likes = likes;
   }
 
-  get readTime(): string {
-    return this._readTime;
-  }
-
-  get likes(): number {
-    return this._likes;
-  }
-  set likes(value: number) {
-    this._likes = value;
-  }
-
-  getFormattedLikes(): string {
-    return `👍 ${this._likes.toLocaleString()}`;
+  incrementLikes(): void {
+    this.likes += 1;
   }
 
   copyWith(
@@ -57,8 +46,8 @@ export class Article {
       this.description,
       this.author,
       this.url,
-      updates.readTime ?? this._readTime,
-      updates.likes ?? this._likes,
+      updates.readTime ?? this.readTime,
+      updates.likes ?? this.likes,
     );
   }
 }
