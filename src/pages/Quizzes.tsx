@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import '../styles/Quizzes.css';
 import { QuizQuestion } from '../models/QuizQuestion';
-import { Quiz } from '../models/Quizzes';
+import { Quiz } from '../models/Quiz';
 import confetti from 'canvas-confetti';
 
 const QUIZZES: Quiz[] = [
