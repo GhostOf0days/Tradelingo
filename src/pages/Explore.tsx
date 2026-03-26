@@ -1,75 +1,21 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import '../styles/Explore.css';
+import { Article } from '../models/Explore';
 
 export default function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'articles' | 'videos'>('all');
 
-  const articles = [
-    {
-      id: 1,
-      title: 'What is an ETF?',
-      category: 'articles',
-      description: 'Learn how exchange-traded funds work, why they are popular with beginners, and how to start investing in them.',
-      author: 'Investopedia',
-      readTime: '8 min',
-      likes: 234,
-      url: 'https://www.investopedia.com/terms/e/etf.asp',
-    },
-    {
-      id: 2,
-      title: 'Understanding Stock Market Crashes',
-      category: 'articles',
-      description: 'Historical perspective on market crashes and how to stay calm during volatile periods.',
-      author: 'Investopedia',
-      readTime: '12 min',
-      likes: 456,
-      url: 'https://www.investopedia.com/terms/s/stock-market-crash.asp',
-    },
-    {
-      id: 3,
-      title: 'The Power of Dollar-Cost Averaging',
-      category: 'articles',
-      description: 'Reduce risk by investing fixed amounts regularly, regardless of market conditions.',
-      author: 'Investopedia',
-      readTime: '10 min',
-      likes: 312,
-      url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp',
-    },
-    {
-      id: 4,
-      title: 'Tax-Loss Harvesting Strategies',
-      category: 'articles',
-      description: 'Maximize returns by strategically offsetting capital gains with losses.',
-      author: 'Investopedia',
-      readTime: '15 min',
-      likes: 189,
-      url: 'https://www.investopedia.com/terms/t/taxgainlossharvesting.asp',
-    },
-    {
-      id: 5,
-      title: 'Introduction to Bonds and Fixed Income',
-      category: 'articles',
-      description: 'Understand how bonds work, different types, and why they matter in your portfolio.',
-      author: 'Investopedia',
-      readTime: '11 min',
-      likes: 278,
-      url: 'https://www.investopedia.com/terms/b/bond.asp',
-    },
-    {
-      id: 6,
-      title: 'Behavioral Finance: Why We Make Bad Decisions',
-      category: 'articles',
-      description: 'Learn about cognitive biases that influence investment decisions and how to overcome them.',
-      author: 'Investopedia',
-      readTime: '13 min',
-      likes: 521,
-      url: 'https://www.investopedia.com/terms/b/behavioralfinance.asp',
-    },
+  const ARTICLES: Article[] = [
+    new Article(1, 'What is an ETF?', 'articles', 'Learn how exchange-traded funds work, why they are popular with beginners, and how to start investing in them.', 'Investopedia', 'https://www.investopedia.com/terms/e/etf.asp', '8 min', 234),
+    new Article(2, 'Understanding Stock Market Crashes', 'articles', 'Historical perspective on market crashes and how to stay calm during volatile periods.', 'Investopedia', 'https://www.investopedia.com/terms/s/stock-market-crash.asp', '12 min', 456),
+    new Article(3, 'The Power of Dollar-Cost Averaging', 'articles', 'Reduce risk by investing fixed amounts regularly, regardless of market conditions.', 'Investopedia', 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp', '10 min', 312),
+    new Article(4, 'Tax-Loss Harvesting Strategies', 'articles', 'Maximize returns by strategically offsetting capital gains with losses.', 'Investopedia', 'https://www.investopedia.com/terms/t/taxgainlossharvesting.asp', '15 min', 189),
+    new Article(5, 'Introduction to Bonds and Fixed Income', 'articles', 'Understand how bonds work, different types, and why they matter in your portfolio.', 'Investopedia', 'https://www.investopedia.com/terms/b/bond.asp', '11 min', 278),
+    new Article(6, 'Behavioral Finance: Why We Make Bad Decisions', 'articles', 'Learn about cognitive biases that influence investment decisions and how to overcome them.', 'Investopedia', 'https://www.investopedia.com/terms/b/behavioralfinance.asp', '13 min', 521)
   ];
-
-  const filteredArticles = articles.filter((article) => {
+  const filteredArticles = ARTICLES.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -101,13 +47,13 @@ export default function Explore() {
           className={`explore__filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('all')}
         >
-          All ({articles.length})
+          All ({ARTICLES.length})
         </button>
         <button
           className={`explore__filter-btn ${selectedCategory === 'articles' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('articles')}
         >
-          Articles ({articles.filter((a) => a.category === 'articles').length})
+          Articles ({ARTICLES.filter((a) => a.category === 'articles').length})
         </button>
       </div>
 
