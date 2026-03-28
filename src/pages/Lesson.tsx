@@ -2,13 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
+import { LessonItem } from '../models/LessonItem';
 import confetti from 'canvas-confetti';
-
-export interface LessonItem {
-  title: string;
-  content: string;
-  question: { question: string; options: string[]; correctIndex: number };
-}
 
 export default function Lesson() {
   const { id } = useParams();
