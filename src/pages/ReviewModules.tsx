@@ -2,24 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import '../styles/ReviewModules.css';
+import { MODULES } from '../data/modules';
+import { CompletedModule } from '../models/CompletedModule';
 
-// same shape as ModulesPage for progress lookup
-const MODULES = [
-  { id: 1, title: 'Trading', lessonTotal: 15, experiencePoints: 600, description: "Master the fundamentals of the stock market." },
-  { id: 2, title: 'Retirement', lessonTotal: 12, experiencePoints: 800, description: "Learn about 401ks, IRAs, and long-term growth." },
-  { id: 3, title: 'Cryptocurrencies', lessonTotal: 21, experiencePoints: 700, description: "Understand blockchain, Bitcoin, and digital assets." },
-  { id: 4, title: 'Brokers', lessonTotal: 10, experiencePoints: 600, description: "Navigate trading platforms and execution." },
-];
-
-interface CompletedModule {
-  moduleId: number;
-  title: string;
-  description: string;
-  completedDate: string;
-  xpEarned: number;
-  score: number;
-  lessons: number;
-}
+const MODULES_LIST = Object.entries(MODULES).map(([id, data]) => ({
+  id: Number(id),
+  ...data
+}));
 
 export default function ReviewModules() {
   const { user } = useUser();
@@ -34,17 +23,16 @@ export default function ReviewModules() {
         if (res.ok) {
           const data = await res.json();
           const progressMap = data.progressByModuleId || {};
-          const finishedModules = MODULES.filter(m => {
+          const finishedModules = MODULES_LIST.filter(m => {
             const currentLesson = progressMap[m.id]?.lessonCurrent || 0;
-            return currentLesson >= m.lessonTotal && m.lessonTotal > 0;
+            return currentLesson >= m.lessons.length && m.lessons.length > 0;
           }).map(m => ({
             moduleId: m.id,
             title: m.title,
-            description: m.description,
             completedDate: new Date().toISOString(),
             xpEarned: m.experiencePoints,
             score: 100,
-            lessons: m.lessonTotal
+            lessons: m.lessons.length
           }));
 
           setCompletedModules(finishedModules);
@@ -94,9 +82,7 @@ export default function ReviewModules() {
                   <h3 style={{ margin: 0, fontSize: '1.5rem' }}>{module.title}</h3>
                   <span style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.875rem', fontWeight: 'bold' }}>✅ Completed</span>
                 </div>
-
-                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>{module.description}</p>
-
+                
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
                   <div>
                     <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Completed on</div>
