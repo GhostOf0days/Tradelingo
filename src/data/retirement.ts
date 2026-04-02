@@ -33,7 +33,8 @@ Three sources of retirement income:
 3. Personal savings and investments (401k, IRA, brokerage accounts)
 
 Starting early matters because of compound interest. Someone who starts saving at 25 can retire comfortably with modest contributions. Someone starting at 45 needs to save much more aggressively.`,
-    question: RETIREMENT_PRETEST[0]
+    question: RETIREMENT_PRETEST[0],
+    demo: 'compound-growth'
   },
   {
     title: "Lesson 2: 401(k) Plans Basics",

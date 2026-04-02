@@ -195,7 +195,8 @@ Remember:
 • All major brokers similar quality
 • Fee difference minimal now
 • Focus on ease of use and education`,
-    question: BROKERS_PRETEST[0]
+    question: BROKERS_PRETEST[0],
+    demo: 'order-book'
   },
   {
     title: "Lesson 2: Broker Types and Models",

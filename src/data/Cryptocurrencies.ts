@@ -240,7 +240,8 @@ With thousands of nodes, how do they agree on truth?
 • Proof of Work (Bitcoin): Majority of computing power validates
 • Proof of Stake (Ethereum 2.0): Owners of coins validate (more energy efficient)
 • Other mechanisms: Proof of Authority, Proof of History, etc.`,
-    question: CRYPTOCURRENCIES_PRETEST[3]
+    question: CRYPTOCURRENCIES_PRETEST[3],
+    demo: 'blockchain-builder'
   },
   {
     title: "Lesson 5: Cryptocurrency Wallets",

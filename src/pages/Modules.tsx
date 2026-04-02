@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Play, CheckCircle2 } from 'lucide-react';
+import { Play, CheckCircle2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
@@ -13,6 +13,7 @@ const MODULE_LIST = Object.entries(MODULES).map(([id, data]) => ({
 function Modules() {
   const [filter, setFilter] = useState<'in-progress' | 'completed'>('in-progress');
   const [progressByModuleId, setProgressByModuleId] = useState<Record<number, { lessonCurrent?: number; streakBonus?: number }>>({});
+  const [lastUnlockedModuleId, setLastUnlockedModuleId] = useState(1);
 
   const navigate = useNavigate();
   const { user } = useUser();
@@ -21,6 +22,7 @@ function Modules() {
     const fetchProgress = async () => {
       if (!user) {
         setProgressByModuleId({});
+        setLastUnlockedModuleId(1);
         return;
       }
       try {
@@ -28,6 +30,7 @@ function Modules() {
         if (response.ok) {
           const data = await response.json();
           setProgressByModuleId(data.progressByModuleId);
+          setLastUnlockedModuleId(data.lastUnlockedModuleId || 1);
         }
       } catch (err) {
         console.error('Failed to fetch progress', err);
@@ -88,43 +91,47 @@ function Modules() {
               ? Math.round((lessonCurrent / module.lessons.length) * 100)
               : 0;
             const isCompleted = lessonCurrent >= module.lessons.length && module.lessons.length > 0;
-            const actionLabel = lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? null : 'Continue';
+            const isLocked = module.id > lastUnlockedModuleId && !isCompleted;
+            const actionLabel = isLocked ? null : lessonCurrent === 0 ? 'Start Lesson' : isCompleted ? null : 'Continue';
 
             return (
               <li key={module.id} className="modules__item">
-                <article className="modules__card">
+                <article className={`modules__card ${isLocked ? 'modules__card--locked' : ''}`}>
                   <div className="modules__card-inner">
                     <div className="modules__card-head">
                       <div className="modules__card-title-row">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {isLocked && <Lock size={18} strokeWidth={2.5} style={{ color: '#52525b' }} />}
                           {isCompleted && <CheckCircle2 size={18} strokeWidth={3} />}
                           <h2 className="modules__card-title">{module.title}</h2>
                         </div>
-                        <span className="modules__card-xp">
+                        <span className={`modules__card-xp ${isLocked ? 'modules__card-xp--locked' : ''}`}>
                           <span className="modules__xp-icon" aria-hidden="true" />
                           +{module.experiencePoints} XP
                         </span>
                       </div>
                       <p className="modules__card-lessons">
-                        Lesson {lessonCurrent} of {module.lessons.length}
+                        {isLocked
+                          ? `Complete Module ${module.id - 1} to unlock`
+                          : `Lesson ${lessonCurrent} of ${module.lessons.length}`}
                       </p>
                     </div>
 
                     <div className="modules__progress-block">
                       <div className="modules__progress-header">
                         <span className="modules__progress-label-text">Progress</span>
-                        <span className="modules__progress-percent">{progressPercent}%</span>
+                        <span className="modules__progress-percent">{isLocked ? 'Locked' : `${progressPercent}%`}</span>
                       </div>
                       <div
                         className="modules__progress-bar"
                         role="progressbar"
-                        aria-valuenow={progressPercent}
+                        aria-valuenow={isLocked ? 0 : progressPercent}
                         aria-valuemin={0}
                         aria-valuemax={100}
                       >
                         <div
                           className="modules__progress-fill"
-                          style={{ width: `${progressPercent}%` }}
+                          style={{ width: `${isLocked ? 0 : progressPercent}%` }}
                         />
                       </div>
                     </div>
@@ -138,25 +145,33 @@ function Modules() {
                       </div>
 
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {lessonCurrent === 0 && (
-                          <button
-                            type="button"
-                            className="modules__card-btn"
-                            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
-                            onClick={() => navigate(`/pretest/${module.id}`)}
-                          >
-                            Test Out
-                          </button>
-                        )}
-                        {actionLabel !== null && (
-                          <button
-                            type="button"
-                            className="modules__card-btn"
-                            onClick={() => navigate(`/lesson/${module.id}`)}
-                          >
-                            {actionLabel}
-                            <Play size={12} fill="currentColor" className="modules__card-btn-icon" />
-                          </button>
+                        {isLocked ? (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1.25rem', borderRadius: '9999px', background: 'var(--surface-hover)', color: '#52525b', fontSize: '0.875rem', fontWeight: 700 }}>
+                            <Lock size={14} /> Locked
+                          </span>
+                        ) : (
+                          <>
+                            {lessonCurrent === 0 && (
+                              <button
+                                type="button"
+                                className="modules__card-btn"
+                                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+                                onClick={() => navigate(`/pretest/${module.id}`)}
+                              >
+                                Test Out
+                              </button>
+                            )}
+                            {actionLabel !== null && (
+                              <button
+                                type="button"
+                                className="modules__card-btn"
+                                onClick={() => navigate(`/lesson/${module.id}`)}
+                              >
+                                {actionLabel}
+                                <Play size={12} fill="currentColor" className="modules__card-btn-icon" />
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

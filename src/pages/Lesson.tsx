@@ -4,6 +4,7 @@ import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
 import { LessonItem } from '../models/LessonItem';
 import confetti from 'canvas-confetti';
+import DemoRenderer from '../components/demos/DemoRegistry';
 
 type Phase = 'reading' | 'quiz' | 'quiz-result' | 'complete';
 
@@ -207,6 +208,9 @@ export default function Lesson() {
             <p style={{ lineHeight: '1.7', color: 'var(--text-muted)', whiteSpace: 'pre-line' }}>
               {moduleLessons[currentLessonIdx].content}
             </p>
+            {moduleLessons[currentLessonIdx].demo && (
+              <DemoRenderer demoId={moduleLessons[currentLessonIdx].demo!} />
+            )}
           </>
         )}
 

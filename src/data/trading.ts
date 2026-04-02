@@ -50,7 +50,8 @@ Bull Market: A period where stock prices are generally rising and investors are 
 Bear Market: A period where stock prices are falling 20% or more from recent highs, and investors are pessimistic. Bears are pessimistic because they "swat the market downward" with their paws. During bear markets, unemployment rises, profits decline, and people are afraid to invest. The 2008 financial crisis was a severe bear market where stocks lost 50%+ of their value.
 
 Important perspective: Even in bear markets, long-term investors who keep buying are actually getting deals on stocks. Think of it like a sale – lower prices mean better value.`, 
-    question: TRADING_PRETEST[2] 
+    question: TRADING_PRETEST[2],
+    demo: 'stock-price-chart'
   },
   { 
     title: "Lesson 4: Dividends", 
@@ -146,7 +147,8 @@ Cons of Market Orders:
 • Not ideal for large trades – Buying 1 million shares at market price could move the market against you
 
 When to use: Market orders are ideal when you want to quickly enter or exit a position and price isn't critically important. Great for beginners.`, 
-    question: TRADING_PRETEST[7] 
+    question: TRADING_PRETEST[7],
+    demo: 'order-book'
   },
   { 
     title: "Lesson 9: Limit Orders", 
