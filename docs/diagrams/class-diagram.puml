@@ -1,0 +1,358 @@
+@startuml Tradelingo
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam classFontSize 13
+skinparam classFontStyle bold
+skinparam packageFontSize 13
+skinparam nodesep 80
+skinparam ranksep 60
+skinparam padding 5
+skinparam linetype ortho
+
+title Tradelingo
+
+' ═══════════════════════════════════════
+'  USER
+' ═══════════════════════════════════════
+
+class User {
+  + email : string
+  + displayName : string
+  + experiencePoints : number
+  + level : number
+  + streakDays : number
+  + lastActivityDate : string
+  + lastUnlockedModuleId : number
+  + themePreference : "light" | "dark"
+  + notificationsEnabled : boolean
+  + progressByModuleId : Map<string, ModuleProgress>
+  + completedModules : CompletedModule[]
+  + badges : Badge[]
+  + createdAt : Date
+  __
+  + register(email, password) : void
+  + login(email, password) : void
+  + logout() : void
+  + updateXP(xpToAdd : number) : void
+  + calculateLevel() : number
+  + updateStreak() : void
+  + resetStreak() : void
+  + toggleTheme() : void
+  + enableNotifications() : void
+}
+
+class ModuleProgress {
+  + lessonCurrent : number
+  + pretestScore : number
+  + posttestScore : number
+  + mistakeQuestionIds : number[]
+  __
+  + getCompletionPercent(totalLessons : number) : number
+  + isComplete(totalLessons : number) : boolean
+  + recordMistake(questionIndex : number) : void
+}
+
+class CompletedModule {
+  + moduleId : number
+  + title : string
+  + description : string
+  + completedDate : string
+  + xpEarned : number
+  + score : number
+  + lessons : number
+  __
+  + formatDate() : string
+}
+
+class Badge {
+  + id : string
+  + name : string
+  + description : string
+  + icon : string
+  + earnedDate : string
+  __
+  + isEarned() : boolean
+}
+
+User *-- "0..*" ModuleProgress
+User *-- "0..*" CompletedModule
+User *-- "0..*" Badge
+
+' ═══════════════════════════════════════
+'  MODULE CONTENT
+' ═══════════════════════════════════════
+
+class ModuleDefinition {
+  + id : number
+  + title : string
+  + experiencePoints : number
+  + lessons : LessonItem[]
+  + pretest : PretestQuestion[]
+  + posttest : PretestQuestion[]
+  + isLocked : boolean
+  __
+  + getLessonCount() : number
+  + getPretestCount() : number
+  + unlock() : void
+}
+
+class LessonItem {
+  + title : string
+  + content : string
+  + question : PretestQuestion
+  + interactiveDemo : InteractiveDemo
+  __
+  + hasDemo() : boolean
+}
+
+class PretestQuestion {
+  + question : string
+  + options : string[]
+  + correctIndex : number
+  __
+  + isCorrect(selectedIndex : number) : boolean
+  + getCorrectAnswer() : string
+}
+
+class InteractiveDemo {
+  + id : string
+  + type : "chart" | "animation" | "simulation"
+  + title : string
+  + data : object
+  __
+  + render() : void
+  + reset() : void
+}
+
+ModuleDefinition *-- "1..*" LessonItem : lessons
+ModuleDefinition *-- "1..*" PretestQuestion : pretest
+LessonItem *-- "1" PretestQuestion : question
+LessonItem *-- "0..1" InteractiveDemo : interactiveDemo
+
+' ═══════════════════════════════════════
+'  QUIZ SYSTEM
+' ═══════════════════════════════════════
+
+class Quiz {
+  + id : number
+  + title : string
+  + description : string
+  + difficulty : "Easy" | "Medium" | "Hard"
+  + xpReward : number
+  + questionCount : number
+  + category : string
+  + questions : QuizQuestion[]
+  __
+  + start() : void
+  + submitAnswer(questionIndex, answerIndex) : boolean
+  + grade() : number
+  + getXPEarned(score : number) : number
+  + isPassing(score : number) : boolean
+}
+
+class QuizQuestion {
+  + question : string
+  + options : string[]
+  + correctIndex : number
+  + explanation : string
+  __
+  + isCorrect(selectedIndex : number) : boolean
+  + getExplanation() : string
+}
+
+class LightningRound {
+  + totalQuestions : number
+  + questionTimeLimit : number
+  + xpPerCorrect : number
+  + perfectBonus : number
+  + questions : QuizQuestion[]
+  + gameState : "lobby" | "countdown" | "playing" | "finished"
+  + score : number
+  + correctCount : number
+  + timeLeft : number
+  __
+  + startGame() : void
+  + selectAnswer(index : number) : void
+  + nextQuestion() : void
+  + calculateXP() : number
+  + isPerfectScore() : boolean
+  + getSpeedBonus(timeRemaining : number) : number
+}
+
+Quiz *-- "1..*" QuizQuestion : questions
+LightningRound *-- "1..*" QuizQuestion : questions
+QuizQuestion --|> PretestQuestion : extends with explanation
+
+' ═══════════════════════════════════════
+'  CALCULATOR
+' ═══════════════════════════════════════
+
+class Account {
+  + id : string
+  + name : string
+  + desc : string
+  + hasEmployerMatch : boolean
+  - _contributionLimit : number
+  - _annualContribution : number
+  - _currentBalance : number
+  - _years : number
+  - _employerMatch : number
+  __
+  + <<get>> contributionLimit() : number
+  + <<get/set>> annualContribution : number
+  + <<get/set>> currentBalance : number
+  + <<get/set>> years : number
+  + <<get/set>> employerMatch : number
+  + getFormattedLimit() : string
+  + copyWith(updates) : Account
+}
+
+class RetirementCalculator {
+  + {static} format(value : number) : string
+  + {static} project(account : Account, annualReturn : number) : number
+  + {static} compound(principal, annualRate, years, compoundFreq) : number
+  + {static} projectSavings(currentSavings, annualContribution, annualReturn, years) : number
+}
+
+RetirementCalculator ..> Account : calculates projections for
+
+' ═══════════════════════════════════════
+'  EXPLORE & SEARCH
+' ═══════════════════════════════════════
+
+class Article {
+  + id : number
+  + title : string
+  + category : string
+  + description : string
+  + author : string
+  + readTime : string
+  + likes : number
+  + url : string
+  __
+  + incrementLikes() : void
+  + matchesSearch(query : string) : boolean
+}
+
+class SearchResult {
+  + id : string
+  + title : string
+  + description : string
+  + source : "module" | "article" | "quiz"
+  + category : string
+  __
+  + getRouteUrl() : string
+}
+
+' ═══════════════════════════════════════
+'  GAMIFICATION & NOTIFICATIONS
+' ═══════════════════════════════════════
+
+class Streak {
+  + currentDays : number
+  + longestStreak : number
+  + lastActivityDate : string
+  + isAtRisk : boolean
+  __
+  + increment() : void
+  + reset() : void
+  + checkRisk() : boolean
+}
+
+class Notification {
+  + id : string
+  + type : "streak_warning" | "module_reminder" | "achievement"
+  + message : string
+  + isRead : boolean
+  + createdAt : Date
+  __
+  + markAsRead() : void
+  + dismiss() : void
+}
+
+class Leaderboard {
+  + entries : LeaderboardEntry[]
+  + timeframe : "daily" | "weekly" | "allTime"
+  __
+  + getRankForUser(email : string) : number
+  + getTopN(n : number) : LeaderboardEntry[]
+  + refresh() : void
+}
+
+class LeaderboardEntry {
+  + rank : number
+  + displayName : string
+  + experiencePoints : number
+  + level : number
+  + streakDays : number
+}
+
+Leaderboard *-- "0..*" LeaderboardEntry
+
+' ═══════════════════════════════════════
+'  PRACTICE & REVIEW
+' ═══════════════════════════════════════
+
+class PracticeSession {
+  + moduleId : number
+  + questions : PretestQuestion[]
+  + currentIndex : number
+  + score : number
+  __
+  + loadQuestionsFromModule(moduleId : number) : void
+  + submitAnswer(index : number) : boolean
+  + getResults() : number
+}
+
+class MistakeReview {
+  + moduleId : number
+  + mistakeQuestions : QuizQuestion[]
+  + currentIndex : number
+  + score : number
+  __
+  + loadMistakes(moduleId : number) : void
+  + submitAnswer(index : number) : boolean
+  + getImprovedCount() : number
+}
+
+' ═══════════════════════════════════════
+'  CONNECTIONS — everything linked
+' ═══════════════════════════════════════
+
+User --> "1" Streak : tracks
+User --> "0..*" Notification : receives
+User --> Leaderboard : ranked on
+
+User --> "0..*" ModuleDefinition : progresses through
+User --> "0..*" Quiz : takes
+User --> "0..*" LightningRound : plays
+User --> RetirementCalculator : uses
+
+ModuleDefinition --> Quiz : generates post-test
+LightningRound --> ModuleDefinition : pulls questions from
+
+PracticeSession --> ModuleDefinition : draws questions from
+PracticeSession --> User : awards XP to
+MistakeReview --> ModuleProgress : reads mistakes from
+MistakeReview --> User : awards XP to
+
+Article --> SearchResult : indexed as
+ModuleDefinition --> SearchResult : indexed as
+Quiz --> SearchResult : indexed as
+
+' ═══════════════════════════════════════
+'  LAYOUT HINTS
+' ═══════════════════════════════════════
+
+User -[hidden]right- Streak
+Streak -[hidden]right- Notification
+ModuleDefinition -[hidden]right- LessonItem
+LessonItem -[hidden]right- PretestQuestion
+Quiz -[hidden]right- LightningRound
+Account -[hidden]right- RetirementCalculator
+Article -[hidden]right- SearchResult
+PracticeSession -[hidden]right- MistakeReview
+Leaderboard -[hidden]right- LeaderboardEntry
+
+@enduml

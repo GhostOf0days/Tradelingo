@@ -1,0 +1,73 @@
+@startuml Calculate-Retirement-Projection
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 200
+skinparam padding 5
+
+title Calculate Retirement Projection – Sequence Diagram
+
+actor "John\n(User)" as john
+participant "Calculator\nPage" as calcPage
+participant "Account" as account
+participant "Retirement\nCalculator" as retCalc
+
+== Navigate to Calculator ==
+
+john -> calcPage : navigates to /calculator
+calcPage --> john : displays three tabs (Retirement, Compound, Savings)
+
+== Select Account Type ==
+
+john -> calcPage : selects "Retirement Accounts" tab
+calcPage --> john : shows account cards (401k, IRA, Roth IRA, SEP IRA)
+
+john -> calcPage : clicks "Roth IRA" card
+
+create account
+calcPage -> account : <<create>> Account("roth", "Roth IRA",\n"Tax-free withdrawals", 7000)
+account --> calcPage : account (id="roth", contributionLimit=7000,\nhasEmployerMatch=false)
+
+calcPage --> john : expands Roth IRA with input fields
+
+== Enter Financial Parameters ==
+
+john -> calcPage : enters Annual Contribution = $7,000
+calcPage -> account : copyWith({annualContribution: 7000})
+account --> calcPage : new Account with annualContribution=7000
+
+john -> calcPage : enters Current Balance = $15,000
+calcPage -> account : copyWith({currentBalance: 15000})
+account --> calcPage : new Account with currentBalance=15000
+
+john -> calcPage : enters Years Until Retirement = 25
+calcPage -> account : copyWith({years: 25})
+account --> calcPage : new Account with years=25
+
+== Calculate Projection ==
+
+calcPage -> retCalc : project(account, annualReturn=7)
+retCalc -> retCalc : compute future value using\ncompound growth formula
+retCalc --> calcPage : projectedBalance = $548,188.41
+
+calcPage -> retCalc : format(548188.41)
+retCalc --> calcPage : "$548,188.41"
+
+calcPage --> john : displays "Projected Balance\nat Retirement: $548,188.41"
+
+== Adjust Inputs ==
+
+john -> calcPage : changes Annual Contribution to $5,000
+calcPage -> account : copyWith({annualContribution: 5000})
+account --> calcPage : new Account with annualContribution=5000
+
+calcPage -> retCalc : project(account, annualReturn=7)
+retCalc --> calcPage : projectedBalance = $418,701.72
+
+calcPage -> retCalc : format(418701.72)
+retCalc --> calcPage : "$418,701.72"
+
+calcPage --> john : updates display to "$418,701.72"
+
+@enduml

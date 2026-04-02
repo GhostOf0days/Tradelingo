@@ -5,180 +5,222 @@ import { MODULES } from '../data/modules';
 import { LessonItem } from '../models/LessonItem';
 import confetti from 'canvas-confetti';
 
+type Phase = 'reading' | 'quiz' | 'quiz-result' | 'complete';
+
 export default function Lesson() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser, updateStreak } = useUser();
   
-  // Check if we are in review modes
   const queryParams = new URLSearchParams(location.search);
   const isReviewMode = queryParams.get('review') === 'true';
   
   const moduleId = Number(id) || 1;
-  const moduleLessons = MODULES[moduleId as keyof typeof MODULES]?.lessons || MODULES[1].lessons;;
+  const moduleData = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
+  const moduleLessons: LessonItem[] = moduleData.lessons;
   
-  const [lessonData, setLessonData] = useState<LessonItem | null>(null);
-  const [currentStep, setCurrentStep] = useState<'info' | 'quiz' | 'complete'>('info');
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [lessonNumber, setLessonNumber] = useState(0);
+  const [phase, setPhase] = useState<Phase>('reading');
+  const [currentLessonIdx, setCurrentLessonIdx] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Separate function to load a specific lesson from local array 
-  const loadLocalLesson = (index: number) => {
-    if (index >= moduleLessons.length) {
-      navigate('/review'); // Go back to review page when done
-      return;
-    }
-    setLessonNumber(index);
-    setLessonData(moduleLessons[index]);
-    setCurrentStep('info');
-    setSelectedAnswer(null);
-  };
+  const [quizQuestionIdx, setQuizQuestionIdx] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
 
-  const fetchCurrentProgress = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      if (isReviewMode) {
-        // If reviewing, just start at lesson index 0 locally
-        loadLocalLesson(0);
-      } else {
-        // Normal mode: Fetch real progress
-        const res = await fetch(`/api/progress/${user.email}`);
-        if (!res.ok) throw new Error("Failed to reach database");
-        
-        const data = await res.json();
-        const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
-        
-        if (currentIdx >= moduleLessons.length) {
-          navigate('/'); // Normal mode kick-out if already finished
-        } else {
-          loadLocalLesson(currentIdx);
-        }
+  const allQuestions = moduleLessons.map((l, idx) => ({
+    lessonIndex: idx,
+    lessonTitle: l.title,
+    question: l.question.question,
+    options: l.question.options,
+    correctIndex: l.question.correctIndex,
+  }));
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!user) {
+        navigate('/login');
+        return;
       }
-    } catch (err) {
-      console.error("Error loading lesson:", err);
-      loadLocalLesson(0);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchCurrentProgress(); }, [user, id]);
-
-  const handleNext = async () => {
-    if (!lessonData) return;
-    if (currentStep === 'info') {
-      setCurrentStep('quiz');
-    } else if (currentStep === 'quiz') {
-      if (selectedAnswer === lessonData.question.correctIndex) {
-        
-        // ONLY update DB if we are NOT in review mode
-        if (user && !isReviewMode) {
-          const res = await fetch('/api/complete-lesson', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, moduleId: moduleId, xpToAdd: 50 })
-          });
+      setIsLoading(true);
+      try {
+        if (isReviewMode) {
+          setCurrentLessonIdx(0);
+          setPhase('reading');
+        } else {
+          const res = await fetch(`/api/progress/${user.email}`);
+          if (!res.ok) throw new Error('Failed to reach database');
           const data = await res.json();
-          setUser({ ...user, experiencePoints: data.experiencePoints });
-          updateStreak(); 
-        }
-        
-        // Check if this is the final lesson
-        if (lessonNumber === moduleLessons.length - 1) {
-          // This is the last lesson, call the module completion endpoint
-          if (user && !isReviewMode) {
-            try {
-              console.log("Calling complete-module endpoint for module:", moduleId);
-              const completeRes = await fetch('/api/complete-module', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  email: user.email,
-                  moduleId: moduleId,
-                  title: MODULES[moduleId as keyof typeof MODULES]?.title || `Module ${moduleId}`,
-                  score: 100,
-                  xpEarned: 500,
-                  lessonsTotal: moduleLessons.length
-                })
-              });
-              const completeData = await completeRes.json();
-              console.log("Complete module response:", completeData);
-              
-              // Trigger confetti
-              confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#a855f7']
-              });
-            } catch (err) {
-              console.error("Error completing module:", err);
-            }
+          const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
+          if (currentIdx >= moduleLessons.length) {
+            navigate('/');
+          } else {
+            setCurrentLessonIdx(0);
+            setPhase('reading');
           }
         }
-        
-        setCurrentStep('complete');
-      } else {
-        alert("Incorrect! Try again.");
+      } catch {
+        setCurrentLessonIdx(0);
+        setPhase('reading');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProgress();
+  }, [user, id]);
+
+  const handleNextLesson = () => {
+    if (currentLessonIdx < moduleLessons.length - 1) {
+      setCurrentLessonIdx(currentLessonIdx + 1);
+    } else {
+      setPhase('quiz');
+      setQuizQuestionIdx(0);
+      setSelectedAnswer(null);
+      setQuizScore(0);
+      setQuizAnswers(new Array(allQuestions.length).fill(null));
+    }
+  };
+
+  const handleSubmitAnswer = () => {
+    const updatedAnswers = [...quizAnswers];
+    updatedAnswers[quizQuestionIdx] = selectedAnswer;
+    setQuizAnswers(updatedAnswers);
+
+    let newScore = quizScore;
+    if (selectedAnswer === allQuestions[quizQuestionIdx].correctIndex) {
+      newScore += 1;
+      setQuizScore(newScore);
+    }
+
+    if (quizQuestionIdx < allQuestions.length - 1) {
+      setQuizQuestionIdx(quizQuestionIdx + 1);
+      setSelectedAnswer(null);
+    } else {
+      setPhase('quiz-result');
+      handleModuleComplete(newScore, updatedAnswers);
+    }
+  };
+
+  const handleModuleComplete = async (finalScore: number, _answers: (number | null)[]) => {
+    const percentage = Math.round((finalScore / allQuestions.length) * 100);
+    const passed = percentage >= 80;
+
+    if (passed) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#a855f7']
+      });
+    }
+
+    if (user && !isReviewMode && passed) {
+      try {
+        for (let i = 0; i < moduleLessons.length; i++) {
+          await fetch('/api/complete-lesson', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email, moduleId, xpToAdd: 50 })
+          });
+        }
+
+        const completeRes = await fetch('/api/complete-module', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            moduleId,
+            title: moduleData.title,
+            score: percentage,
+            xpEarned: moduleData.experiencePoints,
+            lessonsTotal: moduleLessons.length
+          })
+        });
+        const completeData = await completeRes.json();
+
+        const userRes = await fetch(`/api/user/${user.email}`);
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser({ ...user, experiencePoints: userData.experiencePoints });
+        } else {
+          setUser({ ...user, experiencePoints: (completeData.experiencePoints || user.experiencePoints) });
+        }
+        updateStreak();
+      } catch (err) {
+        console.error('Error completing module:', err);
       }
     }
   };
 
-  const handleNextLesson = () => {
-    if (isReviewMode) {
-      loadLocalLesson(lessonNumber + 1);
-    } else {
-      fetchCurrentProgress();
-    }
+  const handleRetryQuiz = () => {
+    setPhase('quiz');
+    setQuizQuestionIdx(0);
+    setSelectedAnswer(null);
+    setQuizScore(0);
+    setQuizAnswers(new Array(allQuestions.length).fill(null));
   };
 
-  if (isLoading || !lessonData) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
+  if (isLoading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
+  }
 
-  const progressPercent = Math.round(((lessonNumber + 1) / moduleLessons.length) * 100);
+  const totalSteps = moduleLessons.length + allQuestions.length;
+  const currentStep = phase === 'reading'
+    ? currentLessonIdx + 1
+    : phase === 'quiz'
+      ? moduleLessons.length + quizQuestionIdx + 1
+      : totalSteps;
+  const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
   return (
     <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
-      
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>
-              {isReviewMode ? 'Review Progress' : 'Module Progress'}
+              {phase === 'reading' ? `Lesson ${currentLessonIdx + 1} of ${moduleLessons.length}` :
+               phase === 'quiz' ? `Quiz Question ${quizQuestionIdx + 1} of ${allQuestions.length}` :
+               isReviewMode ? 'Review Complete' : 'Module Complete'}
             </span>
             <span style={{ fontWeight: 'bold' }}>{progressPercent}%</span>
           </div>
           <div style={{ height: '12px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${progressPercent}%`, background: isReviewMode ? '#22c55e' : 'var(--accent)', transition: 'width 0.6s ease' }} />
+            <div style={{
+              height: '100%',
+              width: `${progressPercent}%`,
+              background: isReviewMode ? '#22c55e' : phase === 'quiz' || phase === 'quiz-result' ? '#6366f1' : 'var(--accent)',
+              transition: 'width 0.6s ease'
+            }} />
           </div>
         </div>
         
-        {!isReviewMode && currentStep !== 'complete' && (
+        {!isReviewMode && phase === 'reading' && (
           <button onClick={() => navigate(`/pretest/${id}`)} style={{ padding: '0.5rem 1rem', background: 'transparent', border: '2px solid #eab308', color: '#eab308', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>Test Out</button>
         )}
       </div>
 
       <div className="modules__card" style={{ padding: '2.5rem' }}>
-        {currentStep === 'info' && (
+        {phase === 'reading' && (
           <>
-            <h2 style={{ marginTop: 0 }}>{lessonData.title}</h2>
-            <p style={{ lineHeight: '1.7', color: 'var(--text-muted)' }}>{lessonData.content}</p>
+            <h2 style={{ marginTop: 0 }}>{moduleLessons[currentLessonIdx].title}</h2>
+            <p style={{ lineHeight: '1.7', color: 'var(--text-muted)', whiteSpace: 'pre-line' }}>
+              {moduleLessons[currentLessonIdx].content}
+            </p>
           </>
         )}
 
-        {currentStep === 'quiz' && (
+        {phase === 'quiz' && (
           <>
-            <h2 style={{ marginTop: 0 }}>Knowledge Check</h2>
-            <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{lessonData.question.question}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <span style={{ background: '#6366f1', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                From: {allQuestions[quizQuestionIdx].lessonTitle}
+              </span>
+            </div>
+            <h2 style={{ marginTop: 0 }}>Module Quiz</h2>
+            <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{allQuestions[quizQuestionIdx].question}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {lessonData.question.options.map((opt: string, idx: number) => (
+              {allQuestions[quizQuestionIdx].options.map((opt: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedAnswer(idx)}
@@ -194,27 +236,67 @@ export default function Lesson() {
           </>
         )}
 
-        {currentStep === 'complete' && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem' }}>{isReviewMode ? '🔁' : '🎉'}</div>
-            <h2>{isReviewMode ? 'Review Complete!' : 'Excellent Work!'}</h2>
-            <p>{isReviewMode ? 'Great job refreshing your memory.' : 'You earned +50 XP.'}</p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
-               <button className="modules__card-btn" onClick={() => navigate('/')} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'white' }}>{isReviewMode ? 'Exit Review' : 'Map'}</button>
-               <button className="modules__card-btn" onClick={handleNextLesson}>Next Lesson</button>
+        {phase === 'quiz-result' && (() => {
+          const percentage = Math.round((quizScore / allQuestions.length) * 100);
+          const passed = percentage >= 80;
+          const xpEarned = passed ? moduleData.experiencePoints + (moduleLessons.length * 50) : 0;
+          return (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem' }}>{passed ? '🎉' : '📚'}</div>
+              <h2>{passed ? (isReviewMode ? 'Review Complete!' : 'Module Complete!') : 'Not Quite!'}</h2>
+              <div style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.5rem', margin: '1.5rem 0' }}>
+                <p style={{ color: 'var(--text-muted)', margin: '0 0 0.5rem' }}>Your Score</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: '0 0 0.5rem' }}>{quizScore} / {allQuestions.length}</p>
+                <p style={{ fontSize: '1.5rem', color: passed ? '#22c55e' : '#ef4444', fontWeight: 600, margin: 0 }}>{percentage}%</p>
+              </div>
+              {passed ? (
+                <div style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #d4af37 100%)', borderRadius: '0.75rem', padding: '1.5rem', color: 'black', marginBottom: '1.5rem' }}>
+                  <p style={{ margin: '0 0 0.5rem' }}>🏆 {isReviewMode ? 'Great Review!' : 'XP Earned'}</p>
+                  {!isReviewMode && <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>+{xpEarned} XP</p>}
+                </div>
+              ) : (
+                <div style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                  <p>You need 80% to pass. Review the lessons and try again!</p>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button className="modules__card-btn" onClick={() => navigate('/')} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'white' }}>
+                  {isReviewMode ? 'Exit Review' : 'Back to Modules'}
+                </button>
+                {!passed && (
+                  <button className="modules__card-btn" onClick={handleRetryQuiz}>
+                    Retry Quiz
+                  </button>
+                )}
+                {!passed && (
+                  <button className="modules__card-btn" onClick={() => { setPhase('reading'); setCurrentLessonIdx(0); }} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'white' }}>
+                    Re-read Lessons
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
-      {currentStep !== 'complete' && (
+      {phase === 'reading' && (
         <button 
           className="modules__card-btn" 
           style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: isReviewMode ? '#22c55e' : '' }}
-          onClick={handleNext}
-          disabled={currentStep === 'quiz' && selectedAnswer === null}
+          onClick={handleNextLesson}
         >
-          {currentStep === 'info' ? 'Understood' : 'Submit Answer'}
+          {currentLessonIdx < moduleLessons.length - 1 ? 'Next Lesson' : 'Start Module Quiz'}
+        </button>
+      )}
+
+      {phase === 'quiz' && (
+        <button 
+          className="modules__card-btn" 
+          style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: '#6366f1' }}
+          onClick={handleSubmitAnswer}
+          disabled={selectedAnswer === null}
+        >
+          {quizQuestionIdx < allQuestions.length - 1 ? 'Next Question' : 'Submit Quiz'}
         </button>
       )}
     </div>
