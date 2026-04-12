@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { TRADING_PRETEST } from '../data/trading';
-import { RETIREMENT_PRETEST } from '../data/retirement';
-import { CRYPTOCURRENCIES_PRETEST } from '../data/Cryptocurrencies';
-import { BROKERS_PRETEST } from '../data/Brokers';
+import { QuizQuestion } from '../models/QuizQuestion';
 import '../styles/LightingRound.css';
 
 const QUESTION_TIME = 10;
@@ -12,21 +9,7 @@ const TOTAL_QUESTIONS = 10;
 const XP_PER_CORRECT = 100;
 const PERFECT_BONUS = 500;
 
-type Question = {
-  question: string;
-  options: string[];
-  correctIndex: number;
-  category: string;
-};
-
 type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
-
-const ALL_QUESTIONS: Question[] = [
-  ...TRADING_PRETEST.map(q => ({ ...q, category: 'Trading' })),
-  ...RETIREMENT_PRETEST.map(q => ({ ...q, category: 'Retirement' })),
-  ...CRYPTOCURRENCIES_PRETEST.map(q => ({ ...q, category: 'Crypto' })),
-  ...BROKERS_PRETEST.map(q => ({ ...q, category: 'Brokers' })),
-];
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -41,8 +24,12 @@ export default function LightingRound() {
   const navigate = useNavigate();
   const { user, setUser } = useUser();
 
+  const [allQuestions, setAllQuestions] = useState<{ q: QuizQuestion; category: string }[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
   const [gameState, setGameState] = useState<GameState>('lobby');
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<{ q: QuizQuestion; category: string }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -56,6 +43,27 @@ export default function LightingRound() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Fetch all questions once on mount
+  useEffect(() => {
+    fetch('/api/modules')
+      .then(res => res.json())
+      .then(modules => {
+        const questions = modules.flatMap((module: any) =>
+          module.pretest.map((q: any) => ({
+            q: new QuizQuestion(q.question, q.options, q.correct, q.explanation),
+            category: module.title
+          }))
+        );
+        setAllQuestions(questions);
+        setIsLoadingQuestions(false);
+      })
+      .catch(err => {
+        console.error('Failed to load questions', err);
+        setLoadError(true);
+        setIsLoadingQuestions(false);
+      });
+  }, []);
 
   const clearTimers = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -117,7 +125,7 @@ export default function LightingRound() {
 
   const startGame = () => {
     clearTimers();
-    const picked = shuffle(ALL_QUESTIONS).slice(0, TOTAL_QUESTIONS);
+    const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS);
     setQuestions(picked);
     setCurrentIndex(0);
     setScore(0);
@@ -135,7 +143,7 @@ export default function LightingRound() {
     setSelectedAnswer(index);
     setIsAnswered(true);
 
-    const correct = questions[currentIndex].correctIndex === index;
+    const correct = questions[currentIndex].q.isCorrectAnswer(index);
     if (correct) {
       const timeBonus = Math.round((timeLeft / QUESTION_TIME) * 50);
       const gained = XP_PER_CORRECT + timeBonus;
@@ -161,7 +169,7 @@ export default function LightingRound() {
       fetch('/api/complete-lesson', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }), // 0 = lightning round
+        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }),
       })
         .then(res => res.json())
         .then(data => {
@@ -176,6 +184,34 @@ export default function LightingRound() {
   const currentQ = questions[currentIndex];
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;
   const timerColor = timeLeft > 5 ? 'var(--accent)' : '#ef4444';
+
+  // Loading state
+  if (isLoadingQuestions) {
+    return (
+      <div className="lr">
+        <div className="lr__lobby">
+          <div className="lr__lobby-icon">⚡</div>
+          <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>Loading questions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (loadError) {
+    return (
+      <div className="lr">
+        <div className="lr__lobby">
+          <div className="lr__lobby-icon">⚠️</div>
+          <h2 style={{ color: 'var(--text-primary)' }}>Failed to load questions</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Please check your connection and try again.</p>
+          <button className="lr__start-btn" onClick={() => window.location.reload()}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (gameState === 'lobby') {
     return (
@@ -203,7 +239,7 @@ export default function LightingRound() {
           <div className="lr__lobby-rules">
             <p>⚡ Answer faster for bonus XP</p>
             <p>🏆 Perfect score earns +{PERFECT_BONUS} bonus XP</p>
-            <p>🔀 Random questions from all 4 modules</p>
+            <p>🔀 Random questions from all modules</p>
           </div>
           {!user && (
             <p className="lr__login-warning">
@@ -282,14 +318,14 @@ export default function LightingRound() {
         <div className="lr__timer-label" style={{ color: timerColor }}>{timeLeft}s</div>
 
         <div className="lr__question-card">
-          <p className="lr__question-text">{currentQ.question}</p>
+          <p className="lr__question-text">{currentQ.q.question}</p>
         </div>
 
         <div className="lr__answers">
-          {currentQ.options.map((option, i) => {
+          {currentQ.q.options.map((option, i) => {
             let cls = 'lr__answer';
             if (isAnswered) {
-              if (i === currentQ.correctIndex) cls += ' lr__answer--correct';
+              if (currentQ.q.isCorrectAnswer(i)) cls += ' lr__answer--correct';
               else if (i === selectedAnswer) cls += ' lr__answer--wrong';
             } else if (selectedAnswer === i) {
               cls += ' lr__answer--selected';
