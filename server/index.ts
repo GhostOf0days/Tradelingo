@@ -33,6 +33,7 @@ const client = new MongoClient(uri, {
 });
 const db = client.db('tradelingo');
 const usersCollection = db.collection('users');
+const modulesCollection = db.collection('modules');
 
 const calculateLevel = (xp: number): number => {
   if (xp < 1000) return 1;
@@ -156,6 +157,34 @@ app.get('/api/progress/:email', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error fetching progress' });
+  }
+});
+
+// fetch all module from database
+app.get('/api/modules', async (req, res) => {
+  try {
+    const modules = await modulesCollection
+      .find({}, { projection: { lessons: 0 } }) // exclude lessons, only return pretest
+      .sort({ moduleId: 1 })
+      .toArray();
+    res.status(200).json(modules);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error fetching modules' });
+  }
+});
+
+// fetch a single module
+app.get('/api/modules/:moduleId', async (req, res) => {
+  try {
+    const module = await modulesCollection.findOne({ 
+      moduleId: Number(req.params.moduleId) 
+    });
+    if (!module) return res.status(404).json({ error: 'Module not found' });
+    res.status(200).json(module);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error fetching module' });
   }
 });
 
