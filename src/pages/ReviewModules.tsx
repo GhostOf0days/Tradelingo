@@ -55,61 +55,54 @@ export default function ReviewModules() {
   };
 
   return (
-    <div className="review-modules" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto', color: 'white' }}>
-      <div className="review-modules__header" style={{ marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📚 Completed Modules</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Review and refresh your knowledge on modules you've already mastered</p>
+    <div className="review-modules">
+      <div className="review-modules__header">
+        <h1>📚 Completed Modules</h1>
+        <p>Review and refresh your knowledge on modules you've already mastered</p>
       </div>
 
       {completedModules.length === 0 ? (
-        <div className="review-modules__empty" style={{ textAlign: 'center', padding: '4rem 2rem', background: '#111', borderRadius: '1rem' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📖</div>
+        <div className="review-modules__empty">
+          <div className="review-modules__empty-icon">激</div>
           <h2>No Completed Modules Yet</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Complete your first module to unlock the ability to review it here</p>
-          <button 
-            style={{ padding: '1rem 2rem', background: 'var(--accent)', color: 'black', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer', border: 'none' }} 
-            onClick={() => navigate('/')}
-          >
+          <p>Complete your first module to unlock the ability to review it here</p>
+          <button className="review-modules__cta" onClick={() => navigate('/')}>
             Go to Modules →
           </button>
         </div>
       ) : (
-        <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {completedModules.map((module) => (
-              <div key={module.moduleId} style={{ background: '#111', padding: '2rem', borderRadius: '1rem', border: '1px solid #333' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1.5rem' }}>{module.title}</h3>
-                  <span style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.875rem', fontWeight: 'bold' }}>✅ Completed</span>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-                  <div>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Completed on</div>
-                    <div style={{ fontWeight: 'bold' }}>{formatDate(module.completedDate)}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Mastery</div>
-                    <div style={{ fontWeight: 'bold', color: '#22c55e' }}>{module.score}%</div>
-                  </div>
-                </div>
-
-                <div style={{ background: '#222', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center', marginBottom: '1.5rem', color: '#eab308', fontWeight: 'bold' }}>
-                  ⭐ +{module.xpEarned} XP Earned
-                </div>
-
-                <button
-                  style={{ width: '100%', padding: '1rem', background: 'transparent', border: '1px solid #444', color: 'white', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s' }}
-                  onClick={() => handleReviewLesson(module.moduleId)}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#222'}
-                  onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  Review Lessons →
-                </button>
+        <div className="review-modules__grid">
+          {completedModules.map((module) => (
+            <div key={module.moduleId} className="review-modules__card">
+              <div className="review-modules__card-header">
+                <h3>{module.title}</h3>
+                <span className="review-modules__badge">✅ Completed</span>
               </div>
-            ))}
-          </div>
-        </>
+              
+              <div className="review-modules__meta">
+                <div className="review-modules__meta-item">
+                  <div className="review-modules__label">Completed on</div>
+                  <div className="review-modules__value">{formatDate(module.completedDate)}</div>
+                </div>
+                <div className="review-modules__meta-item" style={{ textAlign: 'right' }}>
+                  <div className="review-modules__label">Mastery</div>
+                  <div className="review-modules__value" style={{ color: '#22c55e' }}>{module.score}%</div>
+                </div>
+              </div>
+
+              <div className="review-modules__xp-badge">
+                ⭐ +{module.xpEarned} XP Earned
+              </div>
+
+              <button
+                className="review-modules__btn review-modules__btn--secondary"
+                onClick={() => handleReviewLesson(module.moduleId)}
+              >
+                Review Lessons →
+              </button>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

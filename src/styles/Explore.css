@@ -75,7 +75,7 @@
 .explore__filter-btn.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: black;
+  color: #fff;
 }
 
 .explore__grid {
@@ -97,7 +97,7 @@
 
 .explore__card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   border-color: var(--accent);
 }
 
@@ -117,7 +117,7 @@
 
 .explore__category {
   background: var(--accent);
-  color: black;
+  color: #fff;
   padding: 0.25rem 0.75rem;
   border-radius: 99px;
   font-size: 0.75rem;
@@ -177,7 +177,7 @@
 
 .explore__read-btn {
   background: var(--accent);
-  color: black;
+  color: #fff;
   border-color: var(--accent);
   text-decoration: none;
   display: flex;
@@ -186,7 +186,7 @@
 }
 
 .explore__read-btn:hover {
-  opacity: 0.9;
+  background: var(--accent-hover);
   text-decoration: none;
 }
 
@@ -204,7 +204,7 @@
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
   background: var(--accent);
-  color: black;
+  color: #fff;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -221,7 +221,7 @@
   border-radius: 1rem;
   padding: 2rem;
   text-align: center;
-  color: black;
+  color: #fff;
 }
 
 .explore__footer h2 {

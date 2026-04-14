@@ -98,7 +98,7 @@
 }
 
 .lr__login-warning {
-  color: #f59e0b;
+  color: var(--xp-yellow);
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -115,7 +115,7 @@
 
 .lr__start-btn {
   background: var(--accent);
-  color: black;
+  color: #fff;
   border: none;
   border-radius: 0.75rem;
   padding: 0.875rem 2.5rem;
@@ -127,7 +127,7 @@
   margin-top: 0.5rem;
 }
 
-.lr__start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.lr__start-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 .lr__start-btn:active { transform: translateY(0); }
 
 /* ── Countdown ───────────────────────────────────────────────────────── */
@@ -278,7 +278,7 @@
 }
 
 .lr__answer--wrong {
-  border-color: #ef4444 !important;
+  border-color: var(--danger) !important;
   background: rgba(239, 68, 68, 0.12) !important;
 }
 
@@ -337,7 +337,7 @@
 
 .lr__perfect-badge {
   background: linear-gradient(135deg, var(--accent), #d4af37);
-  color: black;
+  color: #fff;
   font-weight: 700;
   border-radius: 0.5rem;
   padding: 0.6rem 1.25rem;

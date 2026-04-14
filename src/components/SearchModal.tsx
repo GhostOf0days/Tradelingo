@@ -80,13 +80,13 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
   const getSourceColor = (source: string) => {
     switch (source) {
       case 'module':
-        return '#3b82f6';
+        return 'var(--accent)';
       case 'article':
-        return '#10b981';
+        return '#10b981'; // Success green
       case 'quiz':
-        return '#f59e0b';
+        return 'var(--xp-yellow)';
       default:
-        return '#6b7280';
+        return 'var(--text-muted)';
     }
   };
 

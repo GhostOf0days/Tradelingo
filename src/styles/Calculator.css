@@ -89,7 +89,7 @@
 
 .calculator__account-card {
   border: 2px solid var(--border);
-  border-left: 5px solid #3b82f6;
+  border-left: 5px solid var(--accent);
   border-radius: 0.75rem;
   padding: 1.5rem;
   cursor: pointer;
@@ -100,13 +100,13 @@
 .calculator__account-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .calculator__account-card.selected {
   border-color: var(--accent);
   background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .calculator__account-card h3 {
@@ -165,7 +165,7 @@
 .calculator__input-group select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .calculator__result {
@@ -174,7 +174,7 @@
   border-radius: 0.75rem;
   padding: 2rem;
   text-align: center;
-  color: black;
+  color: #fff;
   margin-top: 1rem;
 }
 
