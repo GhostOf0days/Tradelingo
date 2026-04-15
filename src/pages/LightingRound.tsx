@@ -159,17 +159,19 @@ export default function LightingRound() {
     setTimeout(() => advanceQuestion(), 1200);
   };
 
+  // When game finishes, calculate XP and update user
   useEffect(() => {
     if (gameState !== 'finished') return;
+
     const isPerfect = correctCount === TOTAL_QUESTIONS;
     const totalXp = score + (isPerfect ? PERFECT_BONUS : 0);
     setXpEarned(totalXp);
 
     if (user && totalXp > 0) {
-      fetch('/api/complete-lesson', {
+      fetch('/api/lighting-round', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }),
+        body: JSON.stringify({ email: user.email, xpEarned: totalXp }),
       })
         .then(res => res.json())
         .then(data => {
@@ -179,7 +181,7 @@ export default function LightingRound() {
         })
         .catch(console.warn);
     }
-  }, [gameState, correctCount, score, user, setUser]);
+  }, [gameState]);
 
   const currentQ = questions[currentIndex];
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;

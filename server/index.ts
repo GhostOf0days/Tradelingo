@@ -228,6 +228,42 @@ app.post('/api/complete-lesson', async (req, res) => {
   }
 });
 
+// lightning-round: add XP based on performance
+app.post('/api/lighting-round', async (req, res) => {
+  try {
+    const { email, xpEarned } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = await usersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const newXp = (user.experiencePoints || 0) + xpEarned;
+    const newLevel = calculateLevel(newXp);
+
+    const result = await usersCollection.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          experiencePoints: newXp,
+          level: newLevel,
+        }
+      },
+      { returnDocument: 'after' }
+    );
+
+    res.status(200).json({
+      experiencePoints: result?.experiencePoints,
+      level: result?.level,
+    });
+  } catch (error) {
+    console.warn(error);
+    res.status(500).json({ error: 'Server error updating Lightning Round XP' });
+  }
+});
+
 // pass-module: pretest passed — set lesson count to total, unlock next module
 app.post('/api/pass-module', async (req, res) => {
   try {
