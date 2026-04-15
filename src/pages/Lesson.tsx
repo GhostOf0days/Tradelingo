@@ -175,7 +175,7 @@ export default function Lesson() {
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: '90%', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
