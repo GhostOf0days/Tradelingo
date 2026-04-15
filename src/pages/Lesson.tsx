@@ -149,7 +149,7 @@ export default function Lesson() {
         }
         updateStreak();
       } catch (err) {
-        console.error('Error completing module:', err);
+        console.warn('Error completing module:', err);
       }
     }
   };
@@ -168,14 +168,14 @@ export default function Lesson() {
 
   const totalSteps = moduleLessons.length + allQuestions.length;
   const currentStep = phase === 'reading'
-    ? currentLessonIdx + 1
+    ? currentLessonIdx
     : phase === 'quiz'
-      ? moduleLessons.length + quizQuestionIdx + 1
+      ? moduleLessons.length + quizQuestionIdx
       : totalSteps;
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: '90%', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ flexGrow: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>

@@ -83,7 +83,7 @@ app.post('/api/register', async (req, res) => {
       lastUnlockedModuleId: newUser.lastUnlockedModuleId,
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error during registration' });
   }
 });
@@ -113,7 +113,7 @@ app.post('/api/login', async (req, res) => {
       lastUnlockedModuleId: user.lastUnlockedModuleId || 1,
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error during login' });
   }
 });
@@ -139,7 +139,7 @@ app.post('/api/update-xp', async (req, res) => {
     if (!result) return res.status(404).json({ error: 'User not found' });
     res.status(200).json({ experiencePoints: result.experiencePoints, level: result.level });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error updating XP' });
   }
 });
@@ -155,13 +155,13 @@ app.get('/api/progress/:email', async (req, res) => {
       progressByModuleId: user.progressByModuleId || {},
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error fetching progress' });
   }
 });
 
 // fetch all module from database
-app.get('/api/modules', async (req, res) => {
+app.get('/api/modules', async (_req, res) => {
   try {
     const modules = await modulesCollection
       .find({}, { projection: { lessons: 0 } }) // exclude lessons, only return pretest
@@ -169,7 +169,7 @@ app.get('/api/modules', async (req, res) => {
       .toArray();
     res.status(200).json(modules);
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error fetching modules' });
   }
 });
@@ -183,7 +183,7 @@ app.get('/api/modules/:moduleId', async (req, res) => {
     if (!module) return res.status(404).json({ error: 'Module not found' });
     res.status(200).json(module);
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error fetching module' });
   }
 });
@@ -223,7 +223,7 @@ app.post('/api/complete-lesson', async (req, res) => {
       progressByModuleId: result.progressByModuleId,
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error updating lesson progress' });
   }
 });
@@ -263,7 +263,7 @@ app.post('/api/pass-module', async (req, res) => {
       progressByModuleId: result?.progressByModuleId,
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error updating pre-test progress' });
   }
 });
@@ -309,7 +309,7 @@ app.post('/api/update-streak', async (req, res) => {
       lastActivityDate: result?.lastActivityDate,
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error updating streak' });
   }
 });
@@ -321,7 +321,7 @@ app.get('/api/completed-modules/:email', async (req, res) => {
 
     res.status(200).json(user.completedModules || []);
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error fetching completed modules' });
   }
 });
@@ -353,7 +353,6 @@ app.post('/api/complete-module', async (req, res) => {
 
     const result = await usersCollection.findOneAndUpdate(
       { email },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {
         $push: { completedModules: completedModule },
         $set: { lastUnlockedModuleId: newUnlockedId },
@@ -369,7 +368,7 @@ app.post('/api/complete-module', async (req, res) => {
       lastUnlockedModuleId: result.lastUnlockedModuleId,
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error completing module' });
   }
 });
@@ -390,7 +389,7 @@ app.get('/api/user/:email', async (req, res) => {
       completedModules: user.completedModules || [],
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
     res.status(500).json({ error: 'Server error fetching user profile' });
   }
 });
@@ -418,7 +417,7 @@ async function runMigrations() {
       { $set: { completedModules: [] } }
     );
   } catch (error) {
-    console.error(error);
+    console.warn(error);
   }
 }
 
@@ -426,10 +425,10 @@ const PORT = Number(process.env.PORT) || 3000;
 if (process.env.NODE_ENV !== 'test') {
   // skip listen in test so supertest can use app
   client.connect().then(async () => {
-    console.log('✅ Connected to MongoDB');
+    // console.log('✅ Connected to MongoDB');
     await runMigrations();
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      // console.log(`🚀 Server running on port ${PORT}`);
     });
   });
 }

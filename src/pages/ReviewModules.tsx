@@ -38,7 +38,7 @@ export default function ReviewModules() {
           setCompletedModules(finishedModules);
         }
       } catch (err) {
-        console.error('Failed to fetch completed modules:', err);
+        console.warn('Failed to fetch completed modules:', err);
       }
     };
 
@@ -63,7 +63,7 @@ export default function ReviewModules() {
 
       {completedModules.length === 0 ? (
         <div className="review-modules__empty">
-          <div className="review-modules__empty-icon">激</div>
+          <div className="review-modules__empty-icon"></div>
           <h2>No Completed Modules Yet</h2>
           <p>Complete your first module to unlock the ability to review it here</p>
           <button className="review-modules__cta" onClick={() => navigate('/')}>

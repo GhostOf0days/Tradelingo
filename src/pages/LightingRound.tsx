@@ -59,7 +59,7 @@ export default function LightingRound() {
         setIsLoadingQuestions(false);
       })
       .catch(err => {
-        console.error('Failed to load questions', err);
+        console.warn('Failed to load questions', err);
         setLoadError(true);
         setIsLoadingQuestions(false);
       });
@@ -177,9 +177,9 @@ export default function LightingRound() {
             setUser({ ...user, experiencePoints: data.experiencePoints });
           }
         })
-        .catch(console.error);
+        .catch(console.warn);
     }
-  }, [gameState]);
+  }, [gameState, correctCount, score, user, setUser]);
 
   const currentQ = questions[currentIndex];
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;

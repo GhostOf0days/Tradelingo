@@ -22,7 +22,7 @@
 
 /* ── Lobby ───────────────────────────────────────────────────────────── */
 .lr__lobby {
-  max-width: 560px;
+  max-width: 90%;
   width: 100%;
   text-align: center;
   background: var(--surface);
@@ -157,7 +157,7 @@
 
 /* ── Game ────────────────────────────────────────────────────────────── */
 .lr__game {
-  max-width: 640px;
+  max-width: 90%;
   width: 100%;
 }
 
@@ -297,7 +297,7 @@
 
 /* ── Results ─────────────────────────────────────────────────────────── */
 .lr__results {
-  max-width: 480px;
+  max-width: 90%;
   width: 100%;
   text-align: center;
   background: var(--surface);
@@ -376,7 +376,7 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
-@media (max-width: 480px) {
+@media (max-width: 90%) {
   .lr__answers { grid-template-columns: 1fr; }
   .lr__lobby-stats { gap: 1rem; }
   .lr__results-fraction { font-size: 2.25rem; }

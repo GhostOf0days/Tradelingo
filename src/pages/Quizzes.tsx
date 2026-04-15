@@ -131,7 +131,7 @@ export default function Quizzes() {
               updateStreak();
             }
           } catch (err) {
-            console.error('Failed to update XP', err);
+            console.warn('Failed to update XP', err);
           }
         }
       }

@@ -48,7 +48,7 @@ export default function Pretest() {
             updateStreak();
           }
         } catch (err) {
-          console.error("Failed to save pre-test", err);
+          console.warn("Failed to save pre-test", err);
         }
       }
       setIsComplete(true);
@@ -72,7 +72,7 @@ export default function Pretest() {
           updateStreak();
         }
       } catch (err) {
-        console.error("Failed to update XP", err);
+        console.warn("Failed to update XP", err);
       }
     }
     navigate(`/lesson/${id}`);
