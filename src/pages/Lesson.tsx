@@ -69,7 +69,7 @@ export default function Lesson() {
       }
     };
     fetchProgress();
-  }, [user, id]);
+  }, [user, id, isReviewMode, moduleId, moduleLessons.length, navigate]);
 
   const handleNextLesson = () => {
     if (currentLessonIdx < moduleLessons.length - 1) {

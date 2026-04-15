@@ -57,6 +57,7 @@ export default function Explore() {
   const [articles, setArticles] = useState<FullArticle[]>(ARTICLES);
   const [selectedType, setSelectedType] = useState<ArticleType | 'all'>('all');
   const [openArticle, setOpenArticle] = useState<FullArticle | null>(null);
+  const [likedArticles, setLikedArticles] = useState<Set<number>>(new Set());
 
   const filteredArticles = articles.filter((article) => {
     const matchesSearch =
@@ -67,13 +68,31 @@ export default function Explore() {
   });
 
   const handleLike = (id: number) => {
+    const isLiked = likedArticles.has(id);
+
     setArticles(prev =>
       prev.map(a =>
-        a.id === id ? { ...a, likes: a.likes + 1 } : a
+        a.id === id
+          ? { ...a, likes: Math.max(0, a.likes + (isLiked ? -1 : 1)) }
+          : a
       )
     );
+
+    setLikedArticles(prev => {
+      const newSet = new Set(prev);
+      if (isLiked) {
+        newSet.delete(id); // unlike
+      } else {
+        newSet.add(id); // like
+      }
+      return newSet;
+    });
+
     if (openArticle && openArticle.id === id) {
-      setOpenArticle({ ...openArticle, likes: openArticle.likes + 1 });
+      setOpenArticle({
+        ...openArticle,
+        likes: Math.max(0, openArticle.likes + (isLiked ? -1 : 1))
+      });
     }
   };
 
@@ -101,7 +120,12 @@ export default function Explore() {
               {openArticle.body}
             </div>
             <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <button onClick={() => handleLike(openArticle.id)} className="explore__like-btn">👍 {openArticle.likes}</button>
+              <button
+                onClick={() => handleLike(openArticle.id)}
+                className={`explore__like-btn ${likedArticles.has(openArticle.id) ? 'liked' : ''}`}
+              >
+                {likedArticles.has(openArticle.id) ? `❤️ ${openArticle.likes}` : `👍 ${openArticle.likes}`}
+              </button>
               <a
                 href={openArticle.url}
                 target="_blank"
@@ -174,7 +198,14 @@ export default function Explore() {
                 <span className="explore__read-time">📖 {article.readTime}</span>
               </div>
               <div className="explore__card-footer">
-                <button onClick={() => handleLike(article.id)} className="explore__like-btn">👍 {article.likes}</button>
+                <button
+                  onClick={() => handleLike(article.id)}
+                  className={`explore__like-btn ${likedArticles.has(article.id) ? 'liked' : ''}`}
+                >
+                  {likedArticles.has(article.id)
+                    ? `❤️ ${article.likes}`
+                    : `👍 ${article.likes}`}
+                </button>
                 <button
                   className="explore__read-btn"
                   onClick={() => setOpenArticle(article)}
