@@ -38,7 +38,7 @@ export default function ReviewModules() {
           setCompletedModules(finishedModules);
         }
       } catch (err) {
-        console.error('Failed to fetch completed modules:', err);
+        console.warn('Failed to fetch completed modules:', err);
       }
     };
 

@@ -33,7 +33,7 @@ function Modules() {
           setLastUnlockedModuleId(data.lastUnlockedModuleId || 1);
         }
       } catch (err) {
-        console.error('Failed to fetch progress', err);
+        console.warn('Failed to fetch progress', err);
       }
     };
 

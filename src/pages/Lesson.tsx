@@ -149,7 +149,7 @@ export default function Lesson() {
         }
         updateStreak();
       } catch (err) {
-        console.error('Error completing module:', err);
+        console.warn('Error completing module:', err);
       }
     }
   };
