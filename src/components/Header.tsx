@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutGrid, Compass, Calculator, Zap, Search, Bell, LogOut } from 'lucide-react';
+import { LayoutGrid, Compass, Calculator, Zap, Search, Bell, LogOut, Sun, Moon } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import './Header.css';
 import { useNavigate } from 'react-router-dom';
@@ -29,9 +29,19 @@ function Header() {
   const [showStreakInfo, setShowStreakInfo] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unfinishedModules, setUnfinishedModules] = useState<UnfinishedModule[]>([]);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   
   const { user, setUser, level } = useUser();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     const fetchUnfinished = async () => {
@@ -118,6 +128,16 @@ function Header() {
           </nav>
         </div>
         <div className="header__actions">
+          <button 
+            type="button" 
+            className="header__icon-btn" 
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
           {user ? (
             <>
               <button 

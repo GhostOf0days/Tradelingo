@@ -89,7 +89,7 @@
 
 .calculator__account-card {
   border: 2px solid var(--border);
-  border-left: 5px solid #3b82f6;
+  border-left: 5px solid var(--accent);
   border-radius: 0.75rem;
   padding: 1.5rem;
   cursor: pointer;
@@ -100,13 +100,13 @@
 .calculator__account-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .calculator__account-card.selected {
   border-color: var(--accent);
   background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .calculator__account-card h3 {
@@ -165,7 +165,7 @@
 .calculator__input-group select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .calculator__result {
@@ -174,7 +174,7 @@
   border-radius: 0.75rem;
   padding: 2rem;
   text-align: center;
-  color: black;
+  color: #fff;
   margin-top: 1rem;
 }
 
@@ -196,4 +196,58 @@
   font-size: 0.95rem;
   margin-top: 0.5rem;
   opacity: 0.9;
+}
+
+.calculator__grid-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .calculator__grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calculator__chart-container {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.calculator__chart-container h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+
+.recharts-default-tooltip {
+  background-color: rgba(15, 15, 15, 0.95) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.recharts-tooltip-item-list {
+  color: #fff !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--text-muted) !important;
+  font-size: 0.9rem !important;
+}
+
+.calculator__section h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, var(--text-primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

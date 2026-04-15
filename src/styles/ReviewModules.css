@@ -1,5 +1,5 @@
 .review-modules {
-  max-width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -43,7 +43,7 @@
 .review-modules__cta {
   padding: 0.75rem 1.5rem;
   background: var(--accent);
-  color: black;
+  color: #fff;
   border: none;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -52,7 +52,7 @@
 }
 
 .review-modules__cta:hover {
-  opacity: 0.9;
+  background: var(--accent-hover);
 }
 
 .review-modules__stats {
@@ -112,7 +112,7 @@
 
 .review-modules__card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   border-color: var(--accent);
 }
 
@@ -204,7 +204,7 @@
 
 .review-modules__xp-badge {
   background: linear-gradient(135deg, var(--accent) 0%, #d4af37 100%);
-  color: black;
+  color: #fff;
   padding: 0.75rem;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -230,11 +230,11 @@
 
 .review-modules__btn--primary {
   background: var(--accent);
-  color: black;
+  color: #fff;
 }
 
 .review-modules__btn--primary:hover {
-  opacity: 0.9;
+  background: var(--accent-hover);
 }
 
 .review-modules__btn--secondary {
@@ -255,11 +255,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
 }
 
 .review-modules__modal {
@@ -272,6 +273,7 @@
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-lg);
 }
 
 .review-modules__modal-close {

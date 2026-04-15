@@ -42,14 +42,14 @@
 }
 
 .modules__toggle-btn:hover {
-  color: #d4d4d8;
-  background: rgba(39, 39, 42, 0.5);
+  color: var(--text-primary);
+  background: var(--surface-hover);
 }
 
 .modules__toggle-btn--active {
   background: var(--surface-hover);
   color: var(--text-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .modules__empty {
@@ -85,7 +85,7 @@
   border-radius: 50%;
   border: 3px solid var(--accent);
   background: var(--accent);
-  color: var(--text-primary);
+  color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
   display: flex;
@@ -97,13 +97,13 @@
 .modules__node--locked {
   background: var(--surface);
   border-color: var(--surface-hover);
-  color: #52525b;
+  color: var(--text-muted-strong);
   box-shadow: none;
 }
 
 .modules__node--completed {
   background: var(--surface);
-  border-color: rgba(37, 99, 235, 0.3);
+  border-color: var(--accent);
   color: var(--accent);
 }
 
@@ -118,8 +118,8 @@
 }
 
 .modules__card:hover {
-  border-color: rgba(37, 99, 235, 0.3);
-  box-shadow: 0 0 24px rgba(37, 99, 235, 0.06);
+  border-color: var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
 }
 
 .modules__card--locked {
@@ -168,9 +168,9 @@
   font-weight: 700;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(39, 39, 42, 0.5);
-  color: #d4d4d8;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-primary);
 }
 
 .modules__card-xp .modules__xp-icon {
@@ -178,8 +178,8 @@
 }
 
 .modules__card-xp--locked {
-  color: #52525b;
-  border-color: #27272a;
+  color: var(--text-muted-strong);
+  border-color: var(--border);
   background: transparent;
 }
 
@@ -237,7 +237,7 @@
   background: var(--accent);
   border-radius: 9999px;
   transition: width 0.2s ease;
-  box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 .modules__card-footer {
@@ -246,7 +246,7 @@
   justify-content: space-between;
   padding-top: 1rem;
   margin-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--border);
 }
 
 .modules__streak-row {
@@ -287,10 +287,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1.5rem;
-  background: #fff;
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 9999px;
-  color: #000;
+  color: var(--btn-primary-text);
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
@@ -298,7 +298,7 @@
 }
 
 .modules__card-btn:hover {
-  background: #f4f4f5;
+  background: var(--btn-primary-hover);
 }
 
 .modules__card-btn-icon {
@@ -353,7 +353,7 @@
 .modules__lightning-icon svg {
   width: 2rem;
   height: 2rem;
-  color: var(--text-primary);
+  color: #fff;
 }
 
 .modules__lightning-text {
@@ -373,14 +373,14 @@
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: rgba(191, 219, 254, 0.95);
+  color: var(--text-muted);
 }
 
 .modules__lightning-play {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: var(--text-primary);
+  background: var(--btn-primary-bg);
   border: none;
   cursor: pointer;
   display: flex;
@@ -391,7 +391,7 @@
   position: relative;
   z-index: 1;
   transition: transform 0.2s;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .modules__lightning-play:hover {
@@ -399,7 +399,7 @@
 }
 
 .modules__lightning-play-icon {
-  color: #000;
+  color: var(--btn-primary-text);
   margin-left: 0.2rem;
 }
 
@@ -464,14 +464,14 @@
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: rgba(167, 243, 208, 0.95);
+  color: var(--text-muted);
 }
 
 .modules__review-btn {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: var(--text-primary);
+  background: var(--btn-primary-bg);
   border: none;
   cursor: pointer;
   display: flex;
@@ -482,7 +482,7 @@
   position: relative;
   z-index: 1;
   transition: transform 0.2s;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .modules__review-btn:hover {
@@ -490,7 +490,7 @@
 }
 
 .modules__review-btn-icon {
-  color: #000;
+  color: var(--btn-primary-text);
   margin-left: 0.2rem;
 }
 
