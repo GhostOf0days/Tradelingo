@@ -168,9 +168,9 @@ export default function Lesson() {
 
   const totalSteps = moduleLessons.length + allQuestions.length;
   const currentStep = phase === 'reading'
-    ? currentLessonIdx + 1
+    ? currentLessonIdx
     : phase === 'quiz'
-      ? moduleLessons.length + quizQuestionIdx + 1
+      ? moduleLessons.length + quizQuestionIdx
       : totalSteps;
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
