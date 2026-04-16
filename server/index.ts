@@ -44,12 +44,18 @@ const calculateLevel = (xp: number): number => {
   return 5 + Math.floor((xp - 10000) / 5000);
 };
 
-// register: hash password, init progress/streak
 app.post('/api/register', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const existingUser = await usersCollection.findOne({ email });
+    if (!email || typeof email !== 'string' || !email.includes('@') || email.length > 320) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const existingUser = await usersCollection.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -121,9 +127,11 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/update-xp', async (req, res) => {
   try {
     const { email, xpToAdd } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email is required' });
+    if (!email || typeof email !== 'string') return res.status(400).json({ error: 'Email is required' });
+    if (typeof xpToAdd !== 'number' || xpToAdd < 0 || xpToAdd > 10000) {
+      return res.status(400).json({ error: 'xpToAdd must be a number between 0 and 10000' });
+    }
 
-    // We need to calculate level after XP increment
     const user = await usersCollection.findOne({ email });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -188,21 +196,24 @@ app.get('/api/modules/:moduleId', async (req, res) => {
   }
 });
 
-// complete-lesson: bump lesson index for this module, add XP
 app.post('/api/complete-lesson', async (req, res) => {
   try {
     const { email, moduleId, xpToAdd } = req.body;
 
-    if (!email || !moduleId) {
-      return res.status(400).json({ error: 'Email and moduleId are required' });
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Email is required' });
     }
+    if (!moduleId || typeof moduleId !== 'number') {
+      return res.status(400).json({ error: 'Valid moduleId is required' });
+    }
+    const safeXp = Math.max(0, Math.min(10000, Number(xpToAdd) || 0));
 
     const user = await usersCollection.findOne({ email });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const newXp = (user.experiencePoints || 0) + xpToAdd;
+    const newXp = (user.experiencePoints || 0) + safeXp;
     const newLevel = calculateLevel(newXp);
-    const progressField = `progressByModuleId.${moduleId}.lessonCurrent`; // dotted key for $inc
+    const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
 
     const result = await usersCollection.findOneAndUpdate(
       { email },
@@ -268,10 +279,12 @@ app.post('/api/pass-module', async (req, res) => {
   }
 });
 
-// update-streak: yesterday -> +1, gap or first time -> 1
 app.post('/api/update-streak', async (req, res) => {
   try {
     const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Email is required' });
+    }
     const user = await usersCollection.findOne({ email });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -326,13 +339,15 @@ app.get('/api/completed-modules/:email', async (req, res) => {
   }
 });
 
-// complete-module: push to completedModules, unlock next
 app.post('/api/complete-module', async (req, res) => {
   try {
     const { email, moduleId, title, score, xpEarned, lessonsTotal } = req.body;
 
-    if (!email || !moduleId) {
-      return res.status(400).json({ error: 'Email and moduleId are required' });
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    if (!moduleId || typeof moduleId !== 'number') {
+      return res.status(400).json({ error: 'Valid moduleId is required' });
     }
 
     const completedDate = new Date().toISOString().split('T')[0];

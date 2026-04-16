@@ -201,15 +201,75 @@ export default function Lesson() {
         )}
       </div>
 
+      {phase === 'reading' && (
+        <div style={{
+          display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem',
+          marginBottom: '1rem', scrollbarWidth: 'thin',
+        }}>
+          {moduleLessons.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => { if (idx <= currentLessonIdx || isReviewMode) setCurrentLessonIdx(idx); }}
+              style={{
+                padding: '0.375rem 0.75rem', borderRadius: '99px', border: 'none', cursor: idx <= currentLessonIdx || isReviewMode ? 'pointer' : 'default',
+                whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: idx === currentLessonIdx ? 'bold' : 'normal',
+                background: idx === currentLessonIdx ? 'var(--accent)' : idx < currentLessonIdx ? 'var(--surface-hover)' : 'var(--surface)',
+                color: idx === currentLessonIdx ? 'white' : idx < currentLessonIdx ? 'var(--text-muted)' : 'var(--text-muted-strong)',
+                opacity: idx <= currentLessonIdx || isReviewMode ? 1 : 0.5,
+                transition: 'background 0.2s, color 0.2s',
+              }}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="modules__card" style={{ padding: '2.5rem' }}>
         {phase === 'reading' && (
           <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span style={{
+                background: 'var(--accent)', color: 'white', padding: '0.15rem 0.5rem',
+                borderRadius: '99px', fontSize: '0.7rem', fontWeight: 'bold',
+              }}>
+                {currentLessonIdx + 1} / {moduleLessons.length}
+              </span>
+              {moduleLessons[currentLessonIdx].demo && (
+                <span style={{
+                  background: '#22c55e22', color: '#22c55e', padding: '0.15rem 0.5rem',
+                  borderRadius: '99px', fontSize: '0.7rem', fontWeight: 'bold',
+                }}>
+                  Interactive Demo
+                </span>
+              )}
+            </div>
             <h2 style={{ marginTop: 0 }}>{moduleLessons[currentLessonIdx].title}</h2>
             <p style={{ lineHeight: '1.7', color: 'var(--text-muted)', whiteSpace: 'pre-line' }}>
               {moduleLessons[currentLessonIdx].content}
             </p>
             {moduleLessons[currentLessonIdx].demo && (
               <DemoRenderer demoId={moduleLessons[currentLessonIdx].demo!} />
+            )}
+            {currentLessonIdx < moduleLessons.length - 1 && (
+              <div style={{
+                marginTop: '2rem', padding: '1rem', background: 'var(--surface)',
+                borderRadius: '0.75rem', borderLeft: '3px solid var(--accent)',
+              }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Up next: <strong style={{ color: 'var(--text-primary)' }}>{moduleLessons[currentLessonIdx + 1].title}</strong>
+                </span>
+              </div>
+            )}
+            {currentLessonIdx === moduleLessons.length - 1 && (
+              <div style={{
+                marginTop: '2rem', padding: '1rem', background: '#6366f115',
+                borderRadius: '0.75rem', borderLeft: '3px solid #6366f1',
+              }}>
+                <span style={{ color: '#a5b4fc', fontSize: '0.85rem' }}>
+                  That's the last lesson! Next up: <strong>Module Quiz</strong> — you need 80% to pass.
+                </span>
+              </div>
             )}
           </>
         )}
@@ -284,13 +344,24 @@ export default function Lesson() {
       </div>
 
       {phase === 'reading' && (
-        <button 
-          className="modules__card-btn" 
-          style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: isReviewMode ? '#22c55e' : '' }}
-          onClick={handleNextLesson}
-        >
-          {currentLessonIdx < moduleLessons.length - 1 ? 'Next Lesson' : 'Start Module Quiz'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '2rem' }}>
+          {currentLessonIdx > 0 && (
+            <button 
+              className="modules__card-btn" 
+              style={{ flex: '0 0 auto', justifyContent: 'center', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+              onClick={() => setCurrentLessonIdx(currentLessonIdx - 1)}
+            >
+              ← Previous
+            </button>
+          )}
+          <button 
+            className="modules__card-btn" 
+            style={{ flex: 1, justifyContent: 'center', background: isReviewMode ? '#22c55e' : '' }}
+            onClick={handleNextLesson}
+          >
+            {currentLessonIdx < moduleLessons.length - 1 ? 'Next Lesson →' : 'Start Module Quiz'}
+          </button>
+        </div>
       )}
 
       {phase === 'quiz' && (

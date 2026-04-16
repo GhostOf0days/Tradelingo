@@ -229,7 +229,8 @@ Key variables:
 • Your investment returns (historically 7-10% for stocks)
 • How long you invest (time horizon)
 • How much you need in retirement`,
-    question: RETIREMENT_PRETEST[6]
+    question: RETIREMENT_PRETEST[6],
+    demo: 'compound-growth'
   },
   {
     title: "Lesson 8: Social Security Basics",

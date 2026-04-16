@@ -1013,7 +1013,8 @@ The most important rule:
 Only invest what you can afford to lose. If you lose 100%, would it significantly impact your life? If yes, you're investing too much.
 
 Crypto is high-risk. Balance with traditional investments (stocks, bonds, real estate).`,
-    question: CRYPTOCURRENCIES_PRETEST[11]
+    question: CRYPTOCURRENCIES_PRETEST[11],
+    demo: 'dollar-cost-average'
   },
   {
     title: "Lesson 13: NFTs and Web3",
