@@ -202,7 +202,8 @@ Portfolio concepts:
 • Sector allocation – How much in technology vs healthcare vs energy, etc.
 
 Your first portfolio might be simple: Just a few stocks or an ETF. As it grows, you'll add more complexity and diversification.`, 
-    question: TRADING_PRETEST[9] 
+    question: TRADING_PRETEST[9],
+    demo: 'portfolio-allocation'
   },
   { 
     title: "Lesson 11: Diversification", 
@@ -228,7 +229,8 @@ How to diversify easily:
 Historical perspective: In the 2008 financial crisis, investors with diversified portfolios lost about 30-40%. Those with only stocks lost 50%+. Those with bonds and stocks lost only 20-30%. Diversification saved portfolios.
 
 Rule of thumb: You need at least 15-20 stocks to be truly diversified. With fewer, a single company's collapse can devastate your portfolio.`, 
-    question: TRADING_PRETEST[10] 
+    question: TRADING_PRETEST[10],
+    demo: 'diversification'
   },
   { 
     title: "Lesson 12: Volatility", 
@@ -364,6 +366,7 @@ How to determine your tolerance:
 Critical insight: Risk tolerance is NOT about how smart you are – it's about your personality and life situation. Even smart investors with low tolerance shouldn't be 100% stocks. Conversely, young investors can afford high volatility.
 
 Action: Match your portfolio to your tolerance, not some generic advice. Losing sleep over investments is a sign your allocation doesn't match your tolerance.`, 
-    question: TRADING_PRETEST[14] 
+    question: TRADING_PRETEST[14],
+    demo: 'risk-tolerance'
   }
 ];

@@ -49,6 +49,15 @@ export function createMockCollection() {
       return store.find((doc) => matchFilter(doc as Record<string, unknown>, filter)) ?? null;
     },
 
+    find(filter: Record<string, unknown> = {}, _options?: Record<string, unknown>) {
+      const matches = store.filter((doc) => matchFilter(doc as Record<string, unknown>, filter));
+      const cursor = {
+        sort() { return cursor; },
+        async toArray() { return matches; },
+      };
+      return cursor;
+    },
+
     async insertOne(doc: Record<string, unknown>) {
       const copy = { ...doc, _id: (doc._id as number) ?? nextId++ };
       store.push(copy);

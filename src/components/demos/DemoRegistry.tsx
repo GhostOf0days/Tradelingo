@@ -4,12 +4,22 @@ const StockPriceDemo = lazy(() => import('./StockPriceDemo'));
 const CompoundGrowthDemo = lazy(() => import('./CompoundGrowthDemo'));
 const BlockchainDemo = lazy(() => import('./BlockchainDemo'));
 const OrderBookDemo = lazy(() => import('./OrderBookDemo'));
+const DiversificationDemo = lazy(() => import('./DiversificationDemo'));
+const PortfolioAllocationDemo = lazy(() => import('./PortfolioAllocationDemo'));
+const DollarCostAverageDemo = lazy(() => import('./DollarCostAverageDemo'));
+const MarginCalculatorDemo = lazy(() => import('./MarginCalculatorDemo'));
+const RiskToleranceDemo = lazy(() => import('./RiskToleranceDemo'));
 
 const DEMO_MAP: Record<string, React.LazyExoticComponent<() => JSX.Element>> = {
   'stock-price-chart': StockPriceDemo,
   'compound-growth': CompoundGrowthDemo,
   'blockchain-builder': BlockchainDemo,
   'order-book': OrderBookDemo,
+  'diversification': DiversificationDemo,
+  'portfolio-allocation': PortfolioAllocationDemo,
+  'dollar-cost-average': DollarCostAverageDemo,
+  'margin-calculator': MarginCalculatorDemo,
+  'risk-tolerance': RiskToleranceDemo,
 };
 
 export default function DemoRenderer({ demoId }: { demoId: string }) {
@@ -18,7 +28,7 @@ export default function DemoRenderer({ demoId }: { demoId: string }) {
 
   return (
     <Suspense fallback={
-      <div style={{ background: '#0a0a0a', borderRadius: '1rem', padding: '2rem', border: '1px solid #222', textAlign: 'center', color: '#888' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '1rem', padding: '2rem', border: '1px solid var(--border)', textAlign: 'center', color: 'var(--text-muted)' }}>
         Loading interactive demo...
       </div>
     }>

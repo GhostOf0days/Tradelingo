@@ -40,21 +40,28 @@ export default function Calculator() {
     annualReturn: 7,
   });
 
-  const compoundResult = RetirementCalculator.compound(compoundData.principal, compoundData.annualRate, compoundData.years, compoundData.compoundFreq);
+  const safeCompoundData = {
+    principal: Math.max(0, compoundData.principal || 0),
+    annualRate: Math.max(0, Math.min(100, compoundData.annualRate || 0)),
+    years: Math.max(0, Math.min(100, compoundData.years || 0)),
+    compoundFreq: Math.max(1, compoundData.compoundFreq || 1),
+  };
 
-  // Generate chart data for Retirement Accounts
+  const compoundResult = RetirementCalculator.compound(safeCompoundData.principal, safeCompoundData.annualRate, safeCompoundData.years, safeCompoundData.compoundFreq);
+
   const retirementChartData = useMemo(() => {
     const data = [];
+    const safeYears = Math.max(0, Math.min(100, selectedAccount.years || 0));
     const annualReturn = 7;
     const r = annualReturn / 100;
     const monthlyRate = r / 12;
     
-    let balance = selectedAccount.currentBalance;
-    const annualContribution = selectedAccount.annualContribution + selectedAccount.employerMatch;
+    let balance = Math.max(0, selectedAccount.currentBalance || 0);
+    const annualContribution = Math.max(0, (selectedAccount.annualContribution || 0) + (selectedAccount.employerMatch || 0));
     const monthlyContribution = annualContribution / 12;
 
-    for (let year = 0; year <= selectedAccount.years; year++) {
-      const totalContributed = selectedAccount.currentBalance + (annualContribution * year);
+    for (let year = 0; year <= safeYears; year++) {
+      const totalContributed = (selectedAccount.currentBalance || 0) + (annualContribution * year);
       const growth = Math.max(0, balance - totalContributed);
       
       data.push({
@@ -64,7 +71,6 @@ export default function Calculator() {
         total: Math.round(balance),
       });
 
-      // Calculate next year's balance with monthly compounding for smoother results
       for (let m = 0; m < 12; m++) {
         balance = (balance + monthlyContribution) * (1 + monthlyRate);
       }
@@ -72,15 +78,15 @@ export default function Calculator() {
     return data;
   }, [selectedAccount]);
 
-  // Generate chart data for Compound Interest
   const compoundChartData = useMemo(() => {
     const data = [];
-    const r = compoundData.annualRate / 100;
-    const n = compoundData.compoundFreq;
+    const r = (safeCompoundData.annualRate) / 100;
+    const n = safeCompoundData.compoundFreq;
+    const safeYears = Math.max(0, Math.min(100, safeCompoundData.years));
     
-    for (let year = 0; year <= compoundData.years; year++) {
-      const amount = compoundData.principal * Math.pow(1 + r / n, n * year);
-      const principal = compoundData.principal;
+    for (let year = 0; year <= safeYears; year++) {
+      const amount = safeCompoundData.principal * Math.pow(1 + r / n, n * year);
+      const principal = safeCompoundData.principal;
       const interest = Math.max(0, amount - principal);
 
       data.push({
@@ -91,26 +97,28 @@ export default function Calculator() {
       });
     }
     return data;
-  }, [compoundData]);
+  }, [safeCompoundData.principal, safeCompoundData.annualRate, safeCompoundData.years, safeCompoundData.compoundFreq]);
 
-  // Generate chart data for Retirement Savings
   const savingsChartData = useMemo(() => {
     const data = [];
-    const years = savingsData.retirementAge - savingsData.currentAge;
-    const r = savingsData.annualReturn / 100;
+    const safeCurrentAge = Math.max(0, Math.min(120, savingsData.currentAge || 0));
+    const safeRetirementAge = Math.max(safeCurrentAge, Math.min(120, savingsData.retirementAge || 0));
+    const years = safeRetirementAge - safeCurrentAge;
+    const r = Math.max(0, Math.min(100, savingsData.annualReturn || 0)) / 100;
     const monthlyRate = r / 12;
     
-    if (years < 0) return [];
+    if (years <= 0) return [];
 
-    let balance = savingsData.currentSavings;
-    const monthlyContribution = savingsData.annualContribution / 12;
+    let balance = Math.max(0, savingsData.currentSavings || 0);
+    const safeAnnualContribution = Math.max(0, savingsData.annualContribution || 0);
+    const monthlyContribution = safeAnnualContribution / 12;
 
     for (let year = 0; year <= years; year++) {
-      const totalContributed = savingsData.currentSavings + (savingsData.annualContribution * year);
+      const totalContributed = (savingsData.currentSavings || 0) + (safeAnnualContribution * year);
       const growth = Math.max(0, balance - totalContributed);
 
       data.push({
-        age: savingsData.currentAge + year,
+        age: safeCurrentAge + year,
         contributed: Math.round(totalContributed),
         growth: Math.round(growth),
         total: Math.round(balance),
@@ -254,14 +262,15 @@ export default function Calculator() {
                         <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                     <XAxis dataKey="year" stroke="var(--text-muted)" />
                     <YAxis tickFormatter={(value) => `$${value/1000}k`} stroke="var(--text-muted)" />
                     <Tooltip 
                       formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
-                      contentStyle={{ backgroundColor: 'rgba(15, 15, 15, 0.95)', borderColor: 'var(--border)', borderRadius: '8px', color: '#fff' }}
+                      contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                      labelStyle={{ color: 'var(--text-muted)' }}
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ color: 'var(--text-muted)' }} />
                     <Area type="monotone" dataKey="contributed" stackId="1" stroke={ACCOUNT_COLORS[selectedAccount.id]} fillOpacity={1} fill="url(#colorContributed)" name="Total Contributed" />
                     <Area type="monotone" dataKey="growth" stackId="1" stroke="#22c55e" fillOpacity={1} fill="url(#colorGrowth)" name="Investment Growth" />
                   </AreaChart>
@@ -348,14 +357,15 @@ export default function Calculator() {
                           <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                       <XAxis dataKey="year" stroke="var(--text-muted)" />
                       <YAxis tickFormatter={(value) => `$${value/1000}k`} stroke="var(--text-muted)" />
                       <Tooltip 
                         formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
-                        contentStyle={{ backgroundColor: 'rgba(15, 15, 15, 0.95)', borderColor: 'var(--border)', borderRadius: '8px', color: '#fff' }}
+                        contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                        labelStyle={{ color: 'var(--text-muted)' }}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ color: 'var(--text-muted)' }} />
                       <Area type="monotone" dataKey="principal" stackId="1" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorPrincipal)" name="Principal" />
                       <Area type="monotone" dataKey="interest" stackId="1" stroke="#22c55e" fillOpacity={1} fill="url(#colorInterest)" name="Interest Earned" />
                     </AreaChart>
@@ -452,14 +462,15 @@ export default function Calculator() {
                           <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                       <XAxis dataKey="age" stroke="var(--text-muted)" label={{ value: 'Age', position: 'insideBottomRight', offset: -5 }} />
                       <YAxis tickFormatter={(value) => `$${value/1000}k`} stroke="var(--text-muted)" />
                       <Tooltip 
                         formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
-                        contentStyle={{ backgroundColor: 'rgba(15, 15, 15, 0.95)', borderColor: 'var(--border)', borderRadius: '8px', color: '#fff' }}
+                        contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                        labelStyle={{ color: 'var(--text-muted)' }}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ color: 'var(--text-muted)' }} />
                       <Area type="monotone" dataKey="contributed" stackId="1" stroke="#3b82f6" fillOpacity={1} fill="url(#colorContributedSavings)" name="Total Contributed" />
                       <Area type="monotone" dataKey="growth" stackId="1" stroke="#22c55e" fillOpacity={1} fill="url(#colorGrowthSavings)" name="Investment Growth" />
                     </AreaChart>

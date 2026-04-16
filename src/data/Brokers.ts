@@ -1036,7 +1036,8 @@ Most successful investors rarely use margin. Warren Buffett uses minimal leverag
 
 Key takeaway:
 Margin amplifies both gains and losses. Most retail traders lose money with margin. Only use if you understand the risks and have specific strategy. Better to trade with cash and grow slowly than to blow up account with leverage.`,
-    question: BROKERS_PRETEST[4]
+    question: BROKERS_PRETEST[4],
+    demo: 'margin-calculator'
   },
   {
     title: "Lesson 6: Broker Tools and Research",
