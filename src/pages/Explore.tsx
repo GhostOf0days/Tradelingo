@@ -1,3 +1,4 @@
+// Curated reading list with local filters/likes. Article bodies are static strings, not fetched.
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import '../styles/Explore.css';
@@ -59,6 +60,7 @@ export default function Explore() {
   const [openArticle, setOpenArticle] = useState<FullArticle | null>(null);
   const [likedArticles, setLikedArticles] = useState<Set<number>>(new Set());
 
+  // Client-side filter: title/description substring + optional topic chip.
   const filteredArticles = articles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,6 +69,7 @@ export default function Explore() {
     return matchesSearch && matchesType;
   });
 
+  /** Toggles like state, bumps the counter, and keeps the detail view in sync if it's open. */
   const handleLike = (id: number) => {
     const isLiked = likedArticles.has(id);
 

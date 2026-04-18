@@ -1,3 +1,4 @@
+// In-memory stand-in for MongoDB collections so API tests run fast with no database.
 const INITIAL_ID = 1;
 let nextId = INITIAL_ID;
 
@@ -20,6 +21,7 @@ function matchFilter(doc: Record<string, unknown>, filter: Record<string, unknow
   return true;
 }
 
+/** Applies Mongo-style $set / $inc / $push to a plain document (used by updateMany + findOneAndUpdate). */
 function applyUpdate(doc: Record<string, unknown>, update: Record<string, unknown>): void {
   if (update.$set) {
     for (const [k, v] of Object.entries(update.$set as Record<string, unknown>)) {
@@ -73,6 +75,7 @@ export function createMockCollection() {
       if (idx === -1) return null;
       const doc = store[idx] as Record<string, unknown>;
 
+      // Dot-path $inc (e.g. progressByModuleId.3.lessonCurrent) — mirrors server lesson increments.
       if (update.$inc) {
         const inc = update.$inc as Record<string, number>;
         for (const [k, v] of Object.entries(inc)) {
@@ -94,6 +97,7 @@ export function createMockCollection() {
           }
         }
       }
+      // Same idea for dotted $set keys (nested progress objects).
       if (update.$set) {
         const set = update.$set as Record<string, unknown>;
         for (const [k, v] of Object.entries(set)) {

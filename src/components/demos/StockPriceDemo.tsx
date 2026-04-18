@@ -1,3 +1,4 @@
+// Animated candlestick-style demo: fake price stream + canvas drawing for lessons on markets.
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Candle {
@@ -17,6 +18,7 @@ export default function StockPriceDemo() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const priceRef = useRef(150);
 
+  /** One OHLC bar; `bias` skews random walk when user picks bull/bear mode. */
   const generateCandle = useCallback((currentPrice: number, bias: number): Candle => {
     const volatility = 2 + Math.random() * 4;
     const direction = Math.random() + bias;
@@ -28,6 +30,7 @@ export default function StockPriceDemo() {
     return { open, close, high: Math.max(10, high), low: Math.max(5, low), volume: 50 + Math.random() * 100 };
   }, []);
 
+  /** Renders grid, candles, volume bars, and last-price guide on the canvas. */
   const drawChart = useCallback((data: Candle[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -129,6 +132,7 @@ export default function StockPriceDemo() {
     };
   }, []);
 
+  /** Appends candles on an interval; keeps last 60 for performance. */
   const startSimulation = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setIsRunning(true);
@@ -144,12 +148,14 @@ export default function StockPriceDemo() {
     }, 400);
   };
 
+  /** Stops the interval but leaves candles on screen so students can inspect the run. */
   const stopSimulation = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
     setIsRunning(false);
   };
 
+  /** Clears history and price so the learner can rerun from a known starting point. */
   const resetSimulation = () => {
     stopSimulation();
     setCandles([]);

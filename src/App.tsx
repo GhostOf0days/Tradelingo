@@ -1,3 +1,5 @@
+// Root shell: wraps the app in auth state and client-side routing so every page
+// can read the logged-in user and navigate without full reloads.
 import { UserProvider } from './contexts/UserContext';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
@@ -13,11 +15,13 @@ import LightingRound from "./pages/LightingRound";
 import ReviewModules from "./pages/ReviewModules";
 import './App.css';
 
+/** Declares every client route; API-backed pages assume Vite proxies `/api` in development. */
 function App() {
   return (
     <UserProvider>
       <BrowserRouter>
         <div className="app">
+          {/* Persistent chrome: nav, theme, streak, notifications */}
           <Header />
           <main className="app__main">
             <Routes>

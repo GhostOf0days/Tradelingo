@@ -1,5 +1,7 @@
+// Compares lump-sum vs fixed monthly buys on a randomly jagged price path (DCA intuition).
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+/** Synthetic monthly prices: mild uptrend + noise + sine so DCA vs lump-sum differs meaningfully. */
 function generatePricePath(months: number, seed: number): number[] {
   const prices = [100];
   let s = seed;
@@ -28,6 +30,7 @@ export default function DollarCostAverageDemo() {
   const lumpShares = (monthlyAmount * months) / prices[0];
   const lumpValue = lumpShares * prices[prices.length - 1];
 
+  /** Price path + markers for each monthly buy; compares DCA vs lump visually. */
   const drawChart = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

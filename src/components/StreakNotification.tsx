@@ -1,3 +1,4 @@
+// Gentle nudge when your last activity was yesterday: complete something today or the streak breaks.
 import { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
@@ -12,10 +13,11 @@ export default function StreakNotification() {
     if (!user || !user.lastActivityDate) return;
     const today = new Date().toISOString().split('T')[0];
     const lastActivity = user.lastActivityDate;
-    const yesterday = new Date(); // last activity yesterday -> warn
+    const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
+    // You were active yesterday but not yet today — last chance before the streak resets tonight.
     if (lastActivity === yesterdayStr && today !== lastActivity) {
       setNotificationType('warning');
       setShowNotification(true);

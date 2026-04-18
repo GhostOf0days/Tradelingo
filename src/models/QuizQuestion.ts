@@ -1,3 +1,4 @@
+// Thin wrapper around a multiple-choice item: keeps the correct index private-ish and helpers for UI.
 export class QuizQuestion {
   question: string;
   options: string[];
@@ -20,6 +21,7 @@ export class QuizQuestion {
     return this._correct;
   }
 
+  /** Used by Lightning Round and quiz UIs to compare a selected index to the key. */
   isCorrectAnswer(index: number): boolean {
     return index === this._correct;
   }

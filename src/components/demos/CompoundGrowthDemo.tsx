@@ -1,3 +1,4 @@
+// Sliders for principal, contribution, rate, and years — shows compound growth over time.
 import { useState, useEffect, useRef } from 'react';
 
 export default function CompoundGrowthDemo() {
@@ -9,6 +10,7 @@ export default function CompoundGrowthDemo() {
   const [hoveredYear, setHoveredYear] = useState<number | null>(null);
   const dataRef = useRef<{ year: number; contributed: number; total: number }[]>([]);
 
+  // Rebuild the year series whenever inputs change, then paint the canvas.
   useEffect(() => {
     const data: { year: number; contributed: number; total: number }[] = [];
     let balance = initial;
@@ -25,6 +27,7 @@ export default function CompoundGrowthDemo() {
     drawChart(data);
   }, [initial, monthly, rate, years]);
 
+  /** Stacked areas for contributions vs growth + optional hover marker for tooltips. */
   const drawChart = (data: { year: number; contributed: number; total: number }[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -161,6 +164,7 @@ export default function CompoundGrowthDemo() {
     }
   };
 
+  /** Map mouse X to nearest simulated year so the tooltip card tracks the cursor. */
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -177,6 +181,7 @@ export default function CompoundGrowthDemo() {
 
   const handleMouseLeave = () => setHoveredYear(null);
 
+  // Redraw when hover index changes so the callout follows the crosshair.
   useEffect(() => {
     drawChart(dataRef.current);
   }, [hoveredYear]);
@@ -237,6 +242,7 @@ export default function CompoundGrowthDemo() {
   );
 }
 
+/** Thin wrapper so the four sliders share layout and monospace readouts. */
 function SliderInput({ label, value, min, max, step, format, onChange, color }: {
   label: string; value: number; min: number; max: number; step: number;
   format: (v: number) => string; onChange: (v: number) => void; color: string;
@@ -256,12 +262,14 @@ function SliderInput({ label, value, min, max, step, format, onChange, color }: 
   );
 }
 
+/** Compact axis/tooltip labels (K / M) so big numbers fit the small canvas. */
 function formatMoney(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
   return `$${n.toLocaleString()}`;
 }
 
+/** Rounded rectangle path for hover cards (avoids sharp boxy tooltips on the chart). */
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);

@@ -1,4 +1,4 @@
-// Class representing a quiz
+// Metadata for a quiz card on the Quizzes page (reward, difficulty, question count).
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export class Quiz {
   id: number;

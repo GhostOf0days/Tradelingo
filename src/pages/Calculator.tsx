@@ -1,3 +1,5 @@
+// Three calculators in one page: retirement account projection, pure compound interest,
+// and generic savings-to-retirement. Charts use Recharts; math lives in RetirementCalculator.
 import { useState, useMemo } from 'react';
 import '../styles/Calculator.css';
 import {Account} from '../models/Account';
@@ -22,7 +24,6 @@ const RETIREMENT_ACCOUNTS = [
   new Account('sep', 'SEP IRA', 'For self-employed', 69000, false, 15000),
 ];
 
-// Main Calculator component
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'retirement' | 'compound' | 'savings'>('retirement');
   const [selectedAccount, setSelectedAccount] = useState<Account>(RETIREMENT_ACCOUNTS[0]);
@@ -49,6 +50,7 @@ export default function Calculator() {
 
   const compoundResult = RetirementCalculator.compound(safeCompoundData.principal, safeCompoundData.annualRate, safeCompoundData.years, safeCompoundData.compoundFreq);
 
+  /** Year-by-year stacked series: money you put in vs growth, for the selected account card. */
   const retirementChartData = useMemo(() => {
     const data = [];
     const safeYears = Math.max(0, Math.min(100, selectedAccount.years || 0));
@@ -78,6 +80,7 @@ export default function Calculator() {
     return data;
   }, [selectedAccount]);
 
+  /** Principal vs interest earned each year under the compound-interest form inputs. */
   const compoundChartData = useMemo(() => {
     const data = [];
     const r = (safeCompoundData.annualRate) / 100;
@@ -99,6 +102,7 @@ export default function Calculator() {
     return data;
   }, [safeCompoundData.principal, safeCompoundData.annualRate, safeCompoundData.years, safeCompoundData.compoundFreq]);
 
+  /** Age-based projection with recurring contributions until retirement age. */
   const savingsChartData = useMemo(() => {
     const data = [];
     const safeCurrentAge = Math.max(0, Math.min(120, savingsData.currentAge || 0));
@@ -131,6 +135,7 @@ export default function Calculator() {
     return data;
   }, [savingsData]);
 
+  /** Shared by Recharts tooltips so ticks and hover values match. */
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

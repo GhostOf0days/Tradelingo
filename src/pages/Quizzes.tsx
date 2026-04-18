@@ -1,3 +1,5 @@
+// Standalone knowledge checks: every quiz currently shares the same QUESTION_BANK for simplicity.
+// Pass at 80% to POST XP; attempts and mistakes live only in component state (lost on refresh).
 import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import '../styles/Quizzes.css';
@@ -54,6 +56,7 @@ export default function Quizzes() {
 
   const quizQuestions = QUIZ_QUESTIONS;
 
+  /** Initializes a run: selected quiz metadata + empty answer sheet for the shared question bank. */
   const handleStartQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
     setQuizStarted(true);
@@ -65,9 +68,14 @@ export default function Quizzes() {
   };
 
   const handleAnswerSelect = (index: number) => {
+    // Selection only; scoring happens on "Next" / "Submit".
     setSelectedAnswer(index);
   };
 
+  /**
+   * Commits the current answer, updates score, and either advances or finalizes the attempt.
+   * On final question: builds mistake list, stores attempt in memory, and may POST XP if ≥80%.
+   */
   const handleNextQuestion = async () => {
     const updatedAnswers = [...userAnswers];
     updatedAnswers[currentQuestion] = selectedAnswer;
@@ -138,6 +146,7 @@ export default function Quizzes() {
     }
   };
 
+  /** Same quiz, fresh attempt from the top (still in the active quiz session). */
   const handleRetry = () => {
     setCurrentQuestion(0);
     setScore(0);
@@ -145,6 +154,7 @@ export default function Quizzes() {
     setSelectedAnswer(null);
   };
 
+  /** Badge styling on the quiz cards (easy / medium / hard). */
   const difficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy':

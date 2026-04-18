@@ -1,3 +1,4 @@
+// Visualizes bid/ask levels and a mid price — helps learners picture limit order books.
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface OrderLevel {
@@ -6,6 +7,7 @@ interface OrderLevel {
   total: number;
 }
 
+/** Builds synthetic bid/ask ladders around mid ± half spread with cumulative size columns. */
 function generateOrderBook(midPrice: number, spread: number): { bids: OrderLevel[]; asks: OrderLevel[] } {
   const bids: OrderLevel[] = [];
   const asks: OrderLevel[] = [];
@@ -44,6 +46,7 @@ export default function OrderBookDemo() {
   const [trades, setTrades] = useState<{ time: string; price: number; size: number; side: string }[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  /** Nudges mid/spread slightly so the book feels "live" without heavy simulation. */
   const updateBook = useCallback(() => {
     const drift = (Math.random() - 0.5) * 0.08;
     const newMid = Math.round((midPrice + drift) * 100) / 100;
@@ -58,6 +61,7 @@ export default function OrderBookDemo() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [updateBook]);
 
+  /** Records a fake fill at best bid/ask (market) or the typed limit price. */
   const handlePlaceOrder = () => {
     const qty = parseInt(shares) || 0;
     if (qty <= 0) return;
@@ -78,6 +82,7 @@ export default function OrderBookDemo() {
     }, ...prev].slice(0, 8));
   };
 
+  // Normalizes bar widths in the depth chart so the largest level fills the row.
   const maxTotal = Math.max(
     book.bids[book.bids.length - 1]?.total || 1,
     book.asks[book.asks.length - 1]?.total || 1

@@ -1,3 +1,4 @@
+// Module 3: crypto basics — wallet concepts, volatility, regulation (large static lesson blob).
 export const CRYPTOCURRENCIES_PRETEST = [
   { question: "What is blockchain?", options: ["A type of stock market", "A distributed ledger technology that records transactions across many computers", "A block of currencies", "A bank's security system"], correctIndex: 1 },
   { question: "What is Bitcoin?", options: ["A currency used in banks", "The first and largest cryptocurrency", "A type of blockchain", "A payment method"], correctIndex: 1 },

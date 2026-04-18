@@ -1,3 +1,5 @@
+// Global auth + gamification state: who is logged in, XP, level, and daily streak.
+// Persists to localStorage so a refresh keeps you signed in (demo-style; no JWT).
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 export type User = {
@@ -9,6 +11,7 @@ export type User = {
   lastActivityDate?: string;
 };
 
+// Mirrors server logic: fixed breakpoints early, then +1 level per 5k XP after 10k.
 export const calculateLevel = (xp: number): number => {
   if (xp < 1000) return 1;
   if (xp < 2500) return 2;
@@ -27,7 +30,8 @@ type UserContextValue = {
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-// true if last activity was not today (YYYY-MM-DD)
+// Used when hydrating from localStorage: if they weren't active "today", we infer
+// streak changes client-side before the next API sync (same calendar-day idea as the server).
 function shouldResetStreak(lastActivityDate: string | undefined): boolean {
   if (!lastActivityDate) return false;
   const today = new Date().toISOString().split('T')[0];
@@ -52,6 +56,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return parsed;
   });
 
+  // Mirror user to localStorage whenever it changes (login, XP updates, logout).
   useEffect(() => {
     if (user) {
       localStorage.setItem('tradelingo_user', JSON.stringify(user));
@@ -60,8 +65,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  /** Replaces session user; stamps activity date and derives level when logging in. */
   const setUser = (newUser: User | null) => {
     if (newUser) {
+      // Treat "just logged in" as activity for the streak UI (server may refine this).
       const today = new Date().toISOString().split('T')[0];
       newUser.lastActivityDate = today;
       newUser.streakDays = newUser.streakDays || 1;
@@ -72,10 +79,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUserState(newUser);
   };
 
+  // Call after meaningful actions (e.g. finishing a module). Bumps streak once per calendar day
+  // in the client and POSTs to the API so Mongo stays the source of truth.
   const updateStreak = async () => {
     if (user) {
       const today = new Date().toISOString().split('T')[0];
-      if (user.lastActivityDate !== today) { // once per day
+      if (user.lastActivityDate !== today) {
         const updatedUser = {
           ...user,
           streakDays: (user.streakDays || 1) + 1,
@@ -104,6 +113,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Throws if used outside the provider so mistakes fail fast instead of returning null silently. */
 export function useUser(): UserContextValue {
   const value = useContext(UserContext);
   if (value === null) {

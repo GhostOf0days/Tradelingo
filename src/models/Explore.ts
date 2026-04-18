@@ -1,4 +1,4 @@
-// Article Class
+// Legacy/explore model (the Explore page mostly uses inline objects instead of this class).
 export class Article {
   id: number;
   title: string;

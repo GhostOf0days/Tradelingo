@@ -1,3 +1,4 @@
+// Compact streak pill in the header (fire emoji + day count). Hidden until you have a streak.
 import { useUser } from '../contexts/UserContext';
 import './StreakCounter.css';
 

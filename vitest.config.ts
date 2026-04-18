@@ -1,3 +1,4 @@
+// Test runner config: Node env, server-only coverage, shared @ alias with the app.
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';

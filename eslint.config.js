@@ -1,3 +1,4 @@
+// Flat ESLint 9 config: TS + React hooks recommended rules, Prettier last to avoid style fights.
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
