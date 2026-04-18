@@ -1,3 +1,4 @@
+// Module 2: retirement accounts, compounding, withdrawal mindset (paired lessons + pretest below).
 export const RETIREMENT_PRETEST = [
   { question: "What is a 401(k)?", options: ["A type of savings account", "An employer-sponsored retirement plan with tax advantages", "A government pension", "A type of stock"], correctIndex: 1 },
   { question: "What does an IRA stand for?", options: ["Individual Retirement Account", "International Revenue Administration", "Institutional Risk Assessment", "Investment Rate Agreement"], correctIndex: 0 },

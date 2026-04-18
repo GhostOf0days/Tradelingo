@@ -1,3 +1,4 @@
+// quiz hub card metadata including reward size and question count.
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export class Quiz {
   id: number;

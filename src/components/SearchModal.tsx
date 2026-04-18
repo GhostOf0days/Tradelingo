@@ -1,3 +1,5 @@
+// Client-only search UI: filters a static index of modules, articles, and quizzes.
+// (Not wired to the backend; good enough for demos and quick discovery.)
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import '../styles/Search.css';
@@ -50,6 +52,7 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
     { id: '27', title: 'Retirement Planning Sprint', description: 'Test your retirement account knowledge', source: 'quiz', category: 'Assessment' },
   ];
 
+  /** Case-insensitive match on title, description, or category across the static catalog. */
   const handleSearch = () => {
     if (!query.trim()) {
       setResults([]);
@@ -68,6 +71,7 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
     setHasSearched(true);
   };
 
+  // Enter runs search; Escape dismisses the overlay (same as clicking outside).
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -77,6 +81,7 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
     }
   };
 
+  /** Badge color for module vs article vs quiz rows. */
   const getSourceColor = (source: string) => {
     switch (source) {
       case 'module':
@@ -91,6 +96,7 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
     }
   };
 
+  /** Human-readable label for the source pill (module / article / quiz). */
   const getSourceLabel = (source: string) => {
     return source.charAt(0).toUpperCase() + source.slice(1);
   };

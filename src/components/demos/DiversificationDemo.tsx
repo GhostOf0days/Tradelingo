@@ -1,3 +1,4 @@
+// Multiple fake stocks with different volatility; shows how blending them smooths portfolio swings.
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Stock {
@@ -15,6 +16,7 @@ const STOCKS: Stock[] = [
   { name: 'Consumer Co', color: '#ec4899', baseReturn: 0.06, volatility: 0.15 },
 ];
 
+/** Monte-Carlo-ish yearly step: each selected line gets a random shock around its base return. */
 function simulate(selectedStocks: boolean[], years: number): { year: number; values: number[]; portfolioValue: number }[] {
   const activeCount = selectedStocks.filter(Boolean).length;
   if (activeCount === 0) return [];
@@ -38,6 +40,7 @@ function simulate(selectedStocks: boolean[], years: number): { year: number; val
   return data;
 }
 
+/** Tiny PRNG so the chart is reproducible while still looking random. */
 function seedRandom(seed: number) {
   let s = seed;
   return () => {
@@ -53,6 +56,7 @@ export default function DiversificationDemo() {
 
   const data = simulate(selected, years);
 
+  /** Canvas redraw: per-stock faint lines + bold equal-weight portfolio line. */
   const drawChart = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || data.length === 0) return;
@@ -132,6 +136,7 @@ export default function DiversificationDemo() {
 
   useEffect(() => { drawChart(); }, [drawChart]);
 
+  /** Flip inclusion; ensures at least one name stays on so the chart never divides by zero. */
   const toggleStock = (idx: number) => {
     setSelected(prev => {
       const next = [...prev];

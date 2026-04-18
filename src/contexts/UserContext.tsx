@@ -1,3 +1,5 @@
+// Global auth + gamification state: who is logged in, XP, level, and daily streak.
+// Persists to localStorage so a refresh keeps you signed in (demo-style; no JWT).
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 // small user snapshot in the browser while the full row lives in mongo.
@@ -63,8 +65,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  /** Replaces session user; stamps activity date and derives level when logging in. */
   const setUser = (newUser: User | null) => {
     if (newUser) {
+      // Treat "just logged in" as activity for the streak UI (server may refine this).
       const today = new Date().toISOString().split('T')[0];
       newUser.lastActivityDate = today;
       newUser.streakDays = newUser.streakDays || 1;
@@ -75,6 +79,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUserState(newUser);
   };
 
+  // Call after meaningful actions (e.g. finishing a module). Bumps streak once per calendar day
+  // in the client and POSTs to the API so Mongo stays the source of truth.
   const updateStreak = async () => {
     if (user) {
       const today = new Date().toISOString().split('T')[0];
@@ -109,6 +115,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Throws if used outside the provider so mistakes fail fast instead of returning null silently. */
 export function useUser(): UserContextValue {
   const value = useContext(UserContext);
   if (value === null) {

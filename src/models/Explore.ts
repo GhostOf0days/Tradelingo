@@ -1,3 +1,4 @@
+// legacy article model for explore helpers while the page mostly uses plain objects.
 export class Article {
   id: number;
   title: string;

@@ -1,3 +1,5 @@
+// Home / module list: shows what's in progress vs done, respects server-side unlock state,
+// and links out to pre-test, lessons, Lightning Round, and completed-module review.
 import { useState, useEffect } from 'react';
 import { Play, CheckCircle2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +20,7 @@ function Modules() {
   const navigate = useNavigate();
   const { user } = useUser();
 
+  // Load unlock + per-module lesson counts whenever the logged-in user changes.
   useEffect(() => {
     const fetchProgress = async () => {
       if (!user) {
@@ -40,6 +43,7 @@ function Modules() {
     fetchProgress();
   }, [user]);
 
+  // "In progress" = not all lessons counted yet; "completed" = lesson count reached total.
   const filteredModules = MODULE_LIST.filter((module) => {
     const progress = progressByModuleId[module.id] ?? { lessonCurrent: 0 };
     const lessonCurrent = progress.lessonCurrent ?? 0;

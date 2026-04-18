@@ -1,3 +1,5 @@
+// Lists modules you've fully cleared (lesson count ≥ lesson total) and opens lessons in review mode.
+// Note: completion metadata is derived from progress here, not the separate completed-modules API.
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -23,6 +25,7 @@ export default function ReviewModules() {
         if (res.ok) {
           const data = await res.json();
           const progressMap = data.progressByModuleId || {};
+          // Infer "completed" from lesson counter vs static lesson length (not /api/completed-modules).
           const finishedModules = MODULES_LIST.filter(m => {
             const currentLesson = progressMap[m.id]?.lessonCurrent || 0;
             return currentLesson >= m.lessons.length && m.lessons.length > 0;
@@ -45,10 +48,12 @@ export default function ReviewModules() {
     fetchProgress();
   }, [user]);
 
+  /** Opens the module reader with ?review=true so Lesson.tsx skips XP/progress writes. */
   const handleReviewLesson = (moduleId: number) => {
     navigate(`/lesson/${moduleId}?review=true`);
   };
 
+  /** Locale-formatted date for cards (ISO strings from the server or synthetic `new Date()`). */
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });

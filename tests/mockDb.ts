@@ -1,3 +1,4 @@
+// In-memory stand-in for MongoDB collections so API tests run fast with no database.
 const INITIAL_ID = 1;
 
 // rough in memory matcher that only approximates mongo filters especially $exists.
@@ -104,6 +105,7 @@ export function createMockCollection() {
       if (idx === -1) return null;
       const doc = store[idx] as Record<string, unknown>;
 
+      // Dot-path $inc (e.g. progressByModuleId.3.lessonCurrent) — mirrors server lesson increments.
       if (update.$inc) {
         const inc = update.$inc as Record<string, number>;
         for (const [k, v] of Object.entries(inc)) {
@@ -125,6 +127,7 @@ export function createMockCollection() {
           }
         }
       }
+      // Same idea for dotted $set keys (nested progress objects).
       if (update.$set) {
         const set = update.$set as Record<string, unknown>;
         for (const [k, v] of Object.entries(set)) {

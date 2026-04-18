@@ -1,3 +1,4 @@
+// Questionnaire-style widget that maps answers to a conservative ↔ aggressive portfolio mix.
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Scenario {
@@ -49,6 +50,7 @@ export default function RiskToleranceDemo() {
   const profileIdx = score <= 2 ? 0 : score <= 5 ? 1 : 2;
   const profile = PROFILES[profileIdx];
 
+  /** Stores option index (0–2) per question; last answer reveals the blended profile. */
   const handleAnswer = (optIdx: number) => {
     const newAnswers = [...answers, optIdx];
     setAnswers(newAnswers);
@@ -59,12 +61,14 @@ export default function RiskToleranceDemo() {
     }
   };
 
+  /** Start the questionnaire over from question 1. */
   const reset = () => {
     setCurrentQ(0);
     setAnswers([]);
     setShowResult(false);
   };
 
+  /** Horizontal stacked bar of stocks/bonds/cash for the suggested profile. */
   const drawAllocation = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || !showResult) return;

@@ -1,3 +1,4 @@
+// Creates an account via POST /api/register and logs the user in immediately afterward.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
@@ -11,6 +12,7 @@ export default function Register() {
   const { setUser } = useUser();
   const navigate = useNavigate();
 
+  /** POST /api/register; server hashes password and returns the public profile fields. */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");

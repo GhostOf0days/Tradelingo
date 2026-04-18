@@ -1,3 +1,4 @@
+// Simple leverage math: balance × leverage and rough liquidation awareness for beginners.
 import { useState } from 'react';
 
 export default function MarginCalculatorDemo() {
@@ -5,6 +6,7 @@ export default function MarginCalculatorDemo() {
   const [leverage, setLeverage] = useState(2);
   const [stockChange, setStockChange] = useState(0);
 
+  // Leveraged position: borrowed = notional − cash; equity drives margin-call / liquidation flags below.
   const buyingPower = accountBalance * leverage;
   const borrowed = buyingPower - accountBalance;
   const positionValue = buyingPower * (1 + stockChange / 100);

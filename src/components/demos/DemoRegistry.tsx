@@ -1,3 +1,4 @@
+// Maps lesson `demo` string ids to lazily loaded interactive widgets so the main bundle stays small.
 import { lazy, Suspense } from 'react';
 
 const StockPriceDemo = lazy(() => import('./StockPriceDemo'));
@@ -22,6 +23,7 @@ const DEMO_MAP: Record<string, React.LazyExoticComponent<() => JSX.Element>> = {
   'risk-tolerance': RiskToleranceDemo,
 };
 
+/** Resolves a lesson's `demo` string to a lazy component, or renders nothing if unknown. */
 export default function DemoRenderer({ demoId }: { demoId: string }) {
   const DemoComponent = DEMO_MAP[demoId];
   if (!DemoComponent) return null;

@@ -1,3 +1,4 @@
+// Toy blockchain: add blocks and see hashes chain together (educational, not cryptographic truth).
 import { useState, useCallback } from 'react';
 
 interface Block {
@@ -9,6 +10,7 @@ interface Block {
   nonce: number;
 }
 
+/** Deterministic string fingerprint — looks crypto-ish but is not secure; fine for a teaching toy. */
 function simpleHash(input: string): string {
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
@@ -20,6 +22,7 @@ function simpleHash(input: string): string {
   return `0x${hex}${hex.split('').reverse().join('')}`;
 }
 
+/** Increments nonce until the hash "looks mined" (starts with 0x00) or we hit a step cap. */
 function mineBlock(index: number, data: string, previousHash: string): Block {
   let nonce = 0;
   let hash = '';
@@ -60,6 +63,7 @@ export default function BlockchainDemo() {
   const [miningProgress, setMiningProgress] = useState(0);
   const [tamperedBlock, setTamperedBlock] = useState<number | null>(null);
 
+  /** Fake mining delay for UX, then append the next transaction block onto the chain. */
   const addBlock = useCallback(async () => {
     setIsMining(true);
     setMiningProgress(0);
@@ -78,6 +82,7 @@ export default function BlockchainDemo() {
     setTamperedBlock(null);
   }, [chain]);
 
+  /** Demonstrates immutability: edits a block and breaks subsequent hashes (visual only). */
   const tamperWithBlock = (index: number) => {
     if (index === 0) return;
     setTamperedBlock(index);
@@ -92,6 +97,7 @@ export default function BlockchainDemo() {
     }));
   };
 
+  /** Back to genesis only — clears tamper highlights too. */
   const resetChain = () => {
     setChain([GENESIS_BLOCK]);
     setTamperedBlock(null);

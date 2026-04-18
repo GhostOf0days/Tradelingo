@@ -1,3 +1,4 @@
+// Integration tests against the Express app with mongodb mocked to mockDb (register, login, progress, etc.).
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { resetMockDb, mockUsersCollection, mockModulesCollection } from './mockDb';
@@ -150,6 +151,17 @@ describe('Progress and XP API', () => {
 
     expect(res.body.experiencePoints).toBe(20);
     expect(res.body.progressByModuleId).toBeDefined();
+  });
+
+  it('POST /api/lighting-round adds run xp without lesson progress', async () => {
+    const app = await getApp();
+    const res = await request(app)
+      .post('/api/lighting-round')
+      .send({ email: 'progress@example.com', xpEarned: 300 })
+      .expect(200);
+
+    expect(res.body.experiencePoints).toBe(300);
+    expect(res.body.level).toBeGreaterThanOrEqual(1);
   });
 });
 

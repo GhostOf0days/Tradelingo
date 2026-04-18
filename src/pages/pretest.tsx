@@ -1,3 +1,5 @@
+// Optional shortcut: pass the pre-test (80%+) to skip lessons, unlock the next module, and earn bonus XP.
+// Skip still routes to lessons but only grants a small XP consolation.
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -20,6 +22,7 @@ export default function Pretest() {
   const currentQuestion = pretest[currentIndex];
   const progressPercent = Math.round((currentIndex / pretest.length) * 100);
 
+  /** Advance or finish: on last question, optionally calls pass-module if score ≥ 80%. */
   const handleNext = async () => {
     const isCorrect = selectedAnswer === currentQuestion.correctIndex;
     const newScore = isCorrect ? score + 1 : score;
@@ -54,6 +57,7 @@ export default function Pretest() {
     }
   };
 
+  /** Small XP bump + navigate into normal lessons (does not unlock via pre-test). */
   const handleSkipModule = async () => {
     if (user) {
       try {

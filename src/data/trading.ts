@@ -1,3 +1,4 @@
+// Module 1 content: intro trading concepts — lessons reference TRADING_PRETEST entries for inline quizzes.
 export const TRADING_PRETEST = [
   { question: "What does a stock represent?", options: ["A loan", "Fractional ownership", "A physical product", "Nothing"], correctIndex: 1 },
   { question: "What is a stock exchange?", options: ["A digital market to trade stocks", "A bank for companies", "A government tax agency", "A private club"], correctIndex: 0 },

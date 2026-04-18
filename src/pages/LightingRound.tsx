@@ -1,4 +1,4 @@
-// pulls module pretests, shuffles ten, and saves xp through the usual lesson completion handler.
+// loads pretests from GET api modules then posts run xp to POST api lighting round.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -67,11 +67,13 @@ export default function LightingRound() {
       });
   }, []);
 
+  /** Stops per-question and countdown intervals so we never leak timers on unmount or transitions. */
   const clearTimers = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
   };
 
+  /** Moves to the next prompt or ends the round when we've hit TOTAL_QUESTIONS. */
   const advanceQuestion = useCallback(() => {
     clearTimers();
     setSelectedAnswer(null);
@@ -89,6 +91,7 @@ export default function LightingRound() {
     });
   }, []);
 
+  // 3-2-1 overlay before the first question; then flip to `playing` and the question timer starts.
   useEffect(() => {
     if (gameState !== 'countdown') return;
     // brief pause before the question timer begins.
@@ -106,6 +109,7 @@ export default function LightingRound() {
     return () => clearTimers();
   }, [gameState]);
 
+  // Per-question countdown: when it hits zero we treat it as a wrong answer and auto-advance.
   useEffect(() => {
     if (gameState !== 'playing' || isAnswered) return;
     setTimeLeft(QUESTION_TIME);
@@ -129,6 +133,7 @@ export default function LightingRound() {
     return () => clearTimers();
   }, [gameState, currentIndex, isAnswered, advanceQuestion]);
 
+  /** Picks a fresh random batch, resets score state, then enters the 3-2-1 countdown phase. */
   const startGame = () => {
     clearTimers();
     const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS);
@@ -143,6 +148,7 @@ export default function LightingRound() {
     setGameState('countdown');
   };
 
+  /** Freezes the timer, applies scoring + flash feedback, then schedules the next question. */
   const handleAnswer = (index: number) => {
     if (isAnswered) return;
     clearTimers();
@@ -165,28 +171,33 @@ export default function LightingRound() {
     setTimeout(() => advanceQuestion(), 1200);
   };
 
+  // Persist total XP once when leaving `playing` (depends on score + perfect-run bonus).
   useEffect(() => {
     if (gameState !== 'finished') return;
+
     const isPerfect = correctCount === TOTAL_QUESTIONS;
     const totalXp = score + (isPerfect ? PERFECT_BONUS : 0);
     setXpEarned(totalXp);
 
     if (user && totalXp > 0) {
-      // module id zero only moves xp without touching real lesson progress.
-      fetch('/api/complete-lesson', {
+      fetch('/api/lighting-round', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, moduleId: 0, xpToAdd: totalXp }),
+        body: JSON.stringify({ email: user.email, xpEarned: totalXp }),
       })
         .then(res => res.json())
         .then(data => {
           if (data.experiencePoints !== undefined) {
-            setUser({ ...user, experiencePoints: data.experiencePoints });
+            setUser({
+              ...user,
+              experiencePoints: data.experiencePoints,
+              ...(typeof data.level === 'number' ? { level: data.level } : {}),
+            });
           }
         })
         .catch(console.warn);
     }
-  }, [gameState, correctCount, score, user, setUser]);
+  }, [gameState]);
 
   const currentQ = questions[currentIndex];
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;

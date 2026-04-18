@@ -221,6 +221,41 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
     }
   });
 
+  // lightning round posts total run xp only. path keeps the historical lighting spelling for clients.
+  app.post('/api/lighting-round', async (req, res) => {
+    try {
+      const { email, xpEarned } = req.body;
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      const rawXp = Number(xpEarned);
+      if (!Number.isFinite(rawXp) || rawXp < 0 || rawXp > 50000) {
+        return res.status(400).json({ error: 'xpEarned must be a number between 0 and 50000' });
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const user = await usersCollection.findOne({ email: normalizedEmail });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      const newXp = (user.experiencePoints || 0) + Math.floor(rawXp);
+      const newLevel = calculateLevel(newXp);
+
+      const result = await usersCollection.findOneAndUpdate(
+        { email: normalizedEmail },
+        { $set: { experiencePoints: newXp, level: newLevel } },
+        { returnDocument: 'after' }
+      );
+
+      res.status(200).json({
+        experiencePoints: result?.experiencePoints,
+        level: result?.level,
+      });
+    } catch (error) {
+      console.warn(error);
+      res.status(500).json({ error: 'Server error updating Lightning Round XP' });
+    }
+  });
+
   // fast forward lesson state after a passed pretest and fold xp into the same write.
   app.post('/api/pass-module', async (req, res) => {
     try {

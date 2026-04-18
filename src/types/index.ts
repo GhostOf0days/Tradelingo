@@ -1,3 +1,6 @@
+// Shared TypeScript shapes for the learning app (modules, quizzes, explore, etc.).
+// Keeping them here avoids circular imports between pages and data files.
+
 export type PretestQuestion = {
   question: string;
   options: string[];

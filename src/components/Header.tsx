@@ -1,3 +1,5 @@
+// Top bar: primary navigation, theme toggle, search, "unfinished module" reminders,
+// streak badge, and account summary. Pulls progress from the API when a user is logged in.
 import { useState, useEffect } from 'react';
 import { LayoutGrid, Compass, Calculator, Zap, Search, Bell, LogOut, Sun, Moon } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
@@ -23,6 +25,7 @@ interface UnfinishedModule {
   percent: number;
 }
 
+/** Site chrome: nav links, theme, search, reminders dropdown, streak popover, user XP. */
 function Header() {
   const [activeItem, setActiveItem] = useState('modules');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -34,15 +37,18 @@ function Header() {
   const { user, setUser, level } = useUser();
   const navigate = useNavigate();
 
+  // Persist theme on <html> + localStorage so CSS variables and reloads stay in sync.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Flip light/dark; styles key off `data-theme` on the document element.
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
+  // Build the notification list: unlocked modules that still have lessons left.
   useEffect(() => {
     const fetchUnfinished = async () => {
       if (!user) { setUnfinishedModules([]); return; }
@@ -76,10 +82,12 @@ function Header() {
   }, [user]);
 
   const handleNavClick = (item: (typeof navigationItems)[number]) => {
+    // Updates which nav pill looks "active" and performs the actual route change.
     setActiveItem(item.id);
     navigate(item.path);
   };
 
+  /** Bell menu: only one of notifications vs streak detail should be open at a time. */
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
     setShowStreakInfo(false);
