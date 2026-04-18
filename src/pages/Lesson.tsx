@@ -6,6 +6,7 @@ import { LessonItem } from '../models/LessonItem';
 import confetti from 'canvas-confetti';
 import DemoRenderer from '../components/demos/DemoRegistry';
 
+// ui goes reading then quiz then result though the phase union still mentions complete.
 type Phase = 'reading' | 'quiz' | 'quiz-result' | 'complete';
 
 export default function Lesson() {
@@ -209,7 +210,9 @@ export default function Lesson() {
           {moduleLessons.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => { if (idx <= currentLessonIdx || isReviewMode) setCurrentLessonIdx(idx); }}
+              onClick={() => {
+                if (idx <= currentLessonIdx || isReviewMode) setCurrentLessonIdx(idx);
+              }}
               style={{
                 padding: '0.375rem 0.75rem', borderRadius: '99px', border: 'none', cursor: idx <= currentLessonIdx || isReviewMode ? 'pointer' : 'default',
                 whiteSpace: 'nowrap', fontSize: '0.75rem', fontWeight: idx === currentLessonIdx ? 'bold' : 'normal',

@@ -1,7 +1,6 @@
 const INITIAL_ID = 1;
-let nextId = INITIAL_ID;
 
-// match doc to filter; supports $exists for migration-style queries
+// rough in memory matcher that only approximates mongo filters especially $exists.
 function matchFilter(doc: Record<string, unknown>, filter: Record<string, unknown>): boolean {
   for (const [key, value] of Object.entries(filter)) {
     if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
@@ -20,6 +19,7 @@ function matchFilter(doc: Record<string, unknown>, filter: Record<string, unknow
   return true;
 }
 
+// applies $set, $inc, and $push in sequence.
 function applyUpdate(doc: Record<string, unknown>, update: Record<string, unknown>): void {
   if (update.$set) {
     for (const [k, v] of Object.entries(update.$set as Record<string, unknown>)) {
@@ -41,19 +41,50 @@ function applyUpdate(doc: Record<string, unknown>, update: Record<string, unknow
   }
 }
 
+function applyProjection(doc: Record<string, unknown>, projection: Record<string, number>): Record<string, unknown> {
+  const out = { ...doc };
+  for (const [k, v] of Object.entries(projection)) {
+    if (v === 0) delete out[k];
+  }
+  return out;
+}
+
 export function createMockCollection() {
   const store: Record<string, unknown>[] = [];
+  let nextId = INITIAL_ID;
 
   const collection = {
+    async countDocuments(filter: Record<string, unknown> = {}) {
+      return store.filter((doc) => matchFilter(doc as Record<string, unknown>, filter)).length;
+    },
+
     async findOne(filter: Record<string, unknown>) {
       return store.find((doc) => matchFilter(doc as Record<string, unknown>, filter)) ?? null;
     },
 
-    find(filter: Record<string, unknown> = {}, _options?: Record<string, unknown>) {
-      const matches = store.filter((doc) => matchFilter(doc as Record<string, unknown>, filter));
+    find(filter: Record<string, unknown> = {}, options?: { projection?: Record<string, number> }) {
+      let matches = store
+        .filter((doc) => matchFilter(doc as Record<string, unknown>, filter))
+        .map((doc) => ({ ...doc }));
+
       const cursor = {
-        sort() { return cursor; },
-        async toArray() { return matches; },
+        sort(spec: Record<string, 1 | -1>) {
+          const key = Object.keys(spec)[0];
+          const dir = spec[key];
+          matches = [...matches].sort((a, b) => {
+            const av = a[key] as number;
+            const bv = b[key] as number;
+            if (av === bv) return 0;
+            return dir === 1 ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
+          });
+          return cursor;
+        },
+        async toArray() {
+          if (options?.projection) {
+            return matches.map((d) => applyProjection(d, options.projection!));
+          }
+          return matches;
+        },
       };
       return cursor;
     },
@@ -128,10 +159,23 @@ export function createMockCollection() {
     },
   };
 
-  return { collection, store, reset: () => { store.length = 0; nextId = INITIAL_ID; } };
+  return {
+    collection,
+    store,
+    reset: () => {
+      store.length = 0;
+      nextId = INITIAL_ID;
+    },
+  };
 }
 
-// one shared store so vi.mock and server share the same collection
-const singleton = createMockCollection();
-export const mockUsersCollection = singleton.collection;
-export const resetMockDb = singleton.reset;
+const usersSingleton = createMockCollection();
+const modulesSingleton = createMockCollection();
+
+export const mockUsersCollection = usersSingleton.collection;
+export const mockModulesCollection = modulesSingleton.collection;
+
+export function resetMockDb(): void {
+  usersSingleton.reset();
+  modulesSingleton.reset();
+}

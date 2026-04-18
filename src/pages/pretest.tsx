@@ -29,7 +29,6 @@ export default function Pretest() {
       setCurrentIndex(curr => curr + 1);
       setSelectedAnswer(null);
     } else {
-      // Pretest finished and Check if they passed >= 80%
       if (newScore / pretest.length >= 0.8 && user) {
         try {
           const response = await fetch('/api/pass-module', {
@@ -38,7 +37,7 @@ export default function Pretest() {
             body: JSON.stringify({ 
               email: user.email, 
               moduleId: Number(id),
-              xpToAdd: 500, // XP bonus
+              xpToAdd: 500,
               totalLessons: module.lessons.length,
             })
           });

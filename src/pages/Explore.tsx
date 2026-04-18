@@ -81,9 +81,9 @@ export default function Explore() {
     setLikedArticles(prev => {
       const newSet = new Set(prev);
       if (isLiked) {
-        newSet.delete(id); // unlike
+        newSet.delete(id);
       } else {
-        newSet.add(id); // like
+        newSet.add(id);
       }
       return newSet;
     });

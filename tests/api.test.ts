@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
-import { resetMockDb, mockUsersCollection } from './mockDb';
+import { resetMockDb, mockUsersCollection, mockModulesCollection } from './mockDb';
 
-// use in-memory collection so no real DB
 vi.mock('mongodb', () => {
   return {
     MongoClient: function () {
       return {
         connect: () => Promise.resolve(),
         db: () => ({
-          collection: () => mockUsersCollection,
+          collection: (name: string) => (name === 'modules' ? mockModulesCollection : mockUsersCollection),
         }),
       };
     },
   };
 });
 
+// defer importing the server until after the mongo mock is installed.
 const getApp = async () => {
   const { app } = await import('../server/index');
   return app;
@@ -194,5 +194,20 @@ describe('User profile API', () => {
   it('GET /api/user/:email returns 404 for unknown user', async () => {
     const app = await getApp();
     await request(app).get('/api/user/unknown@example.com').expect(404);
+  });
+
+  it('GET /api/user/:email includes level', async () => {
+    const app = await getApp();
+    const res = await request(app).get('/api/user/profile@example.com').expect(200);
+    expect(typeof res.body.level).toBe('number');
+    expect(res.body.level).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('Health API', () => {
+  it('GET /api/health returns ok', async () => {
+    const app = await getApp();
+    const res = await request(app).get('/api/health').expect(200);
+    expect(res.body).toEqual({ ok: true });
   });
 });

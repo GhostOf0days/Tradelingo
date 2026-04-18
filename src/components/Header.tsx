@@ -70,7 +70,7 @@ function Header() {
           }
         });
         setUnfinishedModules(unfinished);
-      } catch { /* ignore */ }
+      } catch { }
     };
     fetchUnfinished();
   }, [user]);

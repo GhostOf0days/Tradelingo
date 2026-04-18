@@ -6,7 +6,7 @@ export default function StreakCounter() {
   const streakDays = user?.streakDays || 0;
 
   if (!user || streakDays === 0) {
-    return null; // Don't show streak if user not logged in or no streak
+    return null;
   }
 
   return (

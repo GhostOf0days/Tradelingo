@@ -1,3 +1,4 @@
+// pulls module pretests, shuffles ten, and saves xp through the usual lesson completion handler.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -11,6 +12,7 @@ const PERFECT_BONUS = 500;
 
 type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
 
+// shuffle a copy so the untouched pool stays ordered for later runs.
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -44,7 +46,7 @@ export default function LightingRound() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Fetch all questions once on mount
+  // load every pretest into one array when the component mounts.
   useEffect(() => {
     fetch('/api/modules')
       .then(res => res.json())
@@ -76,6 +78,7 @@ export default function LightingRound() {
     setIsAnswered(false);
     setTimeLeft(QUESTION_TIME);
 
+    // advance or end the round but stay on the last index so xp posts correctly.
     setCurrentIndex(prev => {
       const next = prev + 1;
       if (next >= TOTAL_QUESTIONS) {
@@ -88,6 +91,7 @@ export default function LightingRound() {
 
   useEffect(() => {
     if (gameState !== 'countdown') return;
+    // brief pause before the question timer begins.
     setCountdown(3);
     countdownRef.current = setInterval(() => {
       setCountdown(prev => {
@@ -106,10 +110,12 @@ export default function LightingRound() {
     if (gameState !== 'playing' || isAnswered) return;
     setTimeLeft(QUESTION_TIME);
 
+    // countdown halts after an answer so the speed bonus uses a frozen clock.
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
+          // running out of time marks wrong, flashes, then moves on.
           setIsAnswered(true);
           setFlashWrong(true);
           setTimeout(() => setFlashWrong(false), 400);
@@ -166,6 +172,7 @@ export default function LightingRound() {
     setXpEarned(totalXp);
 
     if (user && totalXp > 0) {
+      // module id zero only moves xp without touching real lesson progress.
       fetch('/api/complete-lesson', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,7 +192,6 @@ export default function LightingRound() {
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;
   const timerColor = timeLeft > 5 ? 'var(--accent)' : '#ef4444';
 
-  // Loading state
   if (isLoadingQuestions) {
     return (
       <div className="lr">
@@ -197,7 +203,6 @@ export default function LightingRound() {
     );
   }
 
-  // Error state
   if (loadError) {
     return (
       <div className="lr">

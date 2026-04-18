@@ -12,7 +12,7 @@ export default function StreakNotification() {
     if (!user || !user.lastActivityDate) return;
     const today = new Date().toISOString().split('T')[0];
     const lastActivity = user.lastActivityDate;
-    const yesterday = new Date(); // last activity yesterday -> warn
+    const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 

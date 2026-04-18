@@ -1,4 +1,3 @@
-// Interface for a completed module
 export interface CompletedModule {
   moduleId: number;
   title: string;

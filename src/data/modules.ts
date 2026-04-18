@@ -3,7 +3,6 @@ import { RETIREMENT_LESSONS, RETIREMENT_PRETEST } from './retirement';
 import { CRYPTOCURRENCIES_LESSONS, CRYPTOCURRENCIES_PRETEST } from './Cryptocurrencies';
 import { BROKERS_LESSONS, BROKERS_PRETEST } from './Brokers';
 
-// module id -> lessons + pretest
 export const MODULES = {
   1: { title: "Stock Market Fundamentals", experiencePoints: 600, lessons: TRADING_LESSONS, pretest: TRADING_PRETEST },
   2: { title: "Retirement Planning", experiencePoints: 800, lessons: RETIREMENT_LESSONS, pretest: RETIREMENT_PRETEST },

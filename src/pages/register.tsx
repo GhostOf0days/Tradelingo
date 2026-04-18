@@ -45,7 +45,6 @@ export default function Register() {
       <div className="auth__card">
         <h1 className="auth__title">Create Account</h1>
         
-        {/* Display backend errors (like "User already exists") to the user */}
         {error && <div className="auth__error">{error}</div>}
 
         <form className="auth__form" onSubmit={handleSubmit}>

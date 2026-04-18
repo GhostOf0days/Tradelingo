@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
+// small user snapshot in the browser while the full row lives in mongo.
 export type User = {
   email: string;
   displayName: string;
@@ -9,6 +10,7 @@ export type User = {
   lastActivityDate?: string;
 };
 
+// xp bands for the badge must match the server level helper.
 export const calculateLevel = (xp: number): number => {
   if (xp < 1000) return 1;
   if (xp < 2500) return 2;
@@ -27,7 +29,6 @@ type UserContextValue = {
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-// true if last activity was not today (YYYY-MM-DD)
 function shouldResetStreak(lastActivityDate: string | undefined): boolean {
   if (!lastActivityDate) return false;
   const today = new Date().toISOString().split('T')[0];
@@ -39,19 +40,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const savedUser = localStorage.getItem('tradelingo_user');
     if (!savedUser) return null;
     const parsed = JSON.parse(savedUser);
+    // cached streak may be off until the update streak request runs.
     if (shouldResetStreak(parsed.lastActivityDate)) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
       if (parsed.lastActivityDate === yesterdayStr) {
-        parsed.streakDays = (parsed.streakDays || 0) + 1; // continue streak
+        parsed.streakDays = (parsed.streakDays || 0) + 1;
       } else {
-        parsed.streakDays = 1; // gap or first load
+        parsed.streakDays = 1;
       }
     }
     return parsed;
   });
 
+  // keep the signed in user in localStorage across reloads.
   useEffect(() => {
     if (user) {
       localStorage.setItem('tradelingo_user', JSON.stringify(user));
@@ -75,7 +78,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const updateStreak = async () => {
     if (user) {
       const today = new Date().toISOString().split('T')[0];
-      if (user.lastActivityDate !== today) { // once per day
+      // touch streak once per utc day locally then sync with the backend.
+      if (user.lastActivityDate !== today) {
         const updatedUser = {
           ...user,
           streakDays: (user.streakDays || 1) + 1,
@@ -89,12 +93,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify({ email: user.email })
           });
         } catch (err) {
-          console.error('Failed to update streak on backend:', err);
+          console.warn('Failed to update streak on backend:', err);
         }
       }
     }
   };
 
+  // fill in level from xp when older caches never stored it.
   const level = user?.level || calculateLevel(user?.experiencePoints || 0);
 
   return (
@@ -107,7 +112,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 export function useUser(): UserContextValue {
   const value = useContext(UserContext);
   if (value === null) {
-    throw new Error('useUser must be used inside UserProvider');
+    throw new Error('please use useUser inside UserProvider');
   }
   return value;
 }

@@ -1,4 +1,3 @@
-// Class representing a quiz
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export class Quiz {
   id: number;

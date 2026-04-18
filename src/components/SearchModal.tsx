@@ -82,7 +82,8 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
       case 'module':
         return 'var(--accent)';
       case 'article':
-        return '#10b981'; // Success green
+        // highlight article rows in green.
+        return '#10b981';
       case 'quiz':
         return 'var(--xp-yellow)';
       default:

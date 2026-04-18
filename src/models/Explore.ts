@@ -1,4 +1,3 @@
-// Article Class
 export class Article {
   id: number;
   title: string;

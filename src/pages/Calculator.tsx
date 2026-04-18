@@ -22,7 +22,6 @@ const RETIREMENT_ACCOUNTS = [
   new Account('sep', 'SEP IRA', 'For self-employed', 69000, false, 15000),
 ];
 
-// Main Calculator component
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'retirement' | 'compound' | 'savings'>('retirement');
   const [selectedAccount, setSelectedAccount] = useState<Account>(RETIREMENT_ACCOUNTS[0]);
@@ -168,7 +167,6 @@ export default function Calculator() {
       </div>
 
       <div className="calculator__content">
-        {/* Retirement Account Selector */}
         {activeTab === 'retirement' && (
           <div className="calculator__section">
             <h2>Which Retirement Account is Best for You?</h2>
@@ -184,7 +182,10 @@ export default function Calculator() {
                   <p className="calculator__account-desc">{account.desc}</p>
                   <p className="calculator__account-limit">Annual Limit: {account.getFormattedLimit()}</p>
                   {selectedAccount.id === account.id && (
-                    <div className="calculator__account-details" onClick={(e) => e.stopPropagation()} >
+                    <div
+                      className="calculator__account-details"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="calculator__input-group">
                         <label>Annual Contribution ($)</label>
                         <input
@@ -280,7 +281,6 @@ export default function Calculator() {
           </div>
         )}
 
-        {/* Compound Interest Calculator */}
         {activeTab === 'compound' && (
           <div className="calculator__section">
             <h2>Compound Interest Calculator</h2>
@@ -376,7 +376,6 @@ export default function Calculator() {
           </div>
         )}
 
-        {/* Retirement Savings Calculator */}
         {activeTab === 'savings' && (
           <div className="calculator__section">
             <h2>Retirement Savings Projection</h2>

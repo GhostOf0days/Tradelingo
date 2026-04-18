@@ -46,7 +46,7 @@ export default function ReviewModules() {
   }, [user]);
 
   const handleReviewLesson = (moduleId: number) => {
-    navigate(`/lesson/${moduleId}?review=true`); // review mode, no progress write
+    navigate(`/lesson/${moduleId}?review=true`);
   };
 
   const formatDate = (dateString: string) => {
