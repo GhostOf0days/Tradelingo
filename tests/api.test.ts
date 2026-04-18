@@ -47,12 +47,12 @@ describe('Auth API', () => {
     const app = await getApp();
     await request(app)
       .post('/api/register')
-      .send({ email: 'dup@example.com', password: 'pass' })
+      .send({ email: 'dup@example.com', password: 'password123' })
       .expect(201);
 
     const res = await request(app)
       .post('/api/register')
-      .send({ email: 'dup@example.com', password: 'other' })
+      .send({ email: 'dup@example.com', password: 'other123' })
       .expect(400);
 
     expect(res.body.error).toBe('User already exists');
@@ -70,11 +70,11 @@ describe('Auth API', () => {
 
   it('POST /api/login succeeds and returns user data', async () => {
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'user@example.com', password: 'secret' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'user@example.com', password: 'secret123' }).expect(201);
 
     const res = await request(app)
       .post('/api/login')
-      .send({ email: 'user@example.com', password: 'secret' })
+      .send({ email: 'user@example.com', password: 'secret123' })
       .expect(200);
 
     expect(res.body).toMatchObject({
@@ -88,11 +88,11 @@ describe('Auth API', () => {
 
   it('POST /api/login returns 401 for wrong password', async () => {
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'u@example.com', password: 'correct' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'u@example.com', password: 'correct123' }).expect(201);
 
     await request(app)
       .post('/api/login')
-      .send({ email: 'u@example.com', password: 'wrong' })
+      .send({ email: 'u@example.com', password: 'wrong123' })
       .expect(401);
   });
 });
@@ -101,7 +101,7 @@ describe('Progress and XP API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'progress@example.com', password: 'p' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'progress@example.com', password: 'password123' }).expect(201);
   });
 
   it('GET /api/progress/:email returns progress', async () => {
@@ -157,7 +157,7 @@ describe('Streak API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'streak@example.com', password: 'p' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'streak@example.com', password: 'password123' }).expect(201);
   });
 
   it('POST /api/update-streak sets first activity day', async () => {
@@ -173,7 +173,7 @@ describe('User profile API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'profile@example.com', password: 'p' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'profile@example.com', password: 'password123' }).expect(201);
   });
 
   it('GET /api/user/:email returns full profile', async () => {

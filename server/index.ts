@@ -55,7 +55,8 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    const existingUser = await usersCollection.findOne({ email: email.toLowerCase().trim() });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await usersCollection.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -64,7 +65,7 @@ app.post('/api/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = {
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       displayName: email.split('@')[0],
       experiencePoints: 0,
@@ -98,7 +99,8 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await usersCollection.findOne({ email });
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    const user = await usersCollection.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
