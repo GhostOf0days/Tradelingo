@@ -311,7 +311,6 @@ app.post('/api/complete-lesson', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // lightning-round: add XP based on performance
 app.post('/api/lighting-round', async (req, res) => {
   try {
@@ -349,13 +348,11 @@ app.post('/api/lighting-round', async (req, res) => {
 });
 
 // pass-module: pretest passed — set lesson count to total, unlock next module
-=======
 /**
  * POST /api/pass-module
  * Allows a user to completely pass a module (e.g., via a pre-test).
  * Sets their lesson progress to maximum, awards XP, and unlocks the next sequential module.
  */
->>>>>>> f2ba2303122c31f5f823375a9420a502d863bb0c
 app.post('/api/pass-module', async (req, res) => {
   try {
     const { email, moduleId, xpToAdd, totalLessons } = req.body;
