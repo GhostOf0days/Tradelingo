@@ -1,3 +1,4 @@
+// Editable snapshot of a retirement account type for the calculator (limits, match, horizon).
 export class Account {
   id: string;
   name: string;

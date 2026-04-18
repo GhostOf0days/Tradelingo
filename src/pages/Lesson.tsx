@@ -1,3 +1,5 @@
+// Linear lesson flow: read content → end-of-module quiz. Passing the quiz (80%+) completes
+// the module, awards XP, and (unless ?review=true) writes progress to the API.
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -15,6 +17,7 @@ export default function Lesson() {
   const { user, setUser, updateStreak } = useUser();
   
   const queryParams = new URLSearchParams(location.search);
+  // Review mode = reread without mutating progress or re-awarding XP.
   const isReviewMode = queryParams.get('review') === 'true';
   
   const moduleId = Number(id) || 1;
@@ -30,6 +33,7 @@ export default function Lesson() {
   const [quizScore, setQuizScore] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
 
+  // One quiz row per lesson: pulls the embedded multiple-choice from each lesson object.
   const allQuestions = moduleLessons.map((l, idx) => ({
     lessonIndex: idx,
     lessonTitle: l.title,
@@ -46,6 +50,7 @@ export default function Lesson() {
       }
       setIsLoading(true);
       try {
+        // Review: always start at lesson 1; no redirect if they already "completed" the module.
         if (isReviewMode) {
           setCurrentLessonIdx(0);
           setPhase('reading');
@@ -54,6 +59,7 @@ export default function Lesson() {
           if (!res.ok) throw new Error('Failed to reach database');
           const data = await res.json();
           const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;
+          // Server already marked every lesson done; send them back to the module list.
           if (currentIdx >= moduleLessons.length) {
             navigate('/');
           } else {
@@ -71,6 +77,7 @@ export default function Lesson() {
     fetchProgress();
   }, [user, id]);
 
+  /** Advance slides, or jump into the module quiz after the last lesson. */
   const handleNextLesson = () => {
     if (currentLessonIdx < moduleLessons.length - 1) {
       setCurrentLessonIdx(currentLessonIdx + 1);
@@ -83,6 +90,7 @@ export default function Lesson() {
     }
   };
 
+  /** Records the pick, updates running score, then either moves to the next quiz Q or finishes. */
   const handleSubmitAnswer = () => {
     const updatedAnswers = [...quizAnswers];
     updatedAnswers[quizQuestionIdx] = selectedAnswer;
@@ -103,6 +111,7 @@ export default function Lesson() {
     }
   };
 
+  /** On pass: confetti + optional API calls to sync XP and completion (skipped in review mode). */
   const handleModuleComplete = async (finalScore: number, _answers: (number | null)[]) => {
     const percentage = Math.round((finalScore / allQuestions.length) * 100);
     const passed = percentage >= 80;
@@ -116,6 +125,7 @@ export default function Lesson() {
       });
     }
 
+    // Backend tracks per-lesson increments; we fire one request per lesson, then finalize the module.
     if (user && !isReviewMode && passed) {
       try {
         for (let i = 0; i < moduleLessons.length; i++) {
@@ -154,6 +164,7 @@ export default function Lesson() {
     }
   };
 
+  /** Reset quiz state after a failed attempt so they can try again from question 1. */
   const handleRetryQuiz = () => {
     setPhase('quiz');
     setQuizQuestionIdx(0);
@@ -166,6 +177,7 @@ export default function Lesson() {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
   }
 
+  // Progress bar spans both reading steps and quiz questions in one linear sequence.
   const totalSteps = moduleLessons.length + allQuestions.length;
   const currentStep = phase === 'reading'
     ? currentLessonIdx

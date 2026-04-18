@@ -1,3 +1,4 @@
+// Module 4: choosing brokers, order types, and platform safety — pairs with BROKERS_LESSONS below.
 export const BROKERS_PRETEST = [
   { question: "What is a broker?", options: ["A bank", "An intermediary that executes trades on your behalf", "A type of stock", "An investment advisor"], correctIndex: 1 },
   { question: "What are the main types of brokers?", options: ["Full-service only", "Discount and full-service", "Government brokers", "Bank brokers"], correctIndex: 1 },

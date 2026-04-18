@@ -1,3 +1,4 @@
+// Drag or adjust weights across asset classes and see a simple risk/return tradeoff.
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface AssetClass {
@@ -29,6 +30,7 @@ export default function PortfolioAllocationDemo() {
   const weightedReturn = ASSETS.reduce((sum, a, i) => sum + (a.expectedReturn * allocations[i]) / 100, 0);
   const weightedRisk = ASSETS.reduce((sum, a, i) => sum + (a.risk * allocations[i]) / 100, 0);
 
+  /** Donut chart: slices by weight; center shows blended expected return. */
   const drawPie = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -79,6 +81,7 @@ export default function PortfolioAllocationDemo() {
 
   useEffect(() => { drawPie(); }, [drawPie]);
 
+  /** Clamps one slider 0–100; totals are not forced to 100% (educational simplification). */
   const handleChange = (idx: number, val: number) => {
     setAllocations(prev => {
       const next = [...prev];
@@ -87,6 +90,7 @@ export default function PortfolioAllocationDemo() {
     });
   };
 
+  /** One-click conservative / balanced / aggressive templates from PRESETS. */
   const applyPreset = (alloc: number[]) => setAllocations([...alloc]);
 
   return (

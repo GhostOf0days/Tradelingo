@@ -311,7 +311,11 @@ app.post('/api/complete-lesson', async (req, res) => {
   }
 });
 
-// lightning-round: add XP based on performance
+/**
+ * POST /api/lighting-round
+ * Persists XP from the timed Lightning Round game (client sends total xpEarned for the run).
+ * Route name keeps the historical typo "lighting" so existing clients keep working.
+ */
 app.post('/api/lighting-round', async (req, res) => {
   try {
     const { email, xpEarned } = req.body;

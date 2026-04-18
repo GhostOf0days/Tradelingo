@@ -1,3 +1,4 @@
+// Integration tests against the Express app with mongodb mocked to mockDb (register, login, progress, etc.).
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { resetMockDb, mockUsersCollection } from './mockDb';

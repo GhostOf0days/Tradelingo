@@ -1,3 +1,4 @@
+// Aggregates topic-specific lesson arrays into numbered modules the UI and API both understand.
 import { TRADING_LESSONS, TRADING_PRETEST } from './trading';
 import { RETIREMENT_LESSONS, RETIREMENT_PRETEST } from './retirement';
 import { CRYPTOCURRENCIES_LESSONS, CRYPTOCURRENCIES_PRETEST } from './Cryptocurrencies';

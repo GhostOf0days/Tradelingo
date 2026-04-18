@@ -1,3 +1,5 @@
+// Timed trivia: pulls pre-test questions from every module via GET /api/modules, shuffles 10,
+// then scores speed + accuracy. XP persists through POST /api/lighting-round (typo kept for API compat).
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
@@ -11,6 +13,7 @@ const PERFECT_BONUS = 500;
 
 type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
 
+/** Fisher–Yates shuffle so each Lightning Round draw is a random subset of pool questions. */
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -65,11 +68,13 @@ export default function LightingRound() {
       });
   }, []);
 
+  /** Stops per-question and countdown intervals so we never leak timers on unmount or transitions. */
   const clearTimers = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
   };
 
+  /** Moves to the next prompt or ends the round when we've hit TOTAL_QUESTIONS. */
   const advanceQuestion = useCallback(() => {
     clearTimers();
     setSelectedAnswer(null);
@@ -86,6 +91,7 @@ export default function LightingRound() {
     });
   }, []);
 
+  // 3-2-1 overlay before the first question; then flip to `playing` and the question timer starts.
   useEffect(() => {
     if (gameState !== 'countdown') return;
     setCountdown(3);
@@ -102,6 +108,7 @@ export default function LightingRound() {
     return () => clearTimers();
   }, [gameState]);
 
+  // Per-question countdown: when it hits zero we treat it as a wrong answer and auto-advance.
   useEffect(() => {
     if (gameState !== 'playing' || isAnswered) return;
     setTimeLeft(QUESTION_TIME);
@@ -123,6 +130,7 @@ export default function LightingRound() {
     return () => clearTimers();
   }, [gameState, currentIndex, isAnswered, advanceQuestion]);
 
+  /** Picks a fresh random batch, resets score state, then enters the 3-2-1 countdown phase. */
   const startGame = () => {
     clearTimers();
     const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS);
@@ -137,6 +145,7 @@ export default function LightingRound() {
     setGameState('countdown');
   };
 
+  /** Freezes the timer, applies scoring + flash feedback, then schedules the next question. */
   const handleAnswer = (index: number) => {
     if (isAnswered) return;
     clearTimers();
@@ -159,7 +168,7 @@ export default function LightingRound() {
     setTimeout(() => advanceQuestion(), 1200);
   };
 
-  // When game finishes, calculate XP and update user
+  // Persist total XP once when leaving `playing` (depends on score + perfect-run bonus).
   useEffect(() => {
     if (gameState !== 'finished') return;
 

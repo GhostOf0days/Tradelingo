@@ -1,6 +1,8 @@
 import { Account } from './Account';
 
+// Pure numeric helpers shared by the Calculator page (FV of annuities, compound growth, formatting).
 export class RetirementCalculator {
+  /** Thousands separators + two decimals for big dollar amounts in the UI. */
   static format(value: number): string {
     return value.toLocaleString('en-US', {
       minimumFractionDigits: 2,
@@ -8,6 +10,7 @@ export class RetirementCalculator {
     });
   }
 
+  /** Future value: current balance grows with lump FV + annuity of annual contributions (+ match). */
   static project(account: Account, annualReturn: number = 7): number {
     const r = annualReturn / 100;
     return (
@@ -18,6 +21,7 @@ export class RetirementCalculator {
     );
   }
 
+  /** Standard compound-interest formula A = P(1 + r/n)^(nt). */
   static compound(
     principal: number,
     annualRate: number,
@@ -28,6 +32,7 @@ export class RetirementCalculator {
     return principal * Math.pow(1 + r / compoundFreq, compoundFreq * years);
   }
 
+  /** Lump sum + end-of-year contributions growing at `annualReturn` (simplified vs monthly loop in UI). */
   static projectSavings(
     currentSavings: number,
     annualContribution: number,

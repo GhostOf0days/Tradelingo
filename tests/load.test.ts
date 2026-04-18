@@ -1,3 +1,4 @@
+// Stress-style checks with autocannon; spins a real HTTP server with mocked Mongo.
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import autocannon from 'autocannon';
 import type { AddressInfo } from 'net';

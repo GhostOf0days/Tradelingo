@@ -1,3 +1,4 @@
+// Email/password login; on success we stash the profile in UserContext and go home.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
@@ -11,6 +12,7 @@ export default function Login() {
   const { setUser } = useUser();
   const navigate = useNavigate();
 
+  /** POST /api/login then hydrate UserContext from JSON (no tokens — session is localStorage). */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
