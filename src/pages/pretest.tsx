@@ -1,15 +1,24 @@
 // Optional shortcut: pass the pre-test (80%+) to skip lessons, unlock the next module, and earn bonus XP.
 // Skip still routes to lessons but only grants a small XP consolation.
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
+import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
 
 export default function Pretest() {
   const { id } = useParams();
   const moduleId = Number(id) || 1;
   const module = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
   const pretest = module.pretest;
+  const displayPretest = useMemo(
+    () =>
+      pretest.map((q) => {
+        const { options, correctIndex } = shuffleQuestionOptions(q.options, q.correctIndex);
+        return { ...q, options, correctIndex };
+      }),
+    [pretest],
+  );
   const navigate = useNavigate();
   const { user, setUser, updateStreak } = useUser();
   
@@ -19,8 +28,8 @@ export default function Pretest() {
   const [isComplete, setIsComplete] = useState(false);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
 
-  const currentQuestion = pretest[currentIndex];
-  const progressPercent = Math.round((currentIndex / pretest.length) * 100);
+  const currentQuestion = displayPretest[currentIndex];
+  const progressPercent = Math.round((currentIndex / displayPretest.length) * 100);
 
   /** Advance or finish: on last question, optionally calls pass-module if score ≥ 80%. */
   const handleNext = async () => {
@@ -28,11 +37,11 @@ export default function Pretest() {
     const newScore = isCorrect ? score + 1 : score;
     setScore(newScore);
 
-    if (currentIndex < pretest.length - 1) {
+    if (currentIndex < displayPretest.length - 1) {
       setCurrentIndex(curr => curr + 1);
       setSelectedAnswer(null);
     } else {
-      if (newScore / pretest.length >= 0.8 && user) {
+      if (newScore / displayPretest.length >= 0.8 && user) {
         try {
           const response = await fetch('/api/pass-module', {
             method: 'POST',
@@ -82,14 +91,14 @@ export default function Pretest() {
   };
 
   if (isComplete) {
-    const passed = score / pretest.length >= 0.8;
+    const passed = score / displayPretest.length >= 0.8;
     return (
       <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
         <div className="modules__card" style={{ padding: '3rem 2rem' }}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{passed ? '🏆' : '📚'}</div>
           <h2>{passed ? 'You Tested Out!' : 'Keep Learning!'}</h2>
           <p style={{ color: 'var(--text-muted)' }}>
-            You scored {score} out of {pretest.length}.
+            You scored {score} out of {displayPretest.length}.
             {passed ? " The next module is now unlocked and you earned +500 XP!" : " You need 80% correct to test out. Head back to take the regular lessons."}
           </p>
           <button className="modules__card-btn" style={{ marginTop: '2rem' }} onClick={() => navigate('/')}>
@@ -158,7 +167,7 @@ export default function Pretest() {
         onClick={handleNext}
         disabled={selectedAnswer === null}
       >
-        {currentIndex === pretest.length - 1 ? 'Submit Exam' : 'Next Question'}
+        {currentIndex === displayPretest.length - 1 ? 'Submit Exam' : 'Next Question'}
       </button>
 
       {/* Skip Dialog Modal */}

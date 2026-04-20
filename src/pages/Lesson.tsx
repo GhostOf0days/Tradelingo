@@ -1,12 +1,21 @@
 // Linear lesson flow: read content → end-of-module quiz. Passing the quiz (80%+) completes
 // the module, awards XP, and (unless ?review=true) writes progress to the API.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
 import { LessonItem } from '../models/LessonItem';
 import confetti from 'canvas-confetti';
 import DemoRenderer from '../components/demos/DemoRegistry';
+import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
+
+type QuizRow = {
+  lessonIndex: number;
+  lessonTitle: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+};
 
 // ui goes reading then quiz then result though the phase union still mentions complete.
 type Phase = 'reading' | 'quiz' | 'quiz-result' | 'complete';
@@ -33,15 +42,27 @@ export default function Lesson() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [quizScore, setQuizScore] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
+  const [quizRows, setQuizRows] = useState<QuizRow[]>([]);
 
   // One quiz row per lesson: pulls the embedded multiple-choice from each lesson object.
-  const allQuestions = moduleLessons.map((l, idx) => ({
-    lessonIndex: idx,
-    lessonTitle: l.title,
-    question: l.question.question,
-    options: l.question.options,
-    correctIndex: l.question.correctIndex,
-  }));
+  const allQuestions = useMemo(
+    () =>
+      moduleLessons.map((l, idx) => ({
+        lessonIndex: idx,
+        lessonTitle: l.title,
+        question: l.question.question,
+        options: l.question.options,
+        correctIndex: l.question.correctIndex,
+      })),
+    [moduleLessons],
+  );
+
+  const shuffleQuizRows = useCallback((rows: QuizRow[]) => {
+    return rows.map((row) => {
+      const { options, correctIndex } = shuffleQuestionOptions(row.options, row.correctIndex);
+      return { ...row, options, correctIndex };
+    });
+  }, []);
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -83,6 +104,7 @@ export default function Lesson() {
     if (currentLessonIdx < moduleLessons.length - 1) {
       setCurrentLessonIdx(currentLessonIdx + 1);
     } else {
+      setQuizRows(shuffleQuizRows(allQuestions));
       setPhase('quiz');
       setQuizQuestionIdx(0);
       setSelectedAnswer(null);
@@ -98,12 +120,12 @@ export default function Lesson() {
     setQuizAnswers(updatedAnswers);
 
     let newScore = quizScore;
-    if (selectedAnswer === allQuestions[quizQuestionIdx].correctIndex) {
+    if (selectedAnswer === quizRows[quizQuestionIdx].correctIndex) {
       newScore += 1;
       setQuizScore(newScore);
     }
 
-    if (quizQuestionIdx < allQuestions.length - 1) {
+    if (quizQuestionIdx < quizRows.length - 1) {
       setQuizQuestionIdx(quizQuestionIdx + 1);
       setSelectedAnswer(null);
     } else {
@@ -167,6 +189,7 @@ export default function Lesson() {
 
   /** Reset quiz state after a failed attempt so they can try again from question 1. */
   const handleRetryQuiz = () => {
+    setQuizRows(shuffleQuizRows(allQuestions));
     setPhase('quiz');
     setQuizQuestionIdx(0);
     setSelectedAnswer(null);
@@ -194,7 +217,7 @@ export default function Lesson() {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>
               {phase === 'reading' ? `Lesson ${currentLessonIdx + 1} of ${moduleLessons.length}` :
-               phase === 'quiz' ? `Quiz Question ${quizQuestionIdx + 1} of ${allQuestions.length}` :
+               phase === 'quiz' ? `Quiz Question ${quizQuestionIdx + 1} of ${quizRows.length}` :
                isReviewMode ? 'Review Complete' : 'Module Complete'}
             </span>
             <span style={{ fontWeight: 'bold' }}>{progressPercent}%</span>
@@ -289,17 +312,17 @@ export default function Lesson() {
           </>
         )}
 
-        {phase === 'quiz' && (
+        {phase === 'quiz' && quizRows.length > 0 && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
               <span style={{ background: '#6366f1', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                From: {allQuestions[quizQuestionIdx].lessonTitle}
+                From: {quizRows[quizQuestionIdx].lessonTitle}
               </span>
             </div>
             <h2 style={{ marginTop: 0 }}>Module Quiz</h2>
-            <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{allQuestions[quizQuestionIdx].question}</p>
+            <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{quizRows[quizQuestionIdx].question}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {allQuestions[quizQuestionIdx].options.map((opt: string, idx: number) => (
+              {quizRows[quizQuestionIdx].options.map((opt: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedAnswer(idx)}
@@ -379,14 +402,14 @@ export default function Lesson() {
         </div>
       )}
 
-      {phase === 'quiz' && (
+      {phase === 'quiz' && quizRows.length > 0 && (
         <button 
           className="modules__card-btn" 
           style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: '#6366f1' }}
           onClick={handleSubmitAnswer}
           disabled={selectedAnswer === null}
         >
-          {quizQuestionIdx < allQuestions.length - 1 ? 'Next Question' : 'Submit Quiz'}
+          {quizQuestionIdx < quizRows.length - 1 ? 'Next Question' : 'Submit Quiz'}
         </button>
       )}
     </div>

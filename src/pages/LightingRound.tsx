@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { QuizQuestion } from '../models/QuizQuestion';
+import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
 import '../styles/LightingRound.css';
 
 const QUESTION_TIME = 10;
@@ -51,11 +52,14 @@ export default function LightingRound() {
     fetch('/api/modules')
       .then(res => res.json())
       .then(modules => {
-        const questions = modules.flatMap((module: any) =>
-          module.pretest.map((q: any) => ({
-            q: new QuizQuestion(q.question, q.options, q.correct, q.explanation),
-            category: module.title
-          }))
+        const questions = modules.flatMap((module: { title: string; pretest: unknown[] }) =>
+          (module.pretest as { question: string; options: string[]; correct?: number; correctIndex?: number; explanation?: string }[]).map((q) => {
+            const key = q.correct ?? q.correctIndex ?? 0;
+            return {
+              q: new QuizQuestion(q.question, q.options, key, q.explanation ?? ''),
+              category: module.title,
+            };
+          })
         );
         setAllQuestions(questions);
         setIsLoadingQuestions(false);
@@ -136,7 +140,13 @@ export default function LightingRound() {
   /** Picks a fresh random batch, resets score state, then enters the 3-2-1 countdown phase. */
   const startGame = () => {
     clearTimers();
-    const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS);
+    const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS).map((item) => {
+      const { options, correctIndex } = shuffleQuestionOptions(item.q.options, item.q.correct);
+      return {
+        q: new QuizQuestion(item.q.question, options, correctIndex, item.q.explanation),
+        category: item.category,
+      };
+    });
     setQuestions(picked);
     setCurrentIndex(0);
     setScore(0);

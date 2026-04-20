@@ -6,6 +6,14 @@ import '../styles/Quizzes.css';
 import { QuizQuestion } from '../models/QuizQuestion';
 import { Quiz } from '../models/Quiz';
 import confetti from 'canvas-confetti';
+import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
+
+function buildSessionQuestions(source: QuizQuestion[]): QuizQuestion[] {
+  return source.map((q) => {
+    const { options, correctIndex } = shuffleQuestionOptions(q.options, q.correct);
+    return new QuizQuestion(q.question, options, correctIndex, q.explanation);
+  });
+}
 
 const QUIZZES: Quiz[] = [
   new Quiz(1, 'Stock Basics Challenge', 'Test your knowledge on stock market fundamentals', 'Easy', 'Stocks', 100, 10),
@@ -36,6 +44,8 @@ type QuizAttempt = {
   total: number;
   mistakes: MistakeRecord[];
   timestamp: string;
+  /** Options order as shown during this attempt (for mistake review). */
+  questionsSnapshot?: QuizQuestion[];
 };
 
 export default function Quizzes() {
@@ -53,11 +63,14 @@ export default function Quizzes() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [viewMode, setViewMode] = useState<'quizzes' | 'completed'>('quizzes');
+  const [sessionQuestions, setSessionQuestions] = useState<QuizQuestion[]>([]);
 
   const quizQuestions = QUIZ_QUESTIONS;
 
   /** Initializes a run: selected quiz metadata + empty answer sheet for the shared question bank. */
   const handleStartQuiz = (quiz: Quiz) => {
+    const shuffled = buildSessionQuestions(quizQuestions);
+    setSessionQuestions(shuffled);
     setSelectedQuiz(quiz);
     setQuizStarted(true);
     setCurrentQuestion(0);
@@ -82,7 +95,7 @@ export default function Quizzes() {
     setUserAnswers(updatedAnswers);
 
     let newScore = score;
-    if (selectedAnswer === quizQuestions[currentQuestion].correct) {
+    if (selectedAnswer === sessionQuestions[currentQuestion].correct) {
       newScore = score + 1;
       setScore(newScore);
     }
@@ -95,7 +108,7 @@ export default function Quizzes() {
 
       const mistakes: MistakeRecord[] = [];
       updatedAnswers.forEach((ans, idx) => {
-        if (ans !== quizQuestions[idx].correct) {
+        if (ans !== sessionQuestions[idx].correct) {
           mistakes.push({ questionIndex: idx, userAnswer: ans ?? -1 });
         }
       });
@@ -108,6 +121,9 @@ export default function Quizzes() {
           total: quizQuestions.length,
           mistakes,
           timestamp: new Date().toISOString(),
+          questionsSnapshot: sessionQuestions.map(
+            (q) => new QuizQuestion(q.question, [...q.options], q.correct, q.explanation),
+          ),
         };
         setCompletedQuizzes(prev => [attempt, ...prev]);
       }
@@ -148,10 +164,12 @@ export default function Quizzes() {
 
   /** Same quiz, fresh attempt from the top (still in the active quiz session). */
   const handleRetry = () => {
+    setSessionQuestions(buildSessionQuestions(quizQuestions));
     setCurrentQuestion(0);
     setScore(0);
     setShowResults(false);
     setSelectedAnswer(null);
+    setUserAnswers(new Array(quizQuestions.length).fill(null));
   };
 
   /** Badge styling on the quiz cards (easy / medium / hard). */
@@ -169,7 +187,10 @@ export default function Quizzes() {
   };
 
   if (quizStarted && selectedQuiz && !showResults) {
-    const question = quizQuestions[currentQuestion];
+    if (sessionQuestions.length !== quizQuestions.length) {
+      return null;
+    }
+    const question = sessionQuestions[currentQuestion];
     const progress = Math.round(((currentQuestion + 1) / quizQuestions.length) * 100);
 
     return (
@@ -256,6 +277,7 @@ export default function Quizzes() {
                   setShowExplanation(false);
                   setShowResults(false);
                   setQuizStarted(false);
+                  setSessionQuestions([]);
                 }}
               >
                 Review Mistakes
@@ -267,6 +289,7 @@ export default function Quizzes() {
                 setQuizStarted(false);
                 setSelectedQuiz(null);
                 setShowResults(false);
+                setSessionQuestions([]);
               }}
             >
               Back to Quizzes
@@ -279,7 +302,9 @@ export default function Quizzes() {
 
   if (reviewingAttempt) {
     const mistake = reviewingAttempt.mistakes[reviewIndex];
-    const q = quizQuestions[mistake.questionIndex];
+    const q =
+      reviewingAttempt.questionsSnapshot?.[mistake.questionIndex] ??
+      quizQuestions[mistake.questionIndex];
     const isLastMistake = reviewIndex >= reviewingAttempt.mistakes.length - 1;
 
     return (
