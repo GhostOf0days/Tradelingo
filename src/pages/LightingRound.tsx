@@ -43,6 +43,7 @@ export default function LightingRound() {
   const [flashCorrect, setFlashCorrect] = useState(false);
   const [flashWrong, setFlashWrong] = useState(false);
   const [xpEarned, setXpEarned] = useState(0);
+  const xpPostedRef = useRef(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -140,6 +141,7 @@ export default function LightingRound() {
   /** Picks a fresh random batch, resets score state, then enters the 3-2-1 countdown phase. */
   const startGame = () => {
     clearTimers();
+    xpPostedRef.current = false;
     const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS).map((item) => {
       const { options, correctIndex } = shuffleQuestionOptions(item.q.options, item.q.correct);
       return {
@@ -183,7 +185,8 @@ export default function LightingRound() {
 
   // Persist total XP once when leaving `playing` (depends on score + perfect-run bonus).
   useEffect(() => {
-    if (gameState !== 'finished') return;
+    if (gameState !== 'finished' || xpPostedRef.current) return;
+    xpPostedRef.current = true;
 
     const isPerfect = correctCount === TOTAL_QUESTIONS;
     const totalXp = score + (isPerfect ? PERFECT_BONUS : 0);
@@ -205,7 +208,7 @@ export default function LightingRound() {
             });
           }
         })
-        .catch(console.warn);
+        .catch((err) => console.warn(err));
     }
   }, [gameState, correctCount, score, user, setUser]);
 
