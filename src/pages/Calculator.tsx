@@ -273,7 +273,7 @@ export default function Calculator() {
                     <XAxis dataKey="year" stroke="var(--text-muted)" />
                     <YAxis tickFormatter={(value) => `$${value/1000}k`} stroke="var(--text-muted)" />
                     <Tooltip 
-                      formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
+                      formatter={(value: unknown) => [formatCurrency(Number(value ?? 0)), '']}
                       contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
                       labelStyle={{ color: 'var(--text-muted)' }}
                     />
@@ -367,7 +367,7 @@ export default function Calculator() {
                       <XAxis dataKey="year" stroke="var(--text-muted)" />
                       <YAxis tickFormatter={(value) => `$${value/1000}k`} stroke="var(--text-muted)" />
                       <Tooltip 
-                        formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
+                        formatter={(value: unknown) => [formatCurrency(Number(value ?? 0)), '']}
                         contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
                         labelStyle={{ color: 'var(--text-muted)' }}
                       />
@@ -471,7 +471,7 @@ export default function Calculator() {
                       <XAxis dataKey="age" stroke="var(--text-muted)" label={{ value: 'Age', position: 'insideBottomRight', offset: -5 }} />
                       <YAxis tickFormatter={(value) => `$${value/1000}k`} stroke="var(--text-muted)" />
                       <Tooltip 
-                        formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
+                        formatter={(value: unknown) => [formatCurrency(Number(value ?? 0)), '']}
                         contentStyle={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
                         labelStyle={{ color: 'var(--text-muted)' }}
                       />

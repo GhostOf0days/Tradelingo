@@ -97,7 +97,7 @@ export default function Lesson() {
       }
     };
     fetchProgress();
-  }, [user, id]);
+  }, [user, id, isReviewMode, moduleId, moduleLessons.length, navigate]);
 
   /** Advance slides, or jump into the module quiz after the last lesson. */
   const handleNextLesson = () => {
@@ -130,12 +130,12 @@ export default function Lesson() {
       setSelectedAnswer(null);
     } else {
       setPhase('quiz-result');
-      handleModuleComplete(newScore, updatedAnswers);
+      handleModuleComplete(newScore);
     }
   };
 
   /** On pass: confetti + optional API calls to sync XP and completion (skipped in review mode). */
-  const handleModuleComplete = async (finalScore: number, _answers: (number | null)[]) => {
+  const handleModuleComplete = async (finalScore: number) => {
     const percentage = Math.round((finalScore / allQuestions.length) * 100);
     const passed = percentage >= 80;
 
@@ -155,7 +155,7 @@ export default function Lesson() {
           await fetch('/api/complete-lesson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, moduleId, xpToAdd: 50 })
+            body: JSON.stringify({ email: user.email, moduleId })
           });
         }
 
@@ -341,7 +341,7 @@ export default function Lesson() {
         {phase === 'quiz-result' && (() => {
           const percentage = Math.round((quizScore / allQuestions.length) * 100);
           const passed = percentage >= 80;
-          const xpEarned = passed ? moduleData.experiencePoints + (moduleLessons.length * 50) : 0;
+          const xpEarned = passed ? moduleData.experiencePoints : 0;
           return (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3rem' }}>{passed ? '🎉' : '📚'}</div>
