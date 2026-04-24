@@ -1,6 +1,6 @@
 // Linear lesson flow: read content → end-of-module quiz. Passing the quiz (80%+) completes
 // the module, awards XP, and (unless ?review=true) writes progress to the API.
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
@@ -43,6 +43,7 @@ export default function Lesson() {
   const [quizScore, setQuizScore] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
   const [quizRows, setQuizRows] = useState<QuizRow[]>([]);
+  const moduleCompletedRef = useRef(false);
 
   // One quiz row per lesson: pulls the embedded multiple-choice from each lesson object.
   const allQuestions = useMemo(
@@ -136,6 +137,8 @@ export default function Lesson() {
 
   /** On pass: confetti + optional API calls to sync XP and completion (skipped in review mode). */
   const handleModuleComplete = async (finalScore: number) => {
+    if (moduleCompletedRef.current) return;
+    moduleCompletedRef.current = true;
     const percentage = Math.round((finalScore / allQuestions.length) * 100);
     const passed = percentage >= 80;
 
@@ -189,6 +192,7 @@ export default function Lesson() {
 
   /** Reset quiz state after a failed attempt so they can try again from question 1. */
   const handleRetryQuiz = () => {
+    moduleCompletedRef.current = false;
     setQuizRows(shuffleQuizRows(allQuestions));
     setPhase('quiz');
     setQuizQuestionIdx(0);
