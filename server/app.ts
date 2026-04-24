@@ -178,7 +178,7 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
   // move lesson progress forward with xp where lightning reuses module id zero on the same handler.
   app.post('/api/complete-lesson', async (req, res) => {
     try {
-      const { email, moduleId, xpToAdd } = req.body;
+      const { email, moduleId } = req.body;
 
       if (!email || typeof email !== 'string') {
         return res.status(400).json({ error: 'Email is required' });
@@ -186,21 +186,16 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
       if (!moduleId || typeof moduleId !== 'number') {
         return res.status(400).json({ error: 'Valid moduleId is required' });
       }
-      const safeXp = Math.max(0, Math.min(10000, Number(xpToAdd) || 0));
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
       if (!user) return res.status(404).json({ error: 'User not found' });
-
-      const newXp = (user.experiencePoints || 0) + safeXp;
-      const newLevel = calculateLevel(newXp);
+  
       const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
 
       const result = await usersCollection.findOneAndUpdate(
         { email: normalizedEmail },
         {
-          $set: { experiencePoints: newXp, level: newLevel },
-          // module zero still bumps a throwaway counter so updates look like real modules.
           $inc: { [progressField]: 1 },
         },
         { returnDocument: 'after' }
@@ -402,9 +397,16 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
       const newUnlockedId = Math.max(user.lastUnlockedModuleId || 1, moduleId + 1);
 
       // typings disallow push and set together so cast the update payload.
+      const newXp = (user.experiencePoints || 0) + (xpEarned || 0);
+      const newLevel = calculateLevel(newXp);
+
       const combinedUpdate = {
         $push: { completedModules: completedModule },
-        $set: { lastUnlockedModuleId: newUnlockedId },
+        $set: { 
+          lastUnlockedModuleId: newUnlockedId,
+          experiencePoints: newXp,
+          level: newLevel,
+        },
       };
       const result = await usersCollection.findOneAndUpdate(
         { email: normalizedEmail },

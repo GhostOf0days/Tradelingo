@@ -86,14 +86,14 @@ describe('Load tests – 1000 concurrent users', () => {
     const totalRequests = result.requests.total;
     const timeoutRate = totalRequests > 0 ? result.errors / totalRequests : 1;
 
-    console.log('\n--- GET /api/modules ---');
-    console.log(`Total requests : ${totalRequests}`);
-    console.log(`Avg latency    : ${result.latency.average} ms`);
-    console.log(`p99 latency    : ${result.latency.p99} ms`);
-    console.log(`Req/sec (avg)  : ${result.requests.average}`);
-    console.log(`Non-2xx resp   : ${result.non2xx}`);
-    console.log(`Timeouts       : ${result.errors}`);
-    console.log(`Timeout rate   : ${(timeoutRate * 100).toFixed(2)}%`);
+    console.warn('\n--- GET /api/modules ---');
+    console.warn(`Total requests : ${totalRequests}`);
+    console.warn(`Avg latency    : ${result.latency.average} ms`);
+    console.warn(`p99 latency    : ${result.latency.p99} ms`);
+    console.warn(`Req/sec (avg)  : ${result.requests.average}`);
+    console.warn(`Non-2xx resp   : ${result.non2xx}`);
+    console.warn(`Timeouts       : ${result.errors}`);
+    console.warn(`Timeout rate   : ${(timeoutRate * 100).toFixed(2)}%`);
 
     expect(totalRequests).toBeGreaterThan(0);
     expect(timeoutRate).toBeLessThan(0.01);
@@ -114,13 +114,13 @@ describe('Load tests – 1000 concurrent users', () => {
     const totalRequests = result.requests.total;
     const timeoutRate = totalRequests > 0 ? result.errors / totalRequests : 1;
 
-    console.log('\n--- POST /api/login ---');
-    console.log(`Total requests : ${totalRequests}`);
-    console.log(`Avg latency    : ${result.latency.average} ms`);
-    console.log(`p99 latency    : ${result.latency.p99} ms`);
-    console.log(`Req/sec (avg)  : ${result.requests.average}`);
-    console.log(`Timeouts       : ${result.errors}`);
-    console.log(`Timeout rate   : ${(timeoutRate * 100).toFixed(2)}%`);
+    console.warn('\n--- POST /api/login ---');
+    console.warn(`Total requests : ${totalRequests}`);
+    console.warn(`Avg latency    : ${result.latency.average} ms`);
+    console.warn(`p99 latency    : ${result.latency.p99} ms`);
+    console.warn(`Req/sec (avg)  : ${result.requests.average}`);
+    console.warn(`Timeouts       : ${result.errors}`);
+    console.warn(`Timeout rate   : ${(timeoutRate * 100).toFixed(2)}%`);
 
     expect(totalRequests).toBeGreaterThan(0);
     expect(timeoutRate).toBeLessThan(0.01);
@@ -141,13 +141,13 @@ describe('Load tests – 1000 concurrent users', () => {
     const totalRequests = result.requests.total;
     const timeoutRate = totalRequests > 0 ? result.errors / totalRequests : 1;
 
-    console.log('\n--- POST /api/update-xp ---');
-    console.log(`Total requests : ${totalRequests}`);
-    console.log(`Avg latency    : ${result.latency.average} ms`);
-    console.log(`p99 latency    : ${result.latency.p99} ms`);
-    console.log(`Req/sec (avg)  : ${result.requests.average}`);
-    console.log(`Timeouts       : ${result.errors}`);
-    console.log(`Timeout rate   : ${(timeoutRate * 100).toFixed(2)}%`);
+    console.warn('\n--- POST /api/update-xp ---');
+    console.warn(`Total requests : ${totalRequests}`);
+    console.warn(`Avg latency    : ${result.latency.average} ms`);
+    console.warn(`p99 latency    : ${result.latency.p99} ms`);
+    console.warn(`Req/sec (avg)  : ${result.requests.average}`);
+    console.warn(`Timeouts       : ${result.errors}`);
+    console.warn(`Timeout rate   : ${(timeoutRate * 100).toFixed(2)}%`);
 
     expect(totalRequests).toBeGreaterThan(0);
     expect(timeoutRate).toBeLessThan(0.01);

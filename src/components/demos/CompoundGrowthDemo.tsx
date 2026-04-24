@@ -1,5 +1,5 @@
 // Sliders for principal, contribution, rate, and years — shows compound growth over time.
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function CompoundGrowthDemo() {
   const [initial, setInitial] = useState(10000);
@@ -10,25 +10,8 @@ export default function CompoundGrowthDemo() {
   const [hoveredYear, setHoveredYear] = useState<number | null>(null);
   const dataRef = useRef<{ year: number; contributed: number; total: number }[]>([]);
 
-  // Rebuild the year series whenever inputs change, then paint the canvas.
-  useEffect(() => {
-    const data: { year: number; contributed: number; total: number }[] = [];
-    let balance = initial;
-    const monthlyRate = rate / 100 / 12;
-
-    for (let y = 0; y <= years; y++) {
-      const contributed = initial + monthly * 12 * y;
-      data.push({ year: y, contributed, total: Math.round(balance) });
-      for (let m = 0; m < 12; m++) {
-        balance = (balance + monthly) * (1 + monthlyRate);
-      }
-    }
-    dataRef.current = data;
-    drawChart(data);
-  }, [initial, monthly, rate, years]);
-
   /** Stacked areas for contributions vs growth + optional hover marker for tooltips. */
-  const drawChart = (data: { year: number; contributed: number; total: number }[]) => {
+  const drawChart = useCallback((data: { year: number; contributed: number; total: number }[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -162,7 +145,24 @@ export default function CompoundGrowthDemo() {
       ctx.fillStyle = '#6366f1';
       ctx.fillText(`Contributed: ${formatMoney(d.contributed)}`, tx + 10, ty + 50);
     }
-  };
+  }, [hoveredYear]);
+
+  // Rebuild the year series whenever inputs change, then paint the canvas.
+  useEffect(() => {
+    const data: { year: number; contributed: number; total: number }[] = [];
+    let balance = initial;
+    const monthlyRate = rate / 100 / 12;
+
+    for (let y = 0; y <= years; y++) {
+      const contributed = initial + monthly * 12 * y;
+      data.push({ year: y, contributed, total: Math.round(balance) });
+      for (let m = 0; m < 12; m++) {
+        balance = (balance + monthly) * (1 + monthlyRate);
+      }
+    }
+    dataRef.current = data;
+    drawChart(data);
+  }, [initial, monthly, rate, years, drawChart]);
 
   /** Map mouse X to nearest simulated year so the tooltip card tracks the cursor. */
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -184,7 +184,7 @@ export default function CompoundGrowthDemo() {
   // Redraw when hover index changes so the callout follows the crosshair.
   useEffect(() => {
     drawChart(dataRef.current);
-  }, [hoveredYear]);
+  }, [hoveredYear, drawChart]);
 
   const finalData = dataRef.current[dataRef.current.length - 1];
   const totalContributed = finalData?.contributed || 0;

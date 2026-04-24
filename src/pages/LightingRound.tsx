@@ -207,7 +207,7 @@ export default function LightingRound() {
         })
         .catch(console.warn);
     }
-  }, [gameState]);
+  }, [gameState, correctCount, score, user, setUser]);
 
   const currentQ = questions[currentIndex];
   const timerPercent = (timeLeft / QUESTION_TIME) * 100;

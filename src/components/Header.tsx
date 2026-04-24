@@ -76,7 +76,9 @@ function Header() {
           }
         });
         setUnfinishedModules(unfinished);
-      } catch { }
+      } catch (error) {
+        console.warn('Error fetching unfinished modules:', error);
+      }
     };
     fetchUnfinished();
   }, [user]);
