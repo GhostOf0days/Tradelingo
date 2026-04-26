@@ -1,3 +1,19 @@
+/**
+ * Design Pattern: Bridge Pattern
+ *
+ * Purpose:
+ * Separates lesson content data from interactive demo implementations.
+ *
+ * How:
+ * Lessons store only a string `demo` identifier.
+ * This registry maps those identifiers to lazily loaded React components.
+ *
+ * Benefit:
+ * New demos can be added or existing demos changed without modifying
+ * lesson content structures. Also supports code-splitting to keep
+ * the main bundle small.
+ */
+
 // Maps lesson `demo` string ids to lazily loaded interactive widgets so the main bundle stays small.
 import { lazy, Suspense } from 'react';
 
@@ -11,6 +27,7 @@ const DollarCostAverageDemo = lazy(() => import('./DollarCostAverageDemo'));
 const MarginCalculatorDemo = lazy(() => import('./MarginCalculatorDemo'));
 const RiskToleranceDemo = lazy(() => import('./RiskToleranceDemo'));
 
+// Bridge implementor mapping: abstraction IDs -> concrete demo components
 const DEMO_MAP: Record<string, React.LazyExoticComponent<() => JSX.Element>> = {
   'stock-price-chart': StockPriceDemo,
   'compound-growth': CompoundGrowthDemo,

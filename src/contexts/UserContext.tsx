@@ -1,3 +1,21 @@
+/**
+ * Design Pattern: Singleton Pattern (shared global instance)
+ *
+ * Purpose:
+ * Provides one centralized source of user state for the application.
+ *
+ * How:
+ * A single UserProvider is mounted near the root of the app and exposes
+ * authentication state, XP, level, and streak data through React Context.
+ *
+ * Benefit:
+ * Prevents duplicated or inconsistent user state across pages and
+ * ensures all components read from the same source of truth.
+ *
+ * Additional Pattern: Observer
+ * Components using useUser() automatically re-render when context state changes.
+ */
+
 // Global auth + gamification state: who is logged in, XP, level, and daily streak.
 // Persists to localStorage so a refresh keeps you signed in (demo-style; no JWT).
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
@@ -37,6 +55,7 @@ function shouldResetStreak(lastActivityDate: string | undefined): boolean {
   return lastActivityDate !== today;
 }
 
+// Singleton access point for shared user state throughout Tradelingo.
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('tradelingo_user');
@@ -56,6 +75,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return parsed;
   });
 
+  // Observer behavior: whenever user state changes, persist it automatically.
   // keep the signed in user in localStorage across reloads.
   useEffect(() => {
     if (user) {
