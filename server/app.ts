@@ -7,8 +7,55 @@ import { fileURLToPath } from 'url';
 import { calculateLevel } from './level';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ARTICLE_BASE_LIKES = new Map<number, number>([
+  [1, 234],
+  [2, 456],
+  [3, 312],
+  [4, 189],
+  [5, 278],
+  [6, 521],
+  [7, 168],
+  [8, 143],
+  [9, 131],
+  [10, 203],
+  [11, 97],
+  [12, 155],
+  [13, 118],
+  [14, 86],
+  [15, 74],
+  [16, 126],
+  [17, 92],
+  [18, 139],
+]);
 
-export function createApp(usersCollection: Collection, modulesCollection: Collection): express.Express {
+function getPasswordValidationError(password: unknown): string | null {
+  if (typeof password !== 'string') return 'Password is required';
+  if (password.length < 8) return 'Password must be at least 8 characters';
+  if (!/[a-z]/.test(password)) return 'Password must include a lowercase letter';
+  if (!/[A-Z]/.test(password)) return 'Password must include an uppercase letter';
+  if (!/[0-9]/.test(password)) return 'Password must include a number';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Password must include a symbol';
+  return null;
+}
+
+async function seedArticleLikesIfMissing(articleLikesCollection: Collection): Promise<void> {
+  const now = new Date();
+  await Promise.all(
+    [...ARTICLE_BASE_LIKES.entries()].map(([articleId, likes]) =>
+      articleLikesCollection.updateOne(
+        { articleId },
+        { $setOnInsert: { articleId, likes, updatedAt: now } },
+        { upsert: true }
+      )
+    )
+  );
+}
+
+export function createApp(
+  usersCollection: Collection,
+  modulesCollection: Collection,
+  articleLikesCollection: Collection
+): express.Express {
   const app = express();
   app.use(cors());
   app.use(express.json());
@@ -25,8 +72,9 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
       if (!email || typeof email !== 'string' || !email.includes('@') || email.length > 320) {
         return res.status(400).json({ error: 'Valid email is required' });
       }
-      if (!password || typeof password !== 'string' || password.length < 6) {
-        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      const passwordError = getPasswordValidationError(password);
+      if (passwordError) {
+        return res.status(400).json({ error: passwordError });
       }
 
       const normalizedEmail = email.toLowerCase().trim();
@@ -175,10 +223,68 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
     }
   });
 
+  app.get('/api/article-likes', async (_req, res) => {
+    try {
+      await seedArticleLikesIfMissing(articleLikesCollection);
+      const likes = await articleLikesCollection
+        .find({}, { projection: { _id: 0 } })
+        .sort({ articleId: 1 })
+        .toArray();
+      res.status(200).json(likes);
+    } catch (error) {
+      console.warn(error);
+      res.status(500).json({ error: 'Server error fetching article likes' });
+    }
+  });
+
+  app.post('/api/article-likes/:articleId', async (req, res) => {
+    try {
+      const articleId = Number(req.params.articleId);
+      const action = req.body?.action;
+
+      if (!Number.isInteger(articleId) || !ARTICLE_BASE_LIKES.has(articleId)) {
+        return res.status(400).json({ error: 'Valid articleId is required' });
+      }
+      if (action !== 'like' && action !== 'unlike') {
+        return res.status(400).json({ error: 'action must be like or unlike' });
+      }
+
+      await articleLikesCollection.updateOne(
+        { articleId },
+        {
+          $setOnInsert: {
+            articleId,
+            likes: ARTICLE_BASE_LIKES.get(articleId) ?? 0,
+            updatedAt: new Date(),
+          },
+        },
+        { upsert: true }
+      );
+
+      const delta = action === 'like' ? 1 : -1;
+      const filter = action === 'unlike' ? { articleId, likes: { $gt: 0 } } : { articleId };
+      const result = await articleLikesCollection.findOneAndUpdate(
+        filter,
+        { $inc: { likes: delta }, $set: { updatedAt: new Date() } },
+        { returnDocument: 'after' }
+      );
+
+      if (!result) {
+        const current = await articleLikesCollection.findOne({ articleId });
+        return res.status(200).json({ articleId, likes: Math.max(0, Number(current?.likes ?? 0)) });
+      }
+
+      res.status(200).json({ articleId, likes: Math.max(0, Number(result.likes ?? 0)) });
+    } catch (error) {
+      console.warn(error);
+      res.status(500).json({ error: 'Server error updating article likes' });
+    }
+  });
+
   // move lesson progress forward with xp where lightning reuses module id zero on the same handler.
   app.post('/api/complete-lesson', async (req, res) => {
     try {
-      const { email, moduleId } = req.body;
+      const { email, moduleId, xpToAdd } = req.body;
 
       if (!email || typeof email !== 'string') {
         return res.status(400).json({ error: 'Email is required' });
@@ -186,17 +292,27 @@ export function createApp(usersCollection: Collection, modulesCollection: Collec
       if (!moduleId || typeof moduleId !== 'number') {
         return res.status(400).json({ error: 'Valid moduleId is required' });
       }
+      const safeXp = xpToAdd === undefined ? 0 : Number(xpToAdd);
+      if (!Number.isFinite(safeXp) || safeXp < 0 || safeXp > 10000) {
+        return res.status(400).json({ error: 'xpToAdd must be a number between 0 and 10000' });
+      }
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
       if (!user) return res.status(404).json({ error: 'User not found' });
   
       const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
+      const newXp = (user.experiencePoints || 0) + safeXp;
+      const newLevel = calculateLevel(newXp);
 
       const result = await usersCollection.findOneAndUpdate(
         { email: normalizedEmail },
         {
           $inc: { [progressField]: 1 },
+          $set: {
+            experiencePoints: newXp,
+            level: newLevel,
+          },
         },
         { returnDocument: 'after' }
       );

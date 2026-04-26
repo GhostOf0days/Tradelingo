@@ -1,9 +1,17 @@
-// Curated reading list with local filters/likes. Article bodies are static strings, not fetched.
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+// Curated reading library with Mongo-backed like counts and browser-local like state.
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowRight, Clock, ExternalLink, Search, ThumbsUp } from 'lucide-react';
 import '../styles/Explore.css';
 
-type ArticleType = 'Investing' | 'Risk' | 'Tax' | 'Bonds' | 'Psychology';
+type ArticleType =
+  | 'Investing'
+  | 'Risk'
+  | 'Tax'
+  | 'Bonds'
+  | 'Psychology'
+  | 'Retirement'
+  | 'Markets'
+  | 'Crypto';
 
 interface FullArticle {
   id: number;
@@ -18,83 +26,432 @@ interface FullArticle {
   body: string;
 }
 
+interface ArticleLikeRecord {
+  articleId: number;
+  likes: number;
+}
+
+const LIKED_ARTICLES_KEY = 'tradelingo-liked-articles';
+
 const ARTICLES: FullArticle[] = [
   {
-    id: 1, title: 'What is an ETF?', category: 'articles', description: 'Learn how exchange-traded funds work, why they are popular with beginners, and how to start investing in them.', author: 'Investopedia', url: 'https://www.investopedia.com/terms/e/etf.asp', readTime: '8 min', likes: 234,
+    id: 1,
+    title: 'What Is an ETF?',
+    category: 'articles',
+    description: 'A clear breakdown of exchange-traded funds, diversification, expenses, and beginner use cases.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/e/etf.asp',
+    readTime: '8 min',
+    likes: 234,
     type: 'Investing',
-    body: `An Exchange-Traded Fund (ETF) is a type of pooled investment security that operates much like a mutual fund. Typically, ETFs will track a particular index, sector, commodity, or other assets, but unlike mutual funds, ETFs can be purchased or sold on a stock exchange the same way that a regular stock can.\n\nETFs can be structured to track anything from the price of an individual commodity to a large and diverse collection of securities. They can even be structured to track specific investment strategies.\n\n**Why are ETFs popular?**\n• Low expense ratios compared to mutual funds\n• Tax efficiency through the creation/redemption mechanism\n• Intraday trading flexibility — buy or sell anytime the market is open\n• Diversification in a single purchase\n\n**How to get started:**\n1. Open a brokerage account\n2. Research ETFs that match your investment goals\n3. Consider broad market ETFs like those tracking the S&P 500\n4. Start with a small investment and add regularly`
+    body: `An exchange-traded fund is a basket of securities that trades on an exchange like a stock. A single ETF can hold hundreds or thousands of companies, which makes it a practical way to diversify without building every position manually.
+
+The main advantages are broad exposure, low fees, transparent holdings, and intraday liquidity. Many investors use broad-market ETFs as the core of a long-term portfolio, then add smaller satellite positions when they have a specific view.
+
+Before buying, compare expense ratio, underlying index, liquidity, tracking error, and overlap with what you already own. The right ETF should make the portfolio simpler, not just add another ticker.`
   },
   {
-    id: 2, title: 'Understanding Stock Market Crashes', category: 'articles', description: 'Historical perspective on market crashes and how to stay calm during volatile periods.', author: 'Investopedia', url: 'https://www.investopedia.com/terms/s/stock-market-crash.asp', readTime: '12 min', likes: 456,
+    id: 2,
+    title: 'How to Think Through Market Crashes',
+    category: 'articles',
+    description: 'A practical playbook for volatility, drawdowns, rebalancing, and avoiding panic decisions.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/s/stock-market-crash.asp',
+    readTime: '12 min',
+    likes: 456,
     type: 'Risk',
-    body: `A stock market crash is a rapid and often unanticipated drop in stock prices. A stock market crash can be a side effect of a major catastrophic event, economic crisis, or the collapse of a long-term speculative bubble.\n\n**Notable crashes in history:**\n• **1929 — The Great Crash:** The Dow lost nearly 25% in two days, leading to the Great Depression.\n• **1987 — Black Monday:** The Dow dropped 22.6% in a single day.\n• **2000 — Dot-Com Bubble:** Tech stocks lost trillions as overvalued internet companies collapsed.\n• **2008 — Financial Crisis:** Triggered by the subprime mortgage collapse, markets lost over 50%.\n• **2020 — COVID-19:** The fastest 30% decline in history, followed by a swift recovery.\n\n**How to stay calm during a crash:**\n1. Remember that markets have always recovered historically\n2. Don't panic sell — selling locks in losses\n3. Continue your regular investment schedule (dollar-cost averaging)\n4. Keep an emergency fund so you don't need to sell investments\n5. Rebalance your portfolio if allocations have shifted significantly`
+    body: `A market crash is a fast, sharp decline in asset prices. The cause can be economic stress, forced selling, excessive valuation, a policy shock, or a sudden change in investor confidence.
+
+The useful question is not whether crashes happen. They do. The useful question is whether your portfolio has enough liquidity, diversification, and time horizon alignment to survive one without forcing bad decisions.
+
+A written plan helps. Define what you will rebalance, what cash you need outside the market, and what would make your original thesis wrong. In volatile markets, process matters more than prediction.`
   },
   {
-    id: 3, title: 'The Power of Dollar-Cost Averaging', category: 'articles', description: 'Reduce risk by investing fixed amounts regularly, regardless of market conditions.', author: 'Investopedia', url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp', readTime: '10 min', likes: 312,
+    id: 3,
+    title: 'Dollar-Cost Averaging Without the Myths',
+    category: 'articles',
+    description: 'How recurring investing reduces timing risk and when lump-sum investing can still make sense.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp',
+    readTime: '10 min',
+    likes: 312,
     type: 'Investing',
-    body: `Dollar-cost averaging (DCA) is the practice of investing a fixed dollar amount on a regular schedule, regardless of the share price. The investor purchases more shares when prices are low and fewer shares when prices are high.\n\n**Example:**\nSuppose you invest $500 per month into an ETF:\n• Month 1: Price $50/share → buy 10 shares\n• Month 2: Price $40/share → buy 12.5 shares\n• Month 3: Price $60/share → buy 8.33 shares\n\nYour average cost per share: $48.39 (lower than the simple average of $50)\n\n**Benefits:**\n• Removes emotion from investing decisions\n• Reduces the risk of investing a lump sum at a market peak\n• Builds a disciplined investing habit\n• Works well with employer-sponsored retirement plans\n\n**Limitations:**\n• In a consistently rising market, lump-sum investing may outperform\n• Doesn't protect against sustained declines\n• Transaction fees can add up (though many brokers now offer free trades)`
+    body: `Dollar-cost averaging means investing a fixed amount on a fixed schedule. You buy more shares when prices are lower and fewer shares when prices are higher, which can reduce regret and timing risk.
+
+It is not magic. In a rising market, investing a lump sum earlier can outperform because more capital is exposed for longer. DCA is most useful when it helps an investor follow through consistently and avoid freezing at market highs.
+
+For most savers, automatic contributions into a diversified portfolio are the strongest version of DCA. The behavior is the edge.`
   },
   {
-    id: 4, title: 'Tax-Loss Harvesting Strategies', category: 'articles', description: 'Maximize returns by strategically offsetting capital gains with losses.', author: 'Investopedia', url: 'https://www.investopedia.com/terms/t/taxgainlossharvesting.asp', readTime: '15 min', likes: 189,
+    id: 4,
+    title: 'Tax-Loss Harvesting Basics',
+    category: 'articles',
+    description: 'What tax-loss harvesting can and cannot do, including wash-sale risk and portfolio fit.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/t/taxgainlossharvesting.asp',
+    readTime: '15 min',
+    likes: 189,
     type: 'Tax',
-    body: `Tax-loss harvesting is the practice of selling a security that has experienced a loss to offset taxes on capital gains and income. The sold security is replaced by a similar one to maintain the portfolio's asset allocation.\n\n**How it works:**\n1. You sell an investment that's at a loss\n2. You use that loss to offset realized capital gains\n3. You reinvest in a similar (but not identical) security\n\n**Key rules to know:**\n• **Wash-Sale Rule:** You cannot buy a "substantially identical" security within 30 days before or after the sale\n• Losses can offset gains dollar-for-dollar\n• Up to $3,000 of excess losses can offset ordinary income per year\n• Remaining losses carry forward to future tax years\n\n**Best practices:**\n• Review your portfolio for tax-loss harvesting opportunities before year-end\n• Consider tax-loss harvesting during market downturns\n• Be mindful of transaction costs\n• Keep good records for tax filing`
+    body: `Tax-loss harvesting is the practice of realizing an investment loss to offset taxable gains. Done carefully, it can improve after-tax returns while keeping the portfolio close to its target exposure.
+
+The main constraint is the wash-sale rule. If you sell at a loss and buy a substantially identical security too close to the sale date, the loss can be disallowed for current tax purposes.
+
+This strategy works best in taxable brokerage accounts. It is less relevant inside tax-advantaged accounts where gains and losses are already sheltered.`
   },
   {
-    id: 5, title: 'Introduction to Bonds and Fixed Income', category: 'articles', description: 'Understand how bonds work, different types, and why they matter in your portfolio.', author: 'Investopedia', url: 'https://www.investopedia.com/terms/b/bond.asp', readTime: '11 min', likes: 278,
+    id: 5,
+    title: 'Bonds and Fixed Income in a Portfolio',
+    category: 'articles',
+    description: 'How bonds work, why yields move, and how fixed income can stabilize a portfolio.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/b/bond.asp',
+    readTime: '11 min',
+    likes: 278,
     type: 'Bonds',
-    body: `A bond is a fixed-income instrument that represents a loan made by an investor to a borrower. Think of it as an IOU between the lender and borrower that includes the details of the loan and its payments.\n\n**Key bond terms:**\n• **Face Value (Par):** The amount the bond will be worth at maturity\n• **Coupon Rate:** The interest rate the bond pays\n• **Maturity Date:** When the bond's principal is repaid\n• **Yield:** The return you actually earn based on the price you paid\n\n**Types of bonds:**\n• **Treasury Bonds:** Issued by the U.S. government, considered very safe\n• **Municipal Bonds:** Issued by states/cities, often tax-exempt\n• **Corporate Bonds:** Issued by companies, higher yield but higher risk\n• **High-Yield (Junk) Bonds:** Lower-rated corporate bonds with higher interest\n\n**Why include bonds in your portfolio?**\n• Provide steady income through coupon payments\n• Generally less volatile than stocks\n• Help diversify and reduce overall portfolio risk\n• Tend to perform well when stocks decline`
+    body: `A bond is a loan from an investor to an issuer. The issuer pays interest and usually returns principal at maturity. Government, municipal, and corporate bonds all share that core structure but carry different risks.
+
+Bond prices move inversely to yields. When market rates rise, existing lower-coupon bonds usually fall in price. When market rates fall, existing higher-coupon bonds often rise.
+
+Fixed income can provide income, reduce volatility, and help fund near-term spending needs. The right mix depends on duration, credit quality, taxes, and how much stability the portfolio needs.`
   },
   {
-    id: 6, title: 'Behavioral Finance: Why We Make Bad Decisions', category: 'articles', description: 'Learn about cognitive biases that influence investment decisions and how to overcome them.', author: 'Investopedia', url: 'https://www.investopedia.com/terms/b/behavioralfinance.asp', readTime: '13 min', likes: 521,
+    id: 6,
+    title: 'Behavioral Finance for Everyday Investors',
+    category: 'articles',
+    description: 'Common biases that damage portfolios and practical guardrails for better decisions.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/b/behavioralfinance.asp',
+    readTime: '13 min',
+    likes: 521,
     type: 'Psychology',
-    body: `Behavioral finance studies how psychological influences and biases affect the financial behaviors of investors and financial practitioners. It helps explain why people make irrational financial decisions.\n\n**Common biases:**\n• **Loss Aversion:** The pain of losing is psychologically about twice as powerful as the pleasure of gaining. This makes investors hold losers too long and sell winners too quickly.\n• **Confirmation Bias:** Seeking information that confirms your existing beliefs while ignoring contradictory evidence.\n• **Herd Mentality:** Following what everyone else is doing instead of making independent decisions.\n• **Anchoring:** Relying too heavily on one piece of information (like the price you bought at).\n• **Overconfidence:** Overestimating your ability to pick winning investments.\n• **Recency Bias:** Giving more weight to recent events than historical data.\n\n**How to overcome these biases:**\n1. Create and follow a written investment plan\n2. Use automatic investing to remove emotional decisions\n3. Diversify to avoid putting all eggs in one basket\n4. Review your portfolio on a set schedule, not in response to news\n5. Seek out opposing viewpoints before making big changes`
+    body: `Investing mistakes often come from behavior, not math. Loss aversion, overconfidence, recency bias, and herd behavior can all push investors toward buying high and selling low.
+
+The best defense is a system. Use allocation targets, automatic contributions, written sell rules, and scheduled review dates. These reduce the number of emotional decisions made under stress.
+
+Markets are noisy. A good process creates enough friction between a market headline and a portfolio action.`
+  },
+  {
+    id: 7,
+    title: 'Asset Allocation: The Decision That Drives Risk',
+    category: 'articles',
+    description: 'Why the stock, bond, and cash mix often matters more than individual security selection.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/a/assetallocation.asp',
+    readTime: '9 min',
+    likes: 168,
+    type: 'Investing',
+    body: `Asset allocation is the mix of stocks, bonds, cash, and other assets in a portfolio. It is the main driver of long-term risk and return because it determines how much exposure you have to growth assets versus stabilizers.
+
+A younger investor with stable income may accept more equity volatility. Someone funding near-term expenses may need more cash and high-quality bonds.
+
+The goal is not to find a perfect allocation. The goal is to choose one you can hold through different market environments.`
+  },
+  {
+    id: 8,
+    title: 'Rebalancing Without Overtrading',
+    category: 'articles',
+    description: 'How threshold-based rebalancing keeps portfolio risk aligned without unnecessary churn.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/r/rebalancing.asp',
+    readTime: '7 min',
+    likes: 143,
+    type: 'Risk',
+    body: `Rebalancing means returning a portfolio to its target allocation after market moves push it away. If stocks rise sharply, rebalancing may mean selling some stocks or directing new contributions to bonds.
+
+Calendar rebalancing is simple, but threshold rebalancing can be more efficient. For example, review quarterly but only trade when an asset class is more than five percentage points away from target.
+
+The benefit is discipline. Rebalancing forces investors to trim what has run and add to what has lagged, while keeping risk from drifting unnoticed.`
+  },
+  {
+    id: 9,
+    title: 'Emergency Funds Before Market Risk',
+    category: 'articles',
+    description: 'Why liquid cash reserves are a portfolio tool, not dead money.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/e/emergency_fund.asp',
+    readTime: '6 min',
+    likes: 131,
+    type: 'Risk',
+    body: `An emergency fund protects the investment plan from real life. Job loss, medical costs, repairs, and family needs can force investors to sell at the worst possible time if they have no cash buffer.
+
+The common guideline is three to six months of essential expenses, adjusted for job stability and household obligations. More uncertainty usually means more cash.
+
+The return on an emergency fund is not just interest. Its real return is avoiding forced selling, high-interest debt, and rushed decisions.`
+  },
+  {
+    id: 10,
+    title: 'Roth vs. Traditional Retirement Accounts',
+    category: 'articles',
+    description: 'How tax timing changes the decision between Roth and pre-tax contributions.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/roth-vs-traditional-ira-4770910',
+    readTime: '10 min',
+    likes: 203,
+    type: 'Retirement',
+    body: `Traditional contributions can reduce taxable income today, while Roth contributions use after-tax dollars and may be withdrawn tax-free later. The core question is whether your tax rate is likely higher now or in retirement.
+
+Roth can be attractive for younger workers, lower-income years, and investors who value tax-free flexibility. Traditional can make sense for high-income years where the deduction is especially valuable.
+
+Many households use both. Tax diversification gives future retirees more control over withdrawal strategy.`
+  },
+  {
+    id: 11,
+    title: 'Sequence-of-Returns Risk',
+    category: 'articles',
+    description: 'Why the order of returns matters most when withdrawals begin.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/s/sequence-risk.asp',
+    readTime: '8 min',
+    likes: 97,
+    type: 'Retirement',
+    body: `Sequence-of-returns risk is the danger that poor market returns arrive early in retirement, when withdrawals are also coming out of the portfolio. The same average return can produce very different outcomes depending on order.
+
+Cash reserves, flexible spending, bond ladders, and lower withdrawal rates can reduce the damage from an early drawdown.
+
+This risk is less important during accumulation and more important near retirement. The portfolio should gradually reflect that change.`
+  },
+  {
+    id: 12,
+    title: 'Understanding Expense Ratios',
+    category: 'articles',
+    description: 'How small annual fund costs compound into large differences over long horizons.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/e/expenseratio.asp',
+    readTime: '5 min',
+    likes: 155,
+    type: 'Investing',
+    body: `An expense ratio is the annual fee charged by a fund as a percentage of assets. A 0.05 percent ETF costs five dollars per year for every ten thousand dollars invested. A 1 percent fund costs one hundred dollars on the same balance.
+
+Fees compound because every dollar paid in fees is also a dollar that no longer compounds for you. Over decades, the gap can become meaningful.
+
+Cost is not the only variable, but it is one of the few investors can control directly.`
+  },
+  {
+    id: 13,
+    title: 'Inflation and Purchasing Power',
+    category: 'articles',
+    description: 'Why nominal returns are only part of the story for long-term wealth.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/p/purchasingpower.asp',
+    readTime: '8 min',
+    likes: 118,
+    type: 'Markets',
+    body: `Inflation reduces purchasing power. If prices rise 3 percent per year, money that sits idle buys less over time. This is why long-term plans focus on real returns, not only nominal returns.
+
+Stocks, real estate, inflation-linked bonds, and wage growth can all help offset inflation in different ways. Cash is useful for stability, but too much cash for too long can create silent risk.
+
+A serious plan should ask what the money will buy in the future, not only what the account balance says today.`
+  },
+  {
+    id: 14,
+    title: 'Reading an Earnings Report',
+    category: 'articles',
+    description: 'A compact guide to revenue, margins, guidance, cash flow, and market reaction.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/e/earningsreport.asp',
+    readTime: '12 min',
+    likes: 86,
+    type: 'Markets',
+    body: `An earnings report updates investors on a company's financial performance. Revenue shows demand, margins show profitability, and cash flow shows whether profits convert into usable cash.
+
+Guidance matters because markets discount the future. A company can beat last quarter's estimates and still sell off if management lowers expectations.
+
+Read the report in context. Compare trends across several quarters, listen for changes in tone, and separate one-time items from durable business performance.`
+  },
+  {
+    id: 15,
+    title: 'Credit Risk in Corporate Bonds',
+    category: 'articles',
+    description: 'How default risk, spreads, and ratings affect fixed-income decisions.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/c/creditrisk.asp',
+    readTime: '9 min',
+    likes: 74,
+    type: 'Bonds',
+    body: `Corporate bonds pay more than Treasuries because investors take credit risk. The extra yield is called a spread, and it compensates holders for the possibility that the company cannot meet its obligations.
+
+Ratings help classify risk, but they are not a substitute for analysis. Leverage, cash flow stability, interest coverage, and industry cyclicality all matter.
+
+Higher yield is not automatically better. Sometimes the extra income is not enough compensation for the downside.`
+  },
+  {
+    id: 16,
+    title: 'Capital Gains Taxes for Investors',
+    category: 'articles',
+    description: 'The difference between short-term and long-term gains and why holding period matters.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/c/capital_gains_tax.asp',
+    readTime: '7 min',
+    likes: 126,
+    type: 'Tax',
+    body: `Capital gains taxes depend partly on holding period. In the United States, gains on assets held for one year or less are generally short-term and taxed like ordinary income. Longer-held assets often receive preferential rates.
+
+Taxes should not be the only reason to hold or sell, but they are part of after-tax return. A good investment decision can still be weakened by unnecessary turnover.
+
+Before making large taxable trades, estimate the tax impact and consider whether rebalancing through new contributions can reduce realized gains.`
+  },
+  {
+    id: 17,
+    title: 'Crypto Allocation: Position Sizing First',
+    category: 'articles',
+    description: 'A risk-first framework for approaching digital assets without letting volatility dominate the plan.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/cryptocurrency-4427699',
+    readTime: '10 min',
+    likes: 92,
+    type: 'Crypto',
+    body: `Digital assets can be volatile, reflexive, and difficult to value with traditional models. That does not automatically make them uninvestable, but it does make position sizing central.
+
+A small allocation can express a view without putting the full financial plan at risk. Custody, liquidity, tax reporting, and security practices matter as much as the asset thesis.
+
+If a position can force emotional decisions during a drawdown, it is probably too large.`
+  },
+  {
+    id: 18,
+    title: 'Building an Investment Policy Statement',
+    category: 'articles',
+    description: 'Turn goals, constraints, allocation, and behavior rules into one operating document.',
+    author: 'Tradelingo Research',
+    url: 'https://www.investopedia.com/terms/i/ips.asp',
+    readTime: '11 min',
+    likes: 139,
+    type: 'Psychology',
+    body: `An investment policy statement is a written plan for how money should be managed. It defines objectives, time horizon, risk tolerance, target allocation, rebalancing rules, and what would trigger a change.
+
+The document is most valuable when markets are stressful. It gives the investor a reference point that was written before panic or excitement took over.
+
+Keep it short enough to use. A one-page policy that is followed beats a long document that never affects behavior.`
   }
 ];
 
-const ARTICLE_TYPES: ArticleType[] = ['Investing', 'Risk', 'Tax', 'Bonds', 'Psychology'];
+const ARTICLE_TYPES: ArticleType[] = [
+  'Investing',
+  'Risk',
+  'Tax',
+  'Bonds',
+  'Psychology',
+  'Retirement',
+  'Markets',
+  'Crypto',
+];
+
+function readLikedArticles(): Set<number> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(LIKED_ARTICLES_KEY);
+    const ids = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(ids) ? ids.filter((id) => Number.isInteger(id)) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function writeLikedArticles(ids: Set<number>): void {
+  window.localStorage.setItem(LIKED_ARTICLES_KEY, JSON.stringify([...ids]));
+}
 
 export default function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [articles, setArticles] = useState<FullArticle[]>(ARTICLES);
   const [selectedType, setSelectedType] = useState<ArticleType | 'all'>('all');
-  const [openArticle, setOpenArticle] = useState<FullArticle | null>(null);
-  const [likedArticles, setLikedArticles] = useState<Set<number>>(new Set());
+  const [openArticleId, setOpenArticleId] = useState<number | null>(null);
+  const [likedArticles, setLikedArticles] = useState<Set<number>>(() => readLikedArticles());
+  const [pendingLikes, setPendingLikes] = useState<Set<number>>(new Set());
 
-  // Client-side filter: title/description substring + optional topic chip.
-  const filteredArticles = articles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = selectedType === 'all' || article.type === selectedType;
-    return matchesSearch && matchesType;
-  });
+  useEffect(() => {
+    let cancelled = false;
 
-  /** Toggles like state, bumps the counter, and keeps the detail view in sync if it's open. */
-  const handleLike = (id: number) => {
-    const isLiked = likedArticles.has(id);
-
-    setArticles(prev =>
-      prev.map(a =>
-        a.id === id
-          ? { ...a, likes: Math.max(0, a.likes + (isLiked ? -1 : 1)) }
-          : a
-      )
-    );
-
-    setLikedArticles(prev => {
-      const newSet = new Set(prev);
-      if (isLiked) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
+    const loadLikes = async () => {
+      try {
+        const response = await fetch('/api/article-likes');
+        if (!response.ok) return;
+        const data = (await response.json()) as ArticleLikeRecord[];
+        const likesById = new Map(data.map((record) => [record.articleId, record.likes]));
+        if (!cancelled) {
+          setArticles((prev) =>
+            prev.map((article) => ({
+              ...article,
+              likes: likesById.get(article.id) ?? article.likes,
+            }))
+          );
+        }
+      } catch (error) {
+        console.warn('Failed to load article likes', error);
       }
-      return newSet;
-    });
+    };
 
-    if (openArticle && openArticle.id === id) {
-      setOpenArticle({
-        ...openArticle,
-        likes: Math.max(0, openArticle.likes + (isLiked ? -1 : 1))
+    loadLikes();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredArticles = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    return articles.filter((article) => {
+      const matchesSearch =
+        normalizedQuery.length === 0 ||
+        article.title.toLowerCase().includes(normalizedQuery) ||
+        article.description.toLowerCase().includes(normalizedQuery) ||
+        article.type.toLowerCase().includes(normalizedQuery);
+      const matchesType = selectedType === 'all' || article.type === selectedType;
+      return matchesSearch && matchesType;
+    });
+  }, [articles, searchQuery, selectedType]);
+
+  const openArticle = openArticleId === null ? null : articles.find((article) => article.id === openArticleId) ?? null;
+
+  const updateLocalLike = (id: number, liked: boolean, likes: number) => {
+    setArticles((prev) =>
+      prev.map((article) => (article.id === id ? { ...article, likes: Math.max(0, likes) } : article))
+    );
+    setLikedArticles((prev) => {
+      const next = new Set(prev);
+      if (liked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      writeLikedArticles(next);
+      return next;
+    });
+  };
+
+  const handleLike = async (id: number) => {
+    const article = articles.find((item) => item.id === id);
+    if (!article || pendingLikes.has(id)) return;
+
+    const wasLiked = likedArticles.has(id);
+    const nextLiked = !wasLiked;
+    const optimisticLikes = Math.max(0, article.likes + (nextLiked ? 1 : -1));
+
+    setPendingLikes((prev) => new Set(prev).add(id));
+    updateLocalLike(id, nextLiked, optimisticLikes);
+
+    try {
+      const response = await fetch(`/api/article-likes/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: nextLiked ? 'like' : 'unlike',
+          baseLikes: article.likes,
+        }),
+      });
+
+      const data = (await response.json()) as ArticleLikeRecord | { error?: string };
+      if (!response.ok || !('likes' in data)) {
+        throw new Error('error' in data ? data.error : 'Failed to save article like');
+      }
+
+      updateLocalLike(id, nextLiked, data.likes);
+    } catch (error) {
+      console.warn('Failed to save article like', error);
+      updateLocalLike(id, wasLiked, article.likes);
+    } finally {
+      setPendingLikes((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
       });
     }
   };
@@ -102,32 +459,37 @@ export default function Explore() {
   if (openArticle) {
     return (
       <div className="explore">
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <button
-            className="explore__filter-btn"
-            style={{ marginBottom: '2rem' }}
-            onClick={() => setOpenArticle(null)}
-          >
-            ← Back to Articles
+        <div className="explore__article-shell">
+          <button className="explore__back-btn" onClick={() => setOpenArticleId(null)}>
+            <ArrowLeft size={16} />
+            Articles
           </button>
-          <article className="explore__card" style={{ padding: '2.5rem' }}>
-            <div className="explore__card-header">
-              <h2 style={{ fontSize: '2rem', margin: 0 }}>{openArticle.title}</h2>
+          <article className="explore__article">
+            <div className="explore__article-header">
               <span className="explore__category">{openArticle.type}</span>
+              <h1>{openArticle.title}</h1>
+              <p>{openArticle.description}</p>
             </div>
-            <div className="explore__card-meta" style={{ marginTop: '1rem' }}>
+            <div className="explore__card-meta explore__article-meta">
               <span className="explore__author">By {openArticle.author}</span>
-              <span className="explore__read-time">📖 {openArticle.readTime}</span>
+              <span className="explore__read-time">
+                <Clock size={15} />
+                {openArticle.readTime}
+              </span>
             </div>
-            <div style={{ marginTop: '2rem', lineHeight: '1.8', color: 'var(--text-muted)', whiteSpace: 'pre-line', fontSize: '1.05rem' }}>
-              {openArticle.body}
+            <div className="explore__article-body">
+              {openArticle.body.split('\n\n').map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
-            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className="explore__article-actions">
               <button
                 onClick={() => handleLike(openArticle.id)}
                 className={`explore__like-btn ${likedArticles.has(openArticle.id) ? 'liked' : ''}`}
+                disabled={pendingLikes.has(openArticle.id)}
               >
-                {likedArticles.has(openArticle.id) ? `❤️ ${openArticle.likes}` : `👍 ${openArticle.likes}`}
+                <ThumbsUp size={16} />
+                {likedArticles.has(openArticle.id) ? 'Liked' : 'Like'} {openArticle.likes}
               </button>
               <a
                 href={openArticle.url}
@@ -135,14 +497,9 @@ export default function Explore() {
                 rel="noopener noreferrer"
                 className="explore__read-btn"
               >
-                Read on {openArticle.author} →
+                Source
+                <ExternalLink size={16} />
               </a>
-              <button
-                className="explore__filter-btn"
-                onClick={() => setOpenArticle(null)}
-              >
-                Close Article
-              </button>
             </div>
           </article>
         </div>
@@ -153,8 +510,9 @@ export default function Explore() {
   return (
     <div className="explore">
       <div className="explore__hero">
-        <h1>📚 Explore & Learn</h1>
-        <p>Discover free articles and resources to expand your investment knowledge</p>
+        <span className="explore__eyebrow">Research Library</span>
+        <h1>Market education for disciplined investors</h1>
+        <p>Concise articles on portfolio construction, risk, taxes, retirement planning, and market behavior.</p>
       </div>
 
       <div className="explore__search">
@@ -162,27 +520,27 @@ export default function Explore() {
           <Search size={20} />
           <input
             type="text"
-            placeholder="Search articles, topics, authors..."
+            placeholder="Search articles, topics, or categories"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="explore__filters">
+      <div className="explore__filters" aria-label="Article categories">
         <button
           className={`explore__filter-btn ${selectedType === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedType('all')}
         >
-          All ({articles.length})
+          All {articles.length}
         </button>
-        {ARTICLE_TYPES.map(type => (
+        {ARTICLE_TYPES.map((type) => (
           <button
             key={type}
             className={`explore__filter-btn ${selectedType === type ? 'active' : ''}`}
             onClick={() => setSelectedType(type)}
           >
-            {type} ({articles.filter(a => a.type === type).length})
+            {type} {articles.filter((article) => article.type === type).length}
           </button>
         ))}
       </div>
@@ -198,42 +556,49 @@ export default function Explore() {
               <p className="explore__description">{article.description}</p>
               <div className="explore__card-meta">
                 <span className="explore__author">By {article.author}</span>
-                <span className="explore__read-time">📖 {article.readTime}</span>
+                <span className="explore__read-time">
+                  <Clock size={15} />
+                  {article.readTime}
+                </span>
               </div>
               <div className="explore__card-footer">
                 <button
                   onClick={() => handleLike(article.id)}
                   className={`explore__like-btn ${likedArticles.has(article.id) ? 'liked' : ''}`}
+                  disabled={pendingLikes.has(article.id)}
                 >
-                  {likedArticles.has(article.id)
-                    ? `❤️ ${article.likes}`
-                    : `👍 ${article.likes}`}
+                  <ThumbsUp size={16} />
+                  {likedArticles.has(article.id) ? 'Liked' : 'Like'} {article.likes}
                 </button>
-                <button
-                  className="explore__read-btn"
-                  onClick={() => setOpenArticle(article)}
-                >
-                  Read Article →
+                <button className="explore__read-btn" onClick={() => setOpenArticleId(article.id)}>
+                  Read
+                  <ArrowRight size={16} />
                 </button>
               </div>
             </article>
           ))
         ) : (
           <div className="explore__empty">
-            <p>No articles found for "{searchQuery}"</p>
-            <button onClick={() => { setSearchQuery(''); setSelectedType('all'); }} className="explore__reset-btn">
-              Clear Filters
+            <p>No articles match "{searchQuery}".</p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedType('all');
+              }}
+              className="explore__reset-btn"
+            >
+              Clear filters
             </button>
           </div>
         )}
       </div>
 
       <div className="explore__footer">
-        <h2>💡 Did You Know?</h2>
+        <span className="explore__eyebrow">Market Insight</span>
+        <h2>Most long-term portfolio results come from allocation, costs, taxes, and behavior.</h2>
         <p>
-          Warren Buffett, one of the world's greatest investors, recommends that most people invest
-          in low-cost index funds. His strategy is to buy and hold for the long term, which has
-          made him a billionaire!
+          Security selection can matter, but a repeatable process usually matters more. Keep the plan simple enough to
+          follow when markets are noisy.
         </p>
       </div>
     </div>

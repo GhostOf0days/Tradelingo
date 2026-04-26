@@ -23,6 +23,18 @@ const RETIREMENT_ACCOUNTS = [
   new Account('roth', 'Roth IRA', 'Tax-free withdrawals', 7000, false, 7000),
   new Account('sep', 'SEP IRA', 'For self-employed', 69000, false, 15000),
 ];
+const MIN_RETURN_RATE = -100;
+const MAX_RETURN_RATE = 100;
+
+const clamp = (value: number, min: number, max: number) => {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, value));
+};
+
+const parseNumberInput = (value: string) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'retirement' | 'compound' | 'savings'>('retirement');
@@ -42,28 +54,50 @@ export default function Calculator() {
   });
 
   const safeCompoundData = {
-    principal: Math.max(0, compoundData.principal || 0),
-    annualRate: Math.max(0, Math.min(100, compoundData.annualRate || 0)),
-    years: Math.max(0, Math.min(100, compoundData.years || 0)),
-    compoundFreq: Math.max(1, compoundData.compoundFreq || 1),
+    principal: clamp(compoundData.principal || 0, 0, 1_000_000_000),
+    annualRate: clamp(compoundData.annualRate || 0, MIN_RETURN_RATE, MAX_RETURN_RATE),
+    years: clamp(compoundData.years || 0, 0, 100),
+    compoundFreq: Math.max(1, Math.floor(compoundData.compoundFreq || 1)),
   };
 
   const compoundResult = RetirementCalculator.compound(safeCompoundData.principal, safeCompoundData.annualRate, safeCompoundData.years, safeCompoundData.compoundFreq);
+  const safeSelectedAccount = selectedAccount.copyWith({
+    annualContribution: clamp(selectedAccount.annualContribution || 0, 0, selectedAccount.contributionLimit),
+    currentBalance: clamp(selectedAccount.currentBalance || 0, 0, 1_000_000_000),
+    years: Math.floor(clamp(selectedAccount.years || 0, 0, 100)),
+    employerMatch: clamp(selectedAccount.employerMatch || 0, 0, 1_000_000_000),
+  });
+  const retirementProjection = RetirementCalculator.project(safeSelectedAccount);
+  const safeSavingsData = {
+    currentAge: Math.floor(clamp(savingsData.currentAge || 0, 0, 120)),
+    currentSavings: clamp(savingsData.currentSavings || 0, 0, 1_000_000_000),
+    annualContribution: clamp(savingsData.annualContribution || 0, 0, 1_000_000_000),
+    annualReturn: clamp(savingsData.annualReturn || 0, MIN_RETURN_RATE, MAX_RETURN_RATE),
+  };
+  const safeRetirementAge = Math.floor(clamp(savingsData.retirementAge || 0, safeSavingsData.currentAge, 120));
+  const savingsYears = safeRetirementAge - safeSavingsData.currentAge;
+  const savingsProjection = RetirementCalculator.projectSavings(
+    safeSavingsData.currentSavings,
+    safeSavingsData.annualContribution,
+    safeSavingsData.annualReturn,
+    savingsYears
+  );
 
   /** Year-by-year stacked series: money you put in vs growth, for the selected account card. */
   const retirementChartData = useMemo(() => {
     const data = [];
-    const safeYears = Math.max(0, Math.min(100, selectedAccount.years || 0));
+    const safeYears = Math.floor(clamp(selectedAccount.years || 0, 0, 100));
     const annualReturn = 7;
     const r = annualReturn / 100;
     const monthlyRate = r / 12;
     
-    let balance = Math.max(0, selectedAccount.currentBalance || 0);
-    const annualContribution = Math.max(0, (selectedAccount.annualContribution || 0) + (selectedAccount.employerMatch || 0));
+    let balance = clamp(selectedAccount.currentBalance || 0, 0, 1_000_000_000);
+    const employeeContribution = clamp(selectedAccount.annualContribution || 0, 0, selectedAccount.contributionLimit);
+    const annualContribution = employeeContribution + clamp(selectedAccount.employerMatch || 0, 0, 1_000_000_000);
     const monthlyContribution = annualContribution / 12;
 
     for (let year = 0; year <= safeYears; year++) {
-      const totalContributed = (selectedAccount.currentBalance || 0) + (annualContribution * year);
+      const totalContributed = clamp(selectedAccount.currentBalance || 0, 0, 1_000_000_000) + (annualContribution * year);
       const growth = Math.max(0, balance - totalContributed);
       
       data.push({
@@ -90,7 +124,7 @@ export default function Calculator() {
     for (let year = 0; year <= safeYears; year++) {
       const amount = safeCompoundData.principal * Math.pow(1 + r / n, n * year);
       const principal = safeCompoundData.principal;
-      const interest = Math.max(0, amount - principal);
+      const interest = amount - principal;
 
       data.push({
         year: `Year ${year}`,
@@ -105,21 +139,20 @@ export default function Calculator() {
   /** Age-based projection with recurring contributions until retirement age. */
   const savingsChartData = useMemo(() => {
     const data = [];
-    const safeCurrentAge = Math.max(0, Math.min(120, savingsData.currentAge || 0));
-    const safeRetirementAge = Math.max(safeCurrentAge, Math.min(120, savingsData.retirementAge || 0));
+    const safeCurrentAge = Math.floor(clamp(savingsData.currentAge || 0, 0, 120));
+    const safeRetirementAge = Math.floor(clamp(savingsData.retirementAge || 0, safeCurrentAge, 120));
     const years = safeRetirementAge - safeCurrentAge;
-    const r = Math.max(0, Math.min(100, savingsData.annualReturn || 0)) / 100;
+    const r = clamp(savingsData.annualReturn || 0, MIN_RETURN_RATE, MAX_RETURN_RATE) / 100;
     const monthlyRate = r / 12;
-    
-    if (years <= 0) return [];
 
-    let balance = Math.max(0, savingsData.currentSavings || 0);
-    const safeAnnualContribution = Math.max(0, savingsData.annualContribution || 0);
+    const safeCurrentSavings = clamp(savingsData.currentSavings || 0, 0, 1_000_000_000);
+    let balance = safeCurrentSavings;
+    const safeAnnualContribution = clamp(savingsData.annualContribution || 0, 0, 1_000_000_000);
     const monthlyContribution = safeAnnualContribution / 12;
 
     for (let year = 0; year <= years; year++) {
-      const totalContributed = (savingsData.currentSavings || 0) + (safeAnnualContribution * year);
-      const growth = Math.max(0, balance - totalContributed);
+      const totalContributed = safeCurrentSavings + (safeAnnualContribution * year);
+      const growth = balance - totalContributed;
 
       data.push({
         age: safeCurrentAge + year,
@@ -147,7 +180,7 @@ export default function Calculator() {
   return (
     <div className="calculator">
       <div className="calculator__header">
-        <h1>💰 Investment Calculator</h1>
+        <h1>Investment Calculator</h1>
         <p>Plan your financial future with our interactive tools</p>
       </div>
 
@@ -196,10 +229,12 @@ export default function Calculator() {
                         <label>Annual Contribution ($)</label>
                         <input
                           type="number"
+                          min={0}
+                          max={selectedAccount.contributionLimit}
                           value={selectedAccount.annualContribution}
                           onChange={(e) =>
                             setSelectedAccount(selectedAccount.copyWith({
-                              annualContribution: parseInt(e.target.value) || 0,
+                              annualContribution: clamp(parseNumberInput(e.target.value), 0, selectedAccount.contributionLimit),
                             }))
                           }
                         />
@@ -209,10 +244,11 @@ export default function Calculator() {
                           <label>Employer Match ($)</label>
                           <input
                             type="number"
+                            min={0}
                             value={selectedAccount.employerMatch}
                             onChange={(e) =>
                               setSelectedAccount(selectedAccount.copyWith({
-                                employerMatch: parseInt(e.target.value) || 0,
+                                employerMatch: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000),
                               }))
                             }
                           />
@@ -222,10 +258,11 @@ export default function Calculator() {
                         <label>Current Balance ($)</label>
                         <input
                           type="number"
+                          min={0}
                           value={selectedAccount.currentBalance}
                           onChange={(e) =>
                             setSelectedAccount(selectedAccount.copyWith({
-                              currentBalance: parseInt(e.target.value) || 0,
+                              currentBalance: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000),
                             }))
                           }
                         />
@@ -234,10 +271,12 @@ export default function Calculator() {
                         <label>Years Until Retirement</label>
                         <input
                           type="number"
+                          min={0}
+                          max={100}
                           value={selectedAccount.years}
                           onChange={(e) =>
                             setSelectedAccount(selectedAccount.copyWith({
-                              years: parseInt(e.target.value) || 0,
+                              years: Math.floor(clamp(parseNumberInput(e.target.value), 0, 100)),
                             }))
                           }
                         />
@@ -245,7 +284,7 @@ export default function Calculator() {
                       <div className="calculator__result">
                         <p>Projected Balance at Retirement:</p>
                         <p className="calculator__result-value">
-                          ${RetirementCalculator.format(RetirementCalculator.project(selectedAccount))}
+                          ${RetirementCalculator.format(retirementProjection)}
                         </p>
                       </div>
                     </div>
@@ -299,9 +338,10 @@ export default function Calculator() {
                   <label>Principal Amount ($)</label>
                   <input
                     type="number"
+                    min={0}
                     value={compoundData.principal}
                     onChange={(e) =>
-                      setCompoundData({ ...compoundData, principal: parseInt(e.target.value) || 0 })
+                      setCompoundData({ ...compoundData, principal: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000) })
                     }
                   />
                 </div>
@@ -309,10 +349,15 @@ export default function Calculator() {
                   <label>Annual Interest Rate (%)</label>
                   <input
                     type="number"
+                    min={MIN_RETURN_RATE}
+                    max={MAX_RETURN_RATE}
                     step="0.1"
                     value={compoundData.annualRate}
                     onChange={(e) =>
-                      setCompoundData({ ...compoundData, annualRate: parseFloat(e.target.value) || 0 })
+                      setCompoundData({
+                        ...compoundData,
+                        annualRate: clamp(parseNumberInput(e.target.value), MIN_RETURN_RATE, MAX_RETURN_RATE),
+                      })
                     }
                   />
                 </div>
@@ -320,9 +365,11 @@ export default function Calculator() {
                   <label>Time Period (Years)</label>
                   <input
                     type="number"
+                    min={0}
+                    max={100}
                     value={compoundData.years}
                     onChange={(e) =>
-                      setCompoundData({ ...compoundData, years: parseInt(e.target.value) || 0 })
+                      setCompoundData({ ...compoundData, years: Math.floor(clamp(parseNumberInput(e.target.value), 0, 100)) })
                     }
                   />
                 </div>
@@ -344,7 +391,9 @@ export default function Calculator() {
                 <div className="calculator__result">
                   <p>Final Amount:</p>
                   <p className="calculator__result-value">${RetirementCalculator.format(compoundResult)}</p>
-                  <p className="calculator__result-gain">Gain: ${RetirementCalculator.format(compoundResult - compoundData.principal)}</p>
+                  <p className="calculator__result-gain">
+                    Gain/Loss: ${RetirementCalculator.format(compoundResult - safeCompoundData.principal)}
+                  </p>
                 </div>
               </div>
 
@@ -394,9 +443,11 @@ export default function Calculator() {
                   <label>Current Age</label>
                   <input
                     type="number"
+                    min={0}
+                    max={120}
                     value={savingsData.currentAge}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, currentAge: parseInt(e.target.value) || 0 })
+                      setSavingsData({ ...savingsData, currentAge: Math.floor(clamp(parseNumberInput(e.target.value), 0, 120)) })
                     }
                   />
                 </div>
@@ -404,9 +455,11 @@ export default function Calculator() {
                   <label>Retirement Age</label>
                   <input
                     type="number"
+                    min={0}
+                    max={120}
                     value={savingsData.retirementAge}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, retirementAge: parseInt(e.target.value) || 0 })
+                      setSavingsData({ ...savingsData, retirementAge: Math.floor(clamp(parseNumberInput(e.target.value), 0, 120)) })
                     }
                   />
                 </div>
@@ -414,9 +467,10 @@ export default function Calculator() {
                   <label>Current Savings ($)</label>
                   <input
                     type="number"
+                    min={0}
                     value={savingsData.currentSavings}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, currentSavings: parseInt(e.target.value) || 0 })
+                      setSavingsData({ ...savingsData, currentSavings: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000) })
                     }
                   />
                 </div>
@@ -424,9 +478,10 @@ export default function Calculator() {
                   <label>Annual Contribution ($)</label>
                   <input
                     type="number"
+                    min={0}
                     value={savingsData.annualContribution}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, annualContribution: parseInt(e.target.value) || 0 })
+                      setSavingsData({ ...savingsData, annualContribution: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000) })
                     }
                   />
                 </div>
@@ -434,20 +489,25 @@ export default function Calculator() {
                   <label>Expected Annual Return (%)</label>
                   <input
                     type="number"
+                    min={MIN_RETURN_RATE}
+                    max={MAX_RETURN_RATE}
                     step="0.1"
                     value={savingsData.annualReturn}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, annualReturn: parseFloat(e.target.value) || 0 })
+                      setSavingsData({
+                        ...savingsData,
+                        annualReturn: clamp(parseNumberInput(e.target.value), MIN_RETURN_RATE, MAX_RETURN_RATE),
+                      })
                     }
                   />
                 </div>
                 <div className="calculator__result">
                   <p>Projected Retirement Savings:</p>
                   <p className="calculator__result-value">
-                    ${RetirementCalculator.format(RetirementCalculator.projectSavings(savingsData.currentSavings, savingsData.annualContribution, savingsData.annualReturn, savingsData.retirementAge - savingsData.currentAge))}
+                    ${RetirementCalculator.format(savingsProjection)}
                   </p>
                   <p className="calculator__result-info">
-                    Years until retirement: {savingsData.retirementAge - savingsData.currentAge}
+                    Years until retirement: {savingsYears}
                   </p>
                 </div>
               </div>

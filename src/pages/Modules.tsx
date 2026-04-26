@@ -5,7 +5,7 @@ import { Play, CheckCircle2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
-import '../styles/modules.css';
+import '../styles/Modules.css';
 
 const MODULE_LIST = Object.entries(MODULES).map(([id, data]) => ({
   id: Number(id),

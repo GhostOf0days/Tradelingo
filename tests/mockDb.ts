@@ -10,6 +10,9 @@ function matchFilter(doc: Record<string, unknown>, filter: Record<string, unknow
         const hasKey = key in doc;
         if (exists && !hasKey) return false;
         if (!exists && hasKey) return false;
+      } else if ('$gt' in (value as Record<string, unknown>)) {
+        const current = doc[key] as number | undefined;
+        if (typeof current !== 'number' || current <= (value as { $gt: number }).$gt) return false;
       } else {
         return matchFilter((doc[key] as Record<string, unknown>) || {}, value as Record<string, unknown>);
       }
@@ -38,6 +41,13 @@ function applyUpdate(doc: Record<string, unknown>, update: Record<string, unknow
       const arr = ((doc as Record<string, unknown>)[k] as unknown[]) ?? [];
       arr.push(v);
       (doc as Record<string, unknown>)[k] = arr;
+    }
+  }
+  if (update.$setOnInsert) {
+    for (const [k, v] of Object.entries(update.$setOnInsert as Record<string, unknown>)) {
+      if (!(k in doc)) {
+        (doc as Record<string, unknown>)[k] = v;
+      }
     }
   }
 }
@@ -94,6 +104,29 @@ export function createMockCollection() {
       const copy = { ...doc, _id: (doc._id as number) ?? nextId++ };
       store.push(copy);
       return { insertedId: copy._id };
+    },
+
+    async updateOne(
+      filter: Record<string, unknown>,
+      update: Record<string, unknown>,
+      options?: { upsert?: boolean }
+    ) {
+      const idx = store.findIndex((doc) => matchFilter(doc as Record<string, unknown>, filter));
+      if (idx !== -1) {
+        applyUpdate(store[idx] as Record<string, unknown>, update);
+        return { matchedCount: 1, modifiedCount: 1, upsertedId: null };
+      }
+
+      if (options?.upsert) {
+        const doc = { ...filter, _id: nextId++ } as Record<string, unknown>;
+        if (update.$setOnInsert) {
+          Object.assign(doc, update.$setOnInsert as Record<string, unknown>);
+        }
+        store.push(doc);
+        return { matchedCount: 0, modifiedCount: 0, upsertedId: doc._id };
+      }
+
+      return { matchedCount: 0, modifiedCount: 0, upsertedId: null };
     },
 
     async findOneAndUpdate(
@@ -174,11 +207,14 @@ export function createMockCollection() {
 
 const usersSingleton = createMockCollection();
 const modulesSingleton = createMockCollection();
+const articleLikesSingleton = createMockCollection();
 
 export const mockUsersCollection = usersSingleton.collection;
 export const mockModulesCollection = modulesSingleton.collection;
+export const mockArticleLikesCollection = articleLikesSingleton.collection;
 
 export function resetMockDb(): void {
   usersSingleton.reset();
   modulesSingleton.reset();
+  articleLikesSingleton.reset();
 }

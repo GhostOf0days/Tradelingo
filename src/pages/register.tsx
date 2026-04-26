@@ -1,8 +1,16 @@
 // Creates an account via POST /api/register and logs the user in immediately afterward.
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import '../styles/Register.css';
+
+const PASSWORD_RULES = [
+  { label: 'At least 8 characters', test: (value: string) => value.length >= 8 },
+  { label: 'One uppercase letter', test: (value: string) => /[A-Z]/.test(value) },
+  { label: 'One lowercase letter', test: (value: string) => /[a-z]/.test(value) },
+  { label: 'One number', test: (value: string) => /[0-9]/.test(value) },
+  { label: 'One symbol', test: (value: string) => /[^A-Za-z0-9]/.test(value) },
+];
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -11,11 +19,25 @@ export default function Register() {
   
   const { setUser } = useUser();
   const navigate = useNavigate();
+  const passwordChecks = useMemo(
+    () => PASSWORD_RULES.map((rule) => ({ ...rule, valid: rule.test(password) })),
+    [password]
+  );
+  const passwordScore = passwordChecks.filter((check) => check.valid).length;
+  const passwordStrength =
+    passwordScore <= 2 ? 'weak' : passwordScore <= 4 ? 'good' : 'strong';
+  const hasPasswordIssues = password.length > 0 && passwordScore < PASSWORD_RULES.length;
 
   /** POST /api/register; server hashes password and returns the public profile fields. */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const missingRule = passwordChecks.find((check) => !check.valid);
+    if (missingRule) {
+      setError(`Password needs: ${missingRule.label.toLowerCase()}`);
+      return;
+    }
 
     try {
       const response = await fetch('/api/register', {
@@ -69,9 +91,39 @@ export default function Register() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Use a strong password"
+              autoComplete="new-password"
+              aria-invalid={hasPasswordIssues}
               required
             />
+            {password.length > 0 && (
+              <div className="auth__password-panel">
+                <div className="auth__strength-row">
+                  <span>Password strength</span>
+                  <strong className={`auth__strength-label auth__strength-label--${passwordStrength}`}>
+                    {passwordStrength}
+                  </strong>
+                </div>
+                <div className="auth__strength-meter" aria-hidden="true">
+                  <span style={{ width: `${(passwordScore / PASSWORD_RULES.length) * 100}%` }} />
+                </div>
+                <ul className="auth__password-rules">
+                  {passwordChecks.map((check) => (
+                    <li
+                      key={check.label}
+                      className={check.valid ? 'auth__password-rule--valid' : ''}
+                    >
+                      {check.valid ? '✓' : '•'} {check.label}
+                    </li>
+                  ))}
+                </ul>
+                {passwordScore < PASSWORD_RULES.length && (
+                  <p className="auth__password-suggestion">
+                    Strong example: MarketSaver27!
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <button className="auth__submit" type="submit">

@@ -1,7 +1,12 @@
 // Integration tests against the Express app with mongodb mocked to mockDb (register, login, progress, etc.).
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
-import { resetMockDb, mockUsersCollection, mockModulesCollection } from './mockDb';
+import {
+  resetMockDb,
+  mockUsersCollection,
+  mockModulesCollection,
+  mockArticleLikesCollection,
+} from './mockDb';
 
 vi.mock('mongodb', () => {
   return {
@@ -9,7 +14,11 @@ vi.mock('mongodb', () => {
       return {
         connect: () => Promise.resolve(),
         db: () => ({
-          collection: (name: string) => (name === 'modules' ? mockModulesCollection : mockUsersCollection),
+          collection: (name: string) => {
+            if (name === 'modules') return mockModulesCollection;
+            if (name === 'articleLikes') return mockArticleLikesCollection;
+            return mockUsersCollection;
+          },
         }),
       };
     },
@@ -22,6 +31,8 @@ const getApp = async () => {
   return app;
 };
 
+const STRONG_PASSWORD = 'TradeLingo123!';
+
 describe('Auth API', () => {
   beforeEach(() => {
     resetMockDb();
@@ -31,7 +42,7 @@ describe('Auth API', () => {
     const app = await getApp();
     const res = await request(app)
       .post('/api/register')
-      .send({ email: 'test@example.com', password: 'password123' })
+      .send({ email: 'test@example.com', password: STRONG_PASSWORD })
       .expect(201);
 
     expect(res.body).toMatchObject({
@@ -44,16 +55,26 @@ describe('Auth API', () => {
     expect(res.body.lastActivityDate).toBeNull();
   });
 
+  it('POST /api/register rejects weak passwords with 400', async () => {
+    const app = await getApp();
+    const res = await request(app)
+      .post('/api/register')
+      .send({ email: 'weak@example.com', password: 'password123' })
+      .expect(400);
+
+    expect(res.body.error).toBe('Password must include an uppercase letter');
+  });
+
   it('POST /api/register rejects duplicate email with 400', async () => {
     const app = await getApp();
     await request(app)
       .post('/api/register')
-      .send({ email: 'dup@example.com', password: 'password123' })
+      .send({ email: 'dup@example.com', password: STRONG_PASSWORD })
       .expect(201);
 
     const res = await request(app)
       .post('/api/register')
-      .send({ email: 'dup@example.com', password: 'other123' })
+      .send({ email: 'dup@example.com', password: 'OtherPass123!' })
       .expect(400);
 
     expect(res.body.error).toBe('User already exists');
@@ -71,11 +92,11 @@ describe('Auth API', () => {
 
   it('POST /api/login succeeds and returns user data', async () => {
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'user@example.com', password: 'secret123' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'user@example.com', password: STRONG_PASSWORD }).expect(201);
 
     const res = await request(app)
       .post('/api/login')
-      .send({ email: 'user@example.com', password: 'secret123' })
+      .send({ email: 'user@example.com', password: STRONG_PASSWORD })
       .expect(200);
 
     expect(res.body).toMatchObject({
@@ -89,11 +110,11 @@ describe('Auth API', () => {
 
   it('POST /api/login returns 401 for wrong password', async () => {
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'u@example.com', password: 'correct123' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'u@example.com', password: STRONG_PASSWORD }).expect(201);
 
     await request(app)
       .post('/api/login')
-      .send({ email: 'u@example.com', password: 'wrong123' })
+      .send({ email: 'u@example.com', password: 'WrongPass123!' })
       .expect(401);
   });
 });
@@ -102,7 +123,7 @@ describe('Progress and XP API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'progress@example.com', password: 'password123' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'progress@example.com', password: STRONG_PASSWORD }).expect(201);
   });
 
   it('GET /api/progress/:email returns progress', async () => {
@@ -169,7 +190,7 @@ describe('Streak API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'streak@example.com', password: 'password123' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'streak@example.com', password: STRONG_PASSWORD }).expect(201);
   });
 
   it('POST /api/update-streak sets first activity day', async () => {
@@ -185,7 +206,7 @@ describe('User profile API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'profile@example.com', password: 'password123' }).expect(201);
+    await request(app).post('/api/register').send({ email: 'profile@example.com', password: STRONG_PASSWORD }).expect(201);
   });
 
   it('GET /api/user/:email returns full profile', async () => {
@@ -221,5 +242,47 @@ describe('Health API', () => {
     const app = await getApp();
     const res = await request(app).get('/api/health').expect(200);
     expect(res.body).toEqual({ ok: true });
+  });
+});
+
+describe('Article likes API', () => {
+  beforeEach(() => {
+    resetMockDb();
+  });
+
+  it('GET /api/article-likes returns stored article counters', async () => {
+    const app = await getApp();
+    await request(app).post('/api/article-likes/3').send({ action: 'like', baseLikes: 312 }).expect(200);
+
+    const res = await request(app).get('/api/article-likes').expect(200);
+    expect(res.body).toEqual(
+      expect.arrayContaining([{ articleId: 3, likes: 313, updatedAt: expect.any(String) }])
+    );
+    expect(res.body.length).toBeGreaterThanOrEqual(18);
+  });
+
+  it('POST /api/article-likes/:articleId increments and decrements persisted counters', async () => {
+    const app = await getApp();
+    const liked = await request(app)
+      .post('/api/article-likes/7')
+      .send({ action: 'like', baseLikes: 0 })
+      .expect(200);
+
+    expect(liked.body).toEqual({ articleId: 7, likes: 169 });
+
+    const unliked = await request(app)
+      .post('/api/article-likes/7')
+      .send({ action: 'unlike', baseLikes: 0 })
+      .expect(200);
+
+    expect(unliked.body).toEqual({ articleId: 7, likes: 168 });
+  });
+
+  it('POST /api/article-likes/:articleId validates article id and action', async () => {
+    const app = await getApp();
+
+    await request(app).post('/api/article-likes/not-a-number').send({ action: 'like' }).expect(400);
+    await request(app).post('/api/article-likes/999').send({ action: 'like' }).expect(400);
+    await request(app).post('/api/article-likes/1').send({ action: 'bookmark' }).expect(400);
   });
 });

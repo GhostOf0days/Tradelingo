@@ -81,3 +81,72 @@
   text-align: center;
   margin-bottom: 1rem;
 }
+
+.auth__password-panel {
+  background: var(--main-bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.875rem;
+}
+
+.auth__strength-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.auth__strength-label {
+  text-transform: capitalize;
+}
+
+.auth__strength-label--weak {
+  color: var(--danger);
+}
+
+.auth__strength-label--good {
+  color: var(--xp-yellow);
+}
+
+.auth__strength-label--strong {
+  color: #22c55e;
+}
+
+.auth__strength-meter {
+  height: 0.4rem;
+  margin-top: 0.65rem;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: 999px;
+}
+
+.auth__strength-meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+.auth__password-rules {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.auth__password-rules li + li {
+  margin-top: 0.35rem;
+}
+
+.auth__password-rule--valid {
+  color: #22c55e;
+}
+
+.auth__password-suggestion {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted-strong);
+  font-size: 0.82rem;
+}
