@@ -62,7 +62,7 @@ export default function ReviewModules() {
   return (
     <div className="review-modules">
       <div className="review-modules__header">
-        <h1>📚 Completed Modules</h1>
+        <h1>Completed Modules</h1>
         <p>Review and refresh your knowledge on modules you've already mastered</p>
       </div>
 
@@ -72,7 +72,7 @@ export default function ReviewModules() {
           <h2>No Completed Modules Yet</h2>
           <p>Complete your first module to unlock the ability to review it here</p>
           <button className="review-modules__cta" onClick={() => navigate('/')}>
-            Go to Modules →
+            Go to Modules
           </button>
         </div>
       ) : (
@@ -81,7 +81,7 @@ export default function ReviewModules() {
             <div key={module.moduleId} className="review-modules__card">
               <div className="review-modules__card-header">
                 <h3>{module.title}</h3>
-                <span className="review-modules__badge">✅ Completed</span>
+                <span className="review-modules__badge">Completed</span>
               </div>
               
               <div className="review-modules__meta">
@@ -91,19 +91,19 @@ export default function ReviewModules() {
                 </div>
                 <div className="review-modules__meta-item" style={{ textAlign: 'right' }}>
                   <div className="review-modules__label">Mastery</div>
-                  <div className="review-modules__value" style={{ color: '#22c55e' }}>{module.score}%</div>
+                  <div className="review-modules__value">{module.score}%</div>
                 </div>
               </div>
 
               <div className="review-modules__xp-badge">
-                ⭐ +{module.xpEarned} XP Earned
+                +{module.xpEarned} XP Earned
               </div>
 
               <button
                 className="review-modules__btn review-modules__btn--secondary"
                 onClick={() => handleReviewLesson(module.moduleId)}
               >
-                Review Lessons →
+                Review Lessons
               </button>
             </div>
           ))}

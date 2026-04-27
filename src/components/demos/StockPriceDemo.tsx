@@ -201,7 +201,7 @@ export default function StockPriceDemo() {
                 color: trend === t ? (t === 'neutral' ? 'white' : 'black') : '#888',
               }}
             >
-              {t === 'bull' ? '🐂 Bull' : t === 'bear' ? '🐻 Bear' : '⚖️ Neutral'}
+              {t === 'bull' ? 'Bull' : t === 'bear' ? 'Bear' : 'Neutral'}
             </button>
           ))}
         </div>
@@ -210,13 +210,13 @@ export default function StockPriceDemo() {
             padding: '0.5rem 1rem', border: 'none', borderRadius: '0.5rem', cursor: 'pointer',
             background: isRunning ? '#ef4444' : '#22c55e', color: isRunning ? 'white' : 'black', fontWeight: 'bold', fontSize: '0.8rem'
           }}>
-            {isRunning ? '⏸ Pause' : '▶ Start'}
+            {isRunning ? 'Pause' : 'Start'}
           </button>
           <button onClick={resetSimulation} style={{
             padding: '0.5rem 0.75rem', border: '1px solid #333', borderRadius: '0.5rem', cursor: 'pointer',
             background: 'transparent', color: '#888', fontSize: '0.8rem'
           }}>
-            ↺ Reset
+            Reset
           </button>
         </div>
       </div>

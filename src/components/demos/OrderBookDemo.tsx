@@ -203,7 +203,7 @@ export default function OrderBookDemo() {
           borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '0.75rem', textAlign: 'center'
         }}>
           <span style={{ color: lastTrade.side === 'buy' ? '#22c55e' : '#ef4444', fontWeight: 'bold' }}>
-            {lastTrade.type === 'market' ? '⚡ Market' : '📋 Limit'} {lastTrade.side.toUpperCase()} executed:
+            {lastTrade.type === 'market' ? 'Market' : 'Limit'} {lastTrade.side.toUpperCase()} executed:
           </span>
           <span style={{ color: 'white', marginLeft: '0.5rem', fontFamily: 'monospace' }}>
             {lastTrade.shares} shares @ ${lastTrade.price.toFixed(2)}

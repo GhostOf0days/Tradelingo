@@ -192,7 +192,6 @@ function Header() {
                     </div>
                     {unfinishedModules.length === 0 ? (
                       <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🎉</div>
                         <p style={{ margin: 0, fontSize: '0.875rem' }}>All caught up! No unfinished modules.</p>
                       </div>
                     ) : (
@@ -212,9 +211,9 @@ function Header() {
                           >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
-                                📖 {mod.title}
+                                {mod.title}
                               </span>
-                              <span style={{ fontSize: '0.75rem', color: '#eab308', fontWeight: 'bold' }}>{mod.percent}%</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>{mod.percent}%</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <div style={{ flex: 1, height: '4px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
@@ -247,7 +246,7 @@ function Header() {
                 {showStreakInfo && (
                   <div className="header__streak-info">
                     <p><strong>{user.streakDays || 0} Day Streak!</strong></p>
-                    <p>🔥 Keep it going!</p>
+                    <p>Keep it going!</p>
                     <p style={{ fontSize: '0.85rem', color: '#999' }}>Complete 1 activity per day</p>
                   </div>
                 )}

@@ -32,7 +32,7 @@ export default function StreakNotification() {
         <div className="streak-notification__content">
           <Bell size={20} className="streak-notification__icon" />
           <div className="streak-notification__text">
-            <h4>🔥 Streak at Risk!</h4>
+            <h4>Streak at Risk</h4>
             <p>Complete a lesson today to keep your {user.streakDays || 0}-day streak alive!</p>
           </div>
           <button

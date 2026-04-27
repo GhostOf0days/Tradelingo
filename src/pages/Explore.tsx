@@ -39,7 +39,7 @@ const ARTICLES: FullArticle[] = [
     title: 'What Is an ETF?',
     category: 'articles',
     description: 'A clear breakdown of exchange-traded funds, diversification, expenses, and beginner use cases.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/e/etf.asp',
     readTime: '8 min',
     likes: 234,
@@ -55,7 +55,7 @@ Before buying, compare expense ratio, underlying index, liquidity, tracking erro
     title: 'How to Think Through Market Crashes',
     category: 'articles',
     description: 'A practical playbook for volatility, drawdowns, rebalancing, and avoiding panic decisions.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/s/stock-market-crash.asp',
     readTime: '12 min',
     likes: 456,
@@ -71,7 +71,7 @@ A written plan helps. Define what you will rebalance, what cash you need outside
     title: 'Dollar-Cost Averaging Without the Myths',
     category: 'articles',
     description: 'How recurring investing reduces timing risk and when lump-sum investing can still make sense.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp',
     readTime: '10 min',
     likes: 312,
@@ -87,7 +87,7 @@ For most savers, automatic contributions into a diversified portfolio are the st
     title: 'Tax-Loss Harvesting Basics',
     category: 'articles',
     description: 'What tax-loss harvesting can and cannot do, including wash-sale risk and portfolio fit.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/t/taxgainlossharvesting.asp',
     readTime: '15 min',
     likes: 189,
@@ -103,7 +103,7 @@ This strategy works best in taxable brokerage accounts. It is less relevant insi
     title: 'Bonds and Fixed Income in a Portfolio',
     category: 'articles',
     description: 'How bonds work, why yields move, and how fixed income can stabilize a portfolio.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/b/bond.asp',
     readTime: '11 min',
     likes: 278,
@@ -119,7 +119,7 @@ Fixed income can provide income, reduce volatility, and help fund near-term spen
     title: 'Behavioral Finance for Everyday Investors',
     category: 'articles',
     description: 'Common biases that damage portfolios and practical guardrails for better decisions.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/b/behavioralfinance.asp',
     readTime: '13 min',
     likes: 521,
@@ -135,7 +135,7 @@ Markets are noisy. A good process creates enough friction between a market headl
     title: 'Asset Allocation: The Decision That Drives Risk',
     category: 'articles',
     description: 'Why the stock, bond, and cash mix often matters more than individual security selection.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/a/assetallocation.asp',
     readTime: '9 min',
     likes: 168,
@@ -151,7 +151,7 @@ The goal is not to find a perfect allocation. The goal is to choose one you can 
     title: 'Rebalancing Without Overtrading',
     category: 'articles',
     description: 'How threshold-based rebalancing keeps portfolio risk aligned without unnecessary churn.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/r/rebalancing.asp',
     readTime: '7 min',
     likes: 143,
@@ -167,7 +167,7 @@ The benefit is discipline. Rebalancing forces investors to trim what has run and
     title: 'Emergency Funds Before Market Risk',
     category: 'articles',
     description: 'Why liquid cash reserves are a portfolio tool, not dead money.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/e/emergency_fund.asp',
     readTime: '6 min',
     likes: 131,
@@ -183,7 +183,7 @@ The return on an emergency fund is not just interest. Its real return is avoidin
     title: 'Roth vs. Traditional Retirement Accounts',
     category: 'articles',
     description: 'How tax timing changes the decision between Roth and pre-tax contributions.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/roth-vs-traditional-ira-4770910',
     readTime: '10 min',
     likes: 203,
@@ -199,7 +199,7 @@ Many households use both. Tax diversification gives future retirees more control
     title: 'Sequence-of-Returns Risk',
     category: 'articles',
     description: 'Why the order of returns matters most when withdrawals begin.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/s/sequence-risk.asp',
     readTime: '8 min',
     likes: 97,
@@ -215,7 +215,7 @@ This risk is less important during accumulation and more important near retireme
     title: 'Understanding Expense Ratios',
     category: 'articles',
     description: 'How small annual fund costs compound into large differences over long horizons.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/e/expenseratio.asp',
     readTime: '5 min',
     likes: 155,
@@ -231,7 +231,7 @@ Cost is not the only variable, but it is one of the few investors can control di
     title: 'Inflation and Purchasing Power',
     category: 'articles',
     description: 'Why nominal returns are only part of the story for long-term wealth.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/p/purchasingpower.asp',
     readTime: '8 min',
     likes: 118,
@@ -247,7 +247,7 @@ A serious plan should ask what the money will buy in the future, not only what t
     title: 'Reading an Earnings Report',
     category: 'articles',
     description: 'A compact guide to revenue, margins, guidance, cash flow, and market reaction.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/e/earningsreport.asp',
     readTime: '12 min',
     likes: 86,
@@ -263,7 +263,7 @@ Read the report in context. Compare trends across several quarters, listen for c
     title: 'Credit Risk in Corporate Bonds',
     category: 'articles',
     description: 'How default risk, spreads, and ratings affect fixed-income decisions.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/c/creditrisk.asp',
     readTime: '9 min',
     likes: 74,
@@ -279,7 +279,7 @@ Higher yield is not automatically better. Sometimes the extra income is not enou
     title: 'Capital Gains Taxes for Investors',
     category: 'articles',
     description: 'The difference between short-term and long-term gains and why holding period matters.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/c/capital_gains_tax.asp',
     readTime: '7 min',
     likes: 126,
@@ -295,7 +295,7 @@ Before making large taxable trades, estimate the tax impact and consider whether
     title: 'Crypto Allocation: Position Sizing First',
     category: 'articles',
     description: 'A risk-first framework for approaching digital assets without letting volatility dominate the plan.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/cryptocurrency-4427699',
     readTime: '10 min',
     likes: 92,
@@ -311,7 +311,7 @@ If a position can force emotional decisions during a drawdown, it is probably to
     title: 'Building an Investment Policy Statement',
     category: 'articles',
     description: 'Turn goals, constraints, allocation, and behavior rules into one operating document.',
-    author: 'Tradelingo Research',
+    author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/i/ips.asp',
     readTime: '11 min',
     likes: 139,
@@ -471,7 +471,7 @@ export default function Explore() {
               <p>{openArticle.description}</p>
             </div>
             <div className="explore__card-meta explore__article-meta">
-              <span className="explore__author">By {openArticle.author}</span>
+              <span className="explore__author">Source: {openArticle.author}</span>
               <span className="explore__read-time">
                 <Clock size={15} />
                 {openArticle.readTime}
@@ -555,7 +555,7 @@ export default function Explore() {
               </div>
               <p className="explore__description">{article.description}</p>
               <div className="explore__card-meta">
-                <span className="explore__author">By {article.author}</span>
+                <span className="explore__author">Source: {article.author}</span>
                 <span className="explore__read-time">
                   <Clock size={15} />
                   {article.readTime}

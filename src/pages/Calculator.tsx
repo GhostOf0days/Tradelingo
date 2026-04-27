@@ -31,33 +31,83 @@ const clamp = (value: number, min: number, max: number) => {
   return Math.min(max, Math.max(min, value));
 };
 
-const parseNumberInput = (value: string) => {
-  const parsed = Number(value);
+const parseNumberInput = (value: string | number) => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+  const normalized = value.trim();
+  if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') {
+    return 0;
+  }
+  const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : 0;
 };
+
+type NumberInputOptions = {
+  allowDecimal?: boolean;
+  allowNegative?: boolean;
+};
+
+const sanitizeNumberInput = (
+  value: string,
+  { allowDecimal = true, allowNegative = false }: NumberInputOptions = {},
+) => {
+  let sanitized = value.replace(/[^\d.-]/g, '');
+
+  if (!allowNegative) {
+    sanitized = sanitized.replace(/-/g, '');
+  } else {
+    sanitized = sanitized.replace(/(?!^)-/g, '');
+  }
+
+  if (!allowDecimal) {
+    sanitized = sanitized.replace(/\./g, '');
+  } else {
+    const firstDecimal = sanitized.indexOf('.');
+    if (firstDecimal !== -1) {
+      sanitized =
+        sanitized.slice(0, firstDecimal + 1) +
+        sanitized.slice(firstDecimal + 1).replace(/\./g, '');
+    }
+  }
+
+  return sanitized;
+};
+
+type AccountInputKey = 'annualContribution' | 'currentBalance' | 'years' | 'employerMatch';
+
+const accountToInputs = (account: Account): Record<AccountInputKey, string> => ({
+  annualContribution: String(account.annualContribution),
+  currentBalance: String(account.currentBalance),
+  years: String(account.years),
+  employerMatch: String(account.employerMatch),
+});
 
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'retirement' | 'compound' | 'savings'>('retirement');
   const [selectedAccount, setSelectedAccount] = useState<Account>(RETIREMENT_ACCOUNTS[0]);
+  const [accountInputs, setAccountInputs] = useState<Record<AccountInputKey, string>>(
+    () => accountToInputs(RETIREMENT_ACCOUNTS[0]),
+  );
   const [compoundData, setCompoundData] = useState({
-    principal: 10000,
-    annualRate: 7,
-    years: 20,
-    compoundFreq: 12,
+    principal: '10000',
+    annualRate: '7',
+    years: '20',
+    compoundFreq: '12',
   });
   const [savingsData, setSavingsData] = useState({
-    currentAge: 30,
-    retirementAge: 65,
-    currentSavings: 50000,
-    annualContribution: 10000,
-    annualReturn: 7,
+    currentAge: '30',
+    retirementAge: '65',
+    currentSavings: '50000',
+    annualContribution: '10000',
+    annualReturn: '7',
   });
 
   const safeCompoundData = {
-    principal: clamp(compoundData.principal || 0, 0, 1_000_000_000),
-    annualRate: clamp(compoundData.annualRate || 0, MIN_RETURN_RATE, MAX_RETURN_RATE),
-    years: clamp(compoundData.years || 0, 0, 100),
-    compoundFreq: Math.max(1, Math.floor(compoundData.compoundFreq || 1)),
+    principal: clamp(parseNumberInput(compoundData.principal), 0, 1_000_000_000),
+    annualRate: clamp(parseNumberInput(compoundData.annualRate), MIN_RETURN_RATE, MAX_RETURN_RATE),
+    years: clamp(parseNumberInput(compoundData.years), 0, 100),
+    compoundFreq: Math.max(1, Math.floor(parseNumberInput(compoundData.compoundFreq) || 1)),
   };
 
   const compoundResult = RetirementCalculator.compound(safeCompoundData.principal, safeCompoundData.annualRate, safeCompoundData.years, safeCompoundData.compoundFreq);
@@ -69,12 +119,12 @@ export default function Calculator() {
   });
   const retirementProjection = RetirementCalculator.project(safeSelectedAccount);
   const safeSavingsData = {
-    currentAge: Math.floor(clamp(savingsData.currentAge || 0, 0, 120)),
-    currentSavings: clamp(savingsData.currentSavings || 0, 0, 1_000_000_000),
-    annualContribution: clamp(savingsData.annualContribution || 0, 0, 1_000_000_000),
-    annualReturn: clamp(savingsData.annualReturn || 0, MIN_RETURN_RATE, MAX_RETURN_RATE),
+    currentAge: Math.floor(clamp(parseNumberInput(savingsData.currentAge), 0, 120)),
+    currentSavings: clamp(parseNumberInput(savingsData.currentSavings), 0, 1_000_000_000),
+    annualContribution: clamp(parseNumberInput(savingsData.annualContribution), 0, 1_000_000_000),
+    annualReturn: clamp(parseNumberInput(savingsData.annualReturn), MIN_RETURN_RATE, MAX_RETURN_RATE),
   };
-  const safeRetirementAge = Math.floor(clamp(savingsData.retirementAge || 0, safeSavingsData.currentAge, 120));
+  const safeRetirementAge = Math.floor(clamp(parseNumberInput(savingsData.retirementAge), safeSavingsData.currentAge, 120));
   const savingsYears = safeRetirementAge - safeSavingsData.currentAge;
   const savingsProjection = RetirementCalculator.projectSavings(
     safeSavingsData.currentSavings,
@@ -139,15 +189,15 @@ export default function Calculator() {
   /** Age-based projection with recurring contributions until retirement age. */
   const savingsChartData = useMemo(() => {
     const data = [];
-    const safeCurrentAge = Math.floor(clamp(savingsData.currentAge || 0, 0, 120));
-    const safeRetirementAge = Math.floor(clamp(savingsData.retirementAge || 0, safeCurrentAge, 120));
+    const safeCurrentAge = Math.floor(clamp(parseNumberInput(savingsData.currentAge), 0, 120));
+    const safeRetirementAge = Math.floor(clamp(parseNumberInput(savingsData.retirementAge), safeCurrentAge, 120));
     const years = safeRetirementAge - safeCurrentAge;
-    const r = clamp(savingsData.annualReturn || 0, MIN_RETURN_RATE, MAX_RETURN_RATE) / 100;
+    const r = clamp(parseNumberInput(savingsData.annualReturn), MIN_RETURN_RATE, MAX_RETURN_RATE) / 100;
     const monthlyRate = r / 12;
 
-    const safeCurrentSavings = clamp(savingsData.currentSavings || 0, 0, 1_000_000_000);
+    const safeCurrentSavings = clamp(parseNumberInput(savingsData.currentSavings), 0, 1_000_000_000);
     let balance = safeCurrentSavings;
-    const safeAnnualContribution = clamp(savingsData.annualContribution || 0, 0, 1_000_000_000);
+    const safeAnnualContribution = clamp(parseNumberInput(savingsData.annualContribution), 0, 1_000_000_000);
     const monthlyContribution = safeAnnualContribution / 12;
 
     for (let year = 0; year <= years; year++) {
@@ -175,6 +225,35 @@ export default function Calculator() {
       currency: 'USD',
       maximumFractionDigits: 0,
     }).format(value);
+  };
+
+  const handleSelectAccount = (account: Account) => {
+    if (account.id === selectedAccount.id) return;
+    setSelectedAccount(account);
+    setAccountInputs(accountToInputs(account));
+  };
+
+  const updateSelectedAccountInput = (
+    field: AccountInputKey,
+    value: string,
+    max: number,
+    options: NumberInputOptions & { integer?: boolean } = {},
+  ) => {
+    const sanitized = sanitizeNumberInput(value, options);
+    const parsed = clamp(parseNumberInput(sanitized), 0, max);
+    const numericValue = options.integer ? Math.floor(parsed) : parsed;
+
+    setAccountInputs((prev) => ({ ...prev, [field]: sanitized }));
+    setSelectedAccount((prev) =>
+      prev.copyWith({
+        [field]: numericValue,
+      } as Partial<{
+        annualContribution: number;
+        currentBalance: number;
+        years: number;
+        employerMatch: number;
+      }>),
+    );
   };
 
   return (
@@ -214,7 +293,7 @@ export default function Calculator() {
                 <div
                   key={account.id}
                   className={`calculator__account-card ${selectedAccount.id === account.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedAccount(account)}
+                  onClick={() => handleSelectAccount(account)}
                   style={{ borderLeftColor: ACCOUNT_COLORS[account.id] }}
                 >
                   <h3>{account.name}</h3>
@@ -228,14 +307,11 @@ export default function Calculator() {
                       <div className="calculator__input-group">
                         <label>Annual Contribution ($)</label>
                         <input
-                          type="number"
-                          min={0}
-                          max={selectedAccount.contributionLimit}
-                          value={selectedAccount.annualContribution}
+                          type="text"
+                          inputMode="decimal"
+                          value={accountInputs.annualContribution}
                           onChange={(e) =>
-                            setSelectedAccount(selectedAccount.copyWith({
-                              annualContribution: clamp(parseNumberInput(e.target.value), 0, selectedAccount.contributionLimit),
-                            }))
+                            updateSelectedAccountInput('annualContribution', e.target.value, selectedAccount.contributionLimit)
                           }
                         />
                       </div>
@@ -243,13 +319,11 @@ export default function Calculator() {
                         <div className="calculator__input-group">
                           <label>Employer Match ($)</label>
                           <input
-                            type="number"
-                            min={0}
-                            value={selectedAccount.employerMatch}
+                            type="text"
+                            inputMode="decimal"
+                            value={accountInputs.employerMatch}
                             onChange={(e) =>
-                              setSelectedAccount(selectedAccount.copyWith({
-                                employerMatch: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000),
-                              }))
+                              updateSelectedAccountInput('employerMatch', e.target.value, 1_000_000_000)
                             }
                           />
                         </div>
@@ -257,27 +331,25 @@ export default function Calculator() {
                       <div className="calculator__input-group">
                         <label>Current Balance ($)</label>
                         <input
-                          type="number"
-                          min={0}
-                          value={selectedAccount.currentBalance}
+                          type="text"
+                          inputMode="decimal"
+                          value={accountInputs.currentBalance}
                           onChange={(e) =>
-                            setSelectedAccount(selectedAccount.copyWith({
-                              currentBalance: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000),
-                            }))
+                            updateSelectedAccountInput('currentBalance', e.target.value, 1_000_000_000)
                           }
                         />
                       </div>
                       <div className="calculator__input-group">
                         <label>Years Until Retirement</label>
                         <input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={selectedAccount.years}
+                          type="text"
+                          inputMode="numeric"
+                          value={accountInputs.years}
                           onChange={(e) =>
-                            setSelectedAccount(selectedAccount.copyWith({
-                              years: Math.floor(clamp(parseNumberInput(e.target.value), 0, 100)),
-                            }))
+                            updateSelectedAccountInput('years', e.target.value, 100, {
+                              allowDecimal: false,
+                              integer: true,
+                            })
                           }
                         />
                       </div>
@@ -337,26 +409,27 @@ export default function Calculator() {
                 <div className="calculator__input-group">
                   <label>Principal Amount ($)</label>
                   <input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
                     value={compoundData.principal}
                     onChange={(e) =>
-                      setCompoundData({ ...compoundData, principal: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000) })
+                      setCompoundData({
+                        ...compoundData,
+                        principal: sanitizeNumberInput(e.target.value),
+                      })
                     }
                   />
                 </div>
                 <div className="calculator__input-group">
                   <label>Annual Interest Rate (%)</label>
                   <input
-                    type="number"
-                    min={MIN_RETURN_RATE}
-                    max={MAX_RETURN_RATE}
-                    step="0.1"
+                    type="text"
+                    inputMode="decimal"
                     value={compoundData.annualRate}
                     onChange={(e) =>
                       setCompoundData({
                         ...compoundData,
-                        annualRate: clamp(parseNumberInput(e.target.value), MIN_RETURN_RATE, MAX_RETURN_RATE),
+                        annualRate: sanitizeNumberInput(e.target.value, { allowNegative: true }),
                       })
                     }
                   />
@@ -364,12 +437,14 @@ export default function Calculator() {
                 <div className="calculator__input-group">
                   <label>Time Period (Years)</label>
                   <input
-                    type="number"
-                    min={0}
-                    max={100}
+                    type="text"
+                    inputMode="numeric"
                     value={compoundData.years}
                     onChange={(e) =>
-                      setCompoundData({ ...compoundData, years: Math.floor(clamp(parseNumberInput(e.target.value), 0, 100)) })
+                      setCompoundData({
+                        ...compoundData,
+                        years: sanitizeNumberInput(e.target.value, { allowDecimal: false }),
+                      })
                     }
                   />
                 </div>
@@ -378,7 +453,7 @@ export default function Calculator() {
                   <select
                     value={compoundData.compoundFreq}
                     onChange={(e) =>
-                      setCompoundData({ ...compoundData, compoundFreq: parseInt(e.target.value) })
+                      setCompoundData({ ...compoundData, compoundFreq: e.target.value })
                     }
                   >
                     <option value={1}>Annually</option>
@@ -442,61 +517,69 @@ export default function Calculator() {
                 <div className="calculator__input-group">
                   <label>Current Age</label>
                   <input
-                    type="number"
-                    min={0}
-                    max={120}
+                    type="text"
+                    inputMode="numeric"
                     value={savingsData.currentAge}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, currentAge: Math.floor(clamp(parseNumberInput(e.target.value), 0, 120)) })
+                      setSavingsData({
+                        ...savingsData,
+                        currentAge: sanitizeNumberInput(e.target.value, { allowDecimal: false }),
+                      })
                     }
                   />
                 </div>
                 <div className="calculator__input-group">
                   <label>Retirement Age</label>
                   <input
-                    type="number"
-                    min={0}
-                    max={120}
+                    type="text"
+                    inputMode="numeric"
                     value={savingsData.retirementAge}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, retirementAge: Math.floor(clamp(parseNumberInput(e.target.value), 0, 120)) })
+                      setSavingsData({
+                        ...savingsData,
+                        retirementAge: sanitizeNumberInput(e.target.value, { allowDecimal: false }),
+                      })
                     }
                   />
                 </div>
                 <div className="calculator__input-group">
                   <label>Current Savings ($)</label>
                   <input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
                     value={savingsData.currentSavings}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, currentSavings: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000) })
+                      setSavingsData({
+                        ...savingsData,
+                        currentSavings: sanitizeNumberInput(e.target.value),
+                      })
                     }
                   />
                 </div>
                 <div className="calculator__input-group">
                   <label>Annual Contribution ($)</label>
                   <input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
                     value={savingsData.annualContribution}
                     onChange={(e) =>
-                      setSavingsData({ ...savingsData, annualContribution: clamp(parseNumberInput(e.target.value), 0, 1_000_000_000) })
+                      setSavingsData({
+                        ...savingsData,
+                        annualContribution: sanitizeNumberInput(e.target.value),
+                      })
                     }
                   />
                 </div>
                 <div className="calculator__input-group">
                   <label>Expected Annual Return (%)</label>
                   <input
-                    type="number"
-                    min={MIN_RETURN_RATE}
-                    max={MAX_RETURN_RATE}
-                    step="0.1"
+                    type="text"
+                    inputMode="decimal"
                     value={savingsData.annualReturn}
                     onChange={(e) =>
                       setSavingsData({
                         ...savingsData,
-                        annualReturn: clamp(parseNumberInput(e.target.value), MIN_RETURN_RATE, MAX_RETURN_RATE),
+                        annualReturn: sanitizeNumberInput(e.target.value, { allowNegative: true }),
                       })
                     }
                   />

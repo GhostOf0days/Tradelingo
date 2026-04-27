@@ -1,7 +1,7 @@
 // Home / module list: shows what's in progress vs done, respects server-side unlock state,
 // and links out to pre-test, lessons, Lightning Round, and completed-module review.
 import { useState, useEffect } from 'react';
-import { Play, CheckCircle2, Lock } from 'lucide-react';
+import { BookOpen, Play, CheckCircle2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MODULES } from '../data/modules';
@@ -80,6 +80,46 @@ function Modules() {
             Completed
           </button>
         </div>
+      </div>
+
+      <div className="modules__quick-actions" aria-label="Module actions">
+        <section className="modules__action-card">
+          <div className="modules__action-icon modules__action-icon--accent" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
+          <div className="modules__action-text">
+            <h3 className="modules__action-title">Lightning Round</h3>
+            <p className="modules__action-subtitle">Play daily. Win up to 2,500 XP</p>
+          </div>
+          <button
+            type="button"
+            className="modules__action-btn"
+            aria-label="Play Lightning Round"
+            onClick={() => navigate('/lightning-round')}
+          >
+            <Play size={18} fill="currentColor" />
+          </button>
+        </section>
+
+        <section className="modules__action-card">
+          <div className="modules__action-icon" aria-hidden="true">
+            <BookOpen size={30} strokeWidth={2.3} />
+          </div>
+          <div className="modules__action-text">
+            <h3 className="modules__action-title">Review Completed Modules</h3>
+            <p className="modules__action-subtitle">Refresh your knowledge on mastered topics</p>
+          </div>
+          <button
+            type="button"
+            className="modules__action-btn"
+            aria-label="Review completed modules"
+            onClick={() => navigate('/completed-modules')}
+          >
+            <Play size={18} fill="currentColor" />
+          </button>
+        </section>
       </div>
 
       {filteredModules.length === 0 ? (
@@ -186,46 +226,6 @@ function Modules() {
           })}
         </ul>
       )}
-
-      <section className="modules__lightning-wrap">
-        <div className="modules__lightning">
-          <div className="modules__lightning-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </div>
-          <div className="modules__lightning-text">
-            <h3 className="modules__lightning-title">Lightning Round</h3>
-            <p className="modules__lightning-subtitle">Play daily. Win up to 2,500 XP</p>
-          </div>
-          <button
-            type="button"
-            className="modules__lightning-play"
-            aria-label="Play Lightning Round"
-            onClick={() => navigate('/lightning-round')}
-          >
-            <Play size={20} fill="currentColor" className="modules__lightning-play-icon" />
-          </button>
-        </div>
-      </section>
-
-      <section className="modules__review-wrap">
-        <div className="modules__review">
-          <div className="modules__review-icon" aria-hidden="true">📚</div>
-          <div className="modules__review-text">
-            <h3 className="modules__review-title">Review Completed Modules</h3>
-            <p className="modules__review-subtitle">Refresh your knowledge on mastered topics</p>
-          </div>
-          <button
-            type="button"
-            className="modules__review-btn"
-            aria-label="Review completed modules"
-            onClick={() => navigate('/completed-modules')}
-          >
-            <Play size={20} fill="currentColor" className="modules__review-btn-icon" />
-          </button>
-        </div>
-      </section>
     </div>
   );
 }

@@ -136,7 +136,7 @@ export default function Quizzes() {
           particleCount: 150,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#a855f7']
+          colors: ['#2563eb', '#1d4ed8', '#60a5fa']
         });
 
         if (user && selectedQuiz) {
@@ -173,18 +173,8 @@ export default function Quizzes() {
   };
 
   /** Badge styling on the quiz cards (easy / medium / hard). */
-  const difficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy':
-        return '#10b981';
-      case 'Medium':
-        return '#f59e0b';
-      case 'Hard':
-        return '#ef4444';
-      default:
-        return '#6b7280';
-    }
-  };
+  const difficultyClass = (difficulty: string) =>
+    `quizzes__difficulty--${difficulty.toLowerCase()}`;
 
   if (quizStarted && selectedQuiz && !showResults) {
     if (sessionQuestions.length !== quizQuestions.length) {
@@ -241,8 +231,8 @@ export default function Quizzes() {
     return (
       <div className="quizzes__results">
         <div className="quizzes__results-card">
-          <div className="quizzes__results-icon">
-            {passed ? '🎉' : '📚'}
+          <div className="quizzes__results-status">
+            {passed ? 'Passed' : 'Needs Review'}
           </div>
           <h2>{selectedQuiz.title}</h2>
           <div className="quizzes__score">
@@ -254,13 +244,13 @@ export default function Quizzes() {
           </div>
           {passed ? (
             <div className="quizzes__reward">
-              <p>🏆 XP Earned</p>
+              <p>XP Earned</p>
               <p className="quizzes__xp-value">+{xpEarned} XP</p>
             </div>
           ) : (
-            <div className="quizzes__reward" style={{ background: 'var(--surface-hover)', color: 'var(--text-primary)' }}>
+            <div className="quizzes__reward quizzes__reward--muted">
               <p>You need 80% to earn XP. Review the modules and try again!</p>
-              <p className="quizzes__xp-value" style={{ fontSize: '1.2rem' }}>0 XP</p>
+              <p className="quizzes__xp-value">0 XP</p>
             </div>
           )}
           <div className="quizzes__actions">
@@ -269,8 +259,7 @@ export default function Quizzes() {
             </button>
             {completedQuizzes.length > 0 && completedQuizzes[0].mistakes.length > 0 && (
               <button
-                className="quizzes__btn quizzes__btn--secondary"
-                style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                className="quizzes__btn quizzes__btn--secondary quizzes__btn--danger"
                 onClick={() => {
                   setReviewingAttempt(completedQuizzes[0]);
                   setReviewIndex(0);
@@ -316,7 +305,7 @@ export default function Quizzes() {
             <div className="quizzes__progress-bar">
               <div
                 className="quizzes__progress-fill"
-                style={{ width: `${((reviewIndex + 1) / reviewingAttempt.mistakes.length) * 100}%`, background: '#ef4444' }}
+                style={{ width: `${((reviewIndex + 1) / reviewingAttempt.mistakes.length) * 100}%` }}
               />
             </div>
           </div>
@@ -326,15 +315,19 @@ export default function Quizzes() {
           <h3>{q.question}</h3>
           <div className="quizzes__options">
             {q.options.map((option, idx) => {
-              let style: React.CSSProperties = {};
+              let optionClass = 'quizzes__option';
+              let answerNote = '';
               if (idx === q.correct) {
-                style = { borderColor: '#22c55e', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' };
+                optionClass += ' quizzes__option--correct';
+                answerNote = 'Correct answer';
               } else if (idx === mistake.userAnswer) {
-                style = { borderColor: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', textDecoration: 'line-through' };
+                optionClass += ' quizzes__option--wrong';
+                answerNote = 'Your answer';
               }
               return (
-                <div key={idx} className="quizzes__option" style={{ ...style, cursor: 'default' }}>
-                  {idx === q.correct && '✅ '}{idx === mistake.userAnswer && idx !== q.correct && '❌ '}{option}
+                <div key={idx} className={optionClass} style={{ cursor: 'default' }}>
+                  {answerNote && <span className="quizzes__answer-note">{answerNote}</span>}
+                  {option}
                 </div>
               );
             })}
@@ -343,15 +336,14 @@ export default function Quizzes() {
           {!showExplanation ? (
             <button
               className="quizzes__next-btn"
-              style={{ background: '#6366f1' }}
               onClick={() => setShowExplanation(true)}
             >
               Show Explanation
             </button>
           ) : (
             <>
-              <div style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.25rem', marginBottom: '1.5rem', lineHeight: '1.6', color: 'var(--text-primary)' }}>
-                <strong style={{ color: '#6366f1' }}>Explanation:</strong> {q.explanation || 'The correct answer is: ' + q.getCorrectAnswer()}
+              <div className="quizzes__review-explanation">
+                <strong>Explanation:</strong> {q.explanation || 'The correct answer is: ' + q.getCorrectAnswer()}
               </div>
               <button
                 className="quizzes__next-btn"
@@ -379,17 +371,16 @@ export default function Quizzes() {
     return (
       <div className="quizzes">
         <div className="quizzes__hero">
-          <h1>📋 Completed Quizzes</h1>
+          <h1>Completed Quizzes</h1>
           <p>Review your past quiz attempts and learn from mistakes</p>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div className="quizzes__completed-nav">
           <button className="quizzes__btn quizzes__btn--secondary" onClick={() => setViewMode('quizzes')}>
-            ← Back to Quizzes
+            Back to Quizzes
           </button>
         </div>
         {completedQuizzes.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
+          <div className="quizzes__empty">
             <p>No completed quizzes yet. Take a quiz to see your results here!</p>
           </div>
         ) : (
@@ -399,19 +390,18 @@ export default function Quizzes() {
               const passed = pct >= 80;
               return (
                 <div key={idx} className="quizzes__card">
-                  <div className="quizzes__difficulty" style={{ backgroundColor: passed ? '#22c55e' : '#ef4444' }}>
+                  <div className={`quizzes__difficulty ${passed ? 'quizzes__status--passed' : 'quizzes__status--failed'}`}>
                     {passed ? 'Passed' : 'Failed'}
                   </div>
                   <h3>{attempt.quizTitle}</h3>
                   <p>Score: {attempt.score}/{attempt.total} ({pct}%)</p>
                   <div className="quizzes__meta">
-                    <span>❌ {attempt.mistakes.length} mistake{attempt.mistakes.length !== 1 ? 's' : ''}</span>
+                    <span>{attempt.mistakes.length} mistake{attempt.mistakes.length !== 1 ? 's' : ''}</span>
                     <span>{new Date(attempt.timestamp).toLocaleDateString()}</span>
                   </div>
                   {attempt.mistakes.length > 0 && (
                     <button
                       className="quizzes__start-btn"
-                      style={{ background: '#6366f1' }}
                       onClick={() => {
                         setReviewingAttempt(attempt);
                         setReviewIndex(0);
@@ -434,7 +424,7 @@ export default function Quizzes() {
   return (
     <div className="quizzes">
       <div className="quizzes__hero">
-        <h1>🧠 Knowledge Checks</h1>
+        <h1>Knowledge Checks</h1>
         <p>Test your skills and earn XP with our quiz challenges</p>
       </div>
 
@@ -459,16 +449,15 @@ export default function Quizzes() {
         {quizzes.map((quiz) => (
           <div key={quiz.id} className="quizzes__card">
             <div
-              className="quizzes__difficulty"
-              style={{ backgroundColor: difficultyColor(quiz.difficulty) }}
+              className={`quizzes__difficulty ${difficultyClass(quiz.difficulty)}`}
             >
               {quiz.difficulty}
             </div>
             <h3>{quiz.title}</h3>
             <p>{quiz.description}</p>
             <div className="quizzes__meta">
-              <span>📝 {quiz.questions} questions</span>
-              <span>⭐ {quiz.xpReward} XP</span>
+              <span>{quiz.questions} questions</span>
+              <span>{quiz.xpReward} XP</span>
             </div>
             <button className="quizzes__start-btn" onClick={() => handleStartQuiz(quiz)}>
               Start Quiz

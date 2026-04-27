@@ -63,9 +63,9 @@
 }
 
 .review-modules__stat {
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   text-align: center;
 }
@@ -91,9 +91,9 @@
 }
 
 .review-modules__card {
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
@@ -107,7 +107,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  background: var(--accent);
 }
 
 .review-modules__card:hover {
@@ -131,10 +131,11 @@
 }
 
 .review-modules__badge {
-  background: #10b981;
-  color: white;
+  background: var(--accent-glow);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
   padding: 0.25rem 0.75rem;
-  border-radius: 99px;
+  border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
@@ -198,13 +199,15 @@
 
 .review-modules__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  background: var(--accent);
   transition: width 0.3s ease;
 }
 
 .review-modules__xp-badge {
-  background: linear-gradient(135deg, var(--accent) 0%, #d4af37 100%);
-  color: #fff;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--accent);
+  color: var(--text-primary);
   padding: 0.75rem;
   border-radius: 0.5rem;
   font-weight: 600;

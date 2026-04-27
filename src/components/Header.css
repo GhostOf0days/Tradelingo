@@ -205,11 +205,7 @@
   display: inline-block;
   width: 0.875rem;
   height: 0.875rem;
-  background: radial-gradient(
-    circle at 30% 30%,
-    var(--xp-yellow),
-    var(--xp-yellow-dark)
-  );
+  background: var(--accent);
   border-radius: 50%;
 }
 

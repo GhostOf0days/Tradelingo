@@ -5,6 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useUser } from "../contexts/UserContext";
 import '../styles/Register.css';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,28 +21,45 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      setError("Enter a valid email address");
+      return;
+    }
+
     try {
       const response = await fetch('/api/login', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      let data: { error?: string; email?: string; displayName?: string; experiencePoints?: number } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: "Login service returned an invalid response" };
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to log in");
       }
 
       setUser({
-        email: data.email,
-        displayName: data.displayName,
-        experiencePoints: data.experiencePoints,
+        email: data.email ?? normalizedEmail,
+        displayName: data.displayName ?? normalizedEmail.split("@")[0],
+        experiencePoints: data.experiencePoints ?? 0,
       });
       navigate("/");
       
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes("expected pattern") || message.includes("Failed to fetch")) {
+        setError("Login service is unavailable. Please try again in a moment.");
+        return;
+      }
+      setError(message);
     }
   };
 
@@ -51,15 +70,18 @@ export default function Login() {
         
         {error && <div className="auth__error">{error}</div>}
 
-        <form className="auth__form" onSubmit={handleSubmit}>
+        <form className="auth__form" onSubmit={handleSubmit} noValidate>
           <div className="auth__field">
             <label className="auth__label">Email</label>
             <input
               className="auth__input"
-              type="email"
+              type="text"
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="trader@example.com"
+              autoCapitalize="none"
+              autoComplete="email"
               required
             />
           </div>

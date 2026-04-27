@@ -1,6 +1,7 @@
 // loads pretests from GET api modules then posts run xp to POST api lighting round.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, Zap } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import { QuizQuestion } from '../models/QuizQuestion';
 import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
@@ -220,7 +221,9 @@ export default function LightingRound() {
     return (
       <div className="lr">
         <div className="lr__lobby">
-          <div className="lr__lobby-icon">⚡</div>
+          <div className="lr__lobby-icon" aria-hidden="true">
+            <Zap size={34} fill="currentColor" />
+          </div>
           <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>Loading questions...</p>
         </div>
       </div>
@@ -231,7 +234,9 @@ export default function LightingRound() {
     return (
       <div className="lr">
         <div className="lr__lobby">
-          <div className="lr__lobby-icon">⚠️</div>
+          <div className="lr__lobby-icon" aria-hidden="true">
+            <AlertTriangle size={34} />
+          </div>
           <h2 style={{ color: 'var(--text-primary)' }}>Failed to load questions</h2>
           <p style={{ color: 'var(--text-muted)' }}>Please check your connection and try again.</p>
           <button className="lr__start-btn" onClick={() => window.location.reload()}>
@@ -246,7 +251,9 @@ export default function LightingRound() {
     return (
       <div className="lr">
         <div className="lr__lobby">
-          <div className="lr__lobby-icon">⚡</div>
+          <div className="lr__lobby-icon" aria-hidden="true">
+            <Zap size={34} fill="currentColor" />
+          </div>
           <h1 className="lr__lobby-title">Lightning Round</h1>
           <p className="lr__lobby-sub">
             10 rapid-fire questions. 10 seconds each. How fast can you go?
@@ -266,17 +273,17 @@ export default function LightingRound() {
             </div>
           </div>
           <div className="lr__lobby-rules">
-            <p>⚡ Answer faster for bonus XP</p>
-            <p>🏆 Perfect score earns +{PERFECT_BONUS} bonus XP</p>
-            <p>🔀 Random questions from all modules</p>
+            <p>Answer faster for bonus XP</p>
+            <p>Perfect score earns +{PERFECT_BONUS} bonus XP</p>
+            <p>Random questions from all modules</p>
           </div>
           {!user && (
             <p className="lr__login-warning">
-              ⚠️ <button className="lr__link-btn" onClick={() => navigate('/login')}>Log in</button> to save your XP
+              <button className="lr__link-btn" onClick={() => navigate('/login')}>Log in</button> to save your XP
             </p>
           )}
           <button className="lr__start-btn" onClick={startGame}>
-            ⚡ Start Lightning Round
+            Start Lightning Round
           </button>
         </div>
       </div>
@@ -300,8 +307,8 @@ export default function LightingRound() {
     return (
       <div className="lr">
         <div className="lr__results">
-          <div className="lr__results-trophy">
-            {isPerfect ? '🏆' : correctCount >= 7 ? '🌟' : correctCount >= 4 ? '👍' : '📚'}
+          <div className="lr__results-status">
+            {isPerfect ? 'Perfect' : correctCount >= 7 ? 'Strong' : correctCount >= 4 ? 'Complete' : 'Needs Review'}
           </div>
           <h1 className="lr__results-title">{isPerfect ? 'Perfect Score!' : 'Round Complete!'}</h1>
           <div className="lr__results-score">
@@ -309,7 +316,7 @@ export default function LightingRound() {
             <span className="lr__results-pct">{pct}% correct</span>
           </div>
           {isPerfect && (
-            <div className="lr__perfect-badge">⚡ Perfect Bonus: +{PERFECT_BONUS} XP</div>
+            <div className="lr__perfect-badge">Perfect Bonus: +{PERFECT_BONUS} XP</div>
           )}
           <div className="lr__results-xp">
             +{xpEarned} XP {user ? 'added to your account!' : '(log in to save XP)'}
@@ -331,7 +338,7 @@ export default function LightingRound() {
         <div className="lr__header">
           <span className="lr__category-badge">{currentQ.category}</span>
           <span className="lr__question-count">{currentIndex + 1} / {TOTAL_QUESTIONS}</span>
-          <div className="lr__score-display">⚡ {score} XP</div>
+          <div className="lr__score-display">{score} XP</div>
         </div>
 
         <div className="lr__timer-wrap">

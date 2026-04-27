@@ -147,7 +147,7 @@ export default function Lesson() {
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#a855f7']
+        colors: ['#2563eb', '#1d4ed8', '#60a5fa']
       });
     }
 
@@ -237,7 +237,7 @@ export default function Lesson() {
         </div>
         
         {!isReviewMode && phase === 'reading' && (
-          <button onClick={() => navigate(`/pretest/${id}`)} style={{ padding: '0.5rem 1rem', background: 'transparent', border: '2px solid #eab308', color: '#eab308', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>Test Out</button>
+          <button onClick={() => navigate(`/pretest/${id}`)} style={{ padding: '0.5rem 1rem', background: 'transparent', border: '2px solid var(--accent)', color: 'var(--accent)', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>Test Out</button>
         )}
       </div>
 
@@ -348,20 +348,22 @@ export default function Lesson() {
           const xpEarned = passed ? moduleData.experiencePoints : 0;
           return (
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem' }}>{passed ? '🎉' : '📚'}</div>
+              <div style={{ display: 'inline-flex', marginBottom: '1rem', padding: '0.35rem 0.75rem', background: 'var(--accent-glow)', border: '1px solid var(--border-strong)', borderRadius: '0.5rem', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                {passed ? 'Passed' : 'Needs Review'}
+              </div>
               <h2>{passed ? (isReviewMode ? 'Review Complete!' : 'Module Complete!') : 'Not Quite!'}</h2>
-              <div style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.5rem', margin: '1.5rem 0' }}>
+              <div style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1.5rem', margin: '1.5rem 0' }}>
                 <p style={{ color: 'var(--text-muted)', margin: '0 0 0.5rem' }}>Your Score</p>
                 <p style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: '0 0 0.5rem' }}>{quizScore} / {allQuestions.length}</p>
-                <p style={{ fontSize: '1.5rem', color: passed ? '#22c55e' : '#ef4444', fontWeight: 600, margin: 0 }}>{percentage}%</p>
+                <p style={{ fontSize: '1.5rem', color: passed ? 'var(--accent)' : 'var(--danger)', fontWeight: 600, margin: 0 }}>{percentage}%</p>
               </div>
               {passed ? (
-                <div style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #d4af37 100%)', borderRadius: '0.75rem', padding: '1.5rem', color: 'black', marginBottom: '1.5rem' }}>
-                  <p style={{ margin: '0 0 0.5rem' }}>🏆 {isReviewMode ? 'Great Review!' : 'XP Earned'}</p>
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderLeft: '4px solid var(--accent)', borderRadius: '0.5rem', padding: '1.5rem', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
+                  <p style={{ margin: '0 0 0.5rem' }}>{isReviewMode ? 'Great Review' : 'XP Earned'}</p>
                   {!isReviewMode && <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>+{xpEarned} XP</p>}
                 </div>
               ) : (
-                <div style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1.5rem', marginBottom: '1.5rem' }}>
                   <p>You need 80% to pass. Review the lessons and try again!</p>
                 </div>
               )}

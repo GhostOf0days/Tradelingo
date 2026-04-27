@@ -25,15 +25,23 @@
   max-width: 90%;
   width: 100%;
   text-align: center;
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: 0.5rem;
   padding: 3rem 2rem;
 }
 
 .lr__lobby-icon {
-  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1rem;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -83,9 +91,9 @@
 }
 
 .lr__lobby-rules {
-  background: var(--surface-hover);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1rem 1.5rem;
   margin-bottom: 1.5rem;
   text-align: left;
@@ -98,7 +106,7 @@
 }
 
 .lr__login-warning {
-  color: var(--xp-yellow);
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -117,7 +125,7 @@
   background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 0.875rem 2.5rem;
   font-size: 1rem;
   font-weight: 700;
@@ -218,9 +226,9 @@
 
 /* Question card */
 .lr__question-card {
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 1.75rem;
   margin-bottom: 1.25rem;
   min-height: 100px;
@@ -249,7 +257,7 @@
   gap: 0.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 0.9rem 1rem;
   cursor: pointer;
   font-size: 0.9rem;
@@ -300,13 +308,24 @@
   max-width: 90%;
   width: 100%;
   text-align: center;
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: 0.5rem;
   padding: 3rem 2rem;
 }
 
-.lr__results-trophy { font-size: 4rem; margin-bottom: 1rem; }
+.lr__results-status {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--accent-glow);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
 
 .lr__results-title {
   font-size: 2rem;
@@ -336,7 +355,8 @@
 }
 
 .lr__perfect-badge {
-  background: linear-gradient(135deg, var(--accent), #d4af37);
+  background: var(--accent-glow);
+  border: 1px solid var(--border-strong);
   color: #fff;
   font-weight: 700;
   border-radius: 0.5rem;
@@ -361,7 +381,7 @@
 .lr__home-btn {
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 0.875rem;
   font-size: 1rem;
   font-weight: 600;

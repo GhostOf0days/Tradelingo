@@ -27,6 +27,7 @@ const ARTICLE_BASE_LIKES = new Map<number, number>([
   [17, 92],
   [18, 139],
 ]);
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getPasswordValidationError(password: unknown): string | null {
   if (typeof password !== 'string') return 'Password is required';
@@ -67,9 +68,10 @@ export function createApp(
   app.post('/api/register', async (req, res) => {
     try {
       const { email, password } = req.body;
+      const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
 
       // basic email checks with a hard max length on registration.
-      if (!email || typeof email !== 'string' || !email.includes('@') || email.length > 320) {
+      if (!EMAIL_PATTERN.test(normalizedEmail) || normalizedEmail.length > 320) {
         return res.status(400).json({ error: 'Valid email is required' });
       }
       const passwordError = getPasswordValidationError(password);
@@ -77,7 +79,6 @@ export function createApp(
         return res.status(400).json({ error: passwordError });
       }
 
-      const normalizedEmail = email.toLowerCase().trim();
       const existingUser = await usersCollection.findOne({ email: normalizedEmail });
       if (existingUser) {
         return res.status(400).json({ error: 'User already exists' });
@@ -121,7 +122,10 @@ export function createApp(
   app.post('/api/login', async (req, res) => {
     try {
       const { email, password } = req.body;
-      const normalizedEmail = (email || '').toLowerCase().trim();
+      const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
+      if (!EMAIL_PATTERN.test(normalizedEmail) || typeof password !== 'string') {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
       const user = await usersCollection.findOne({ email: normalizedEmail });
 
       if (!user) {

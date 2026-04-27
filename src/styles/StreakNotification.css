@@ -18,17 +18,19 @@
 }
 
 .streak-notification--warning {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
-  border-radius: 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--accent);
+  border-radius: 0.5rem;
   padding: 1rem 1.5rem;
-  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .streak-notification__content {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: white;
+  color: var(--text-primary);
   max-width: 400px;
 }
 

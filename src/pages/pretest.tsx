@@ -95,7 +95,9 @@ export default function Pretest() {
     return (
       <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
         <div className="modules__card" style={{ padding: '3rem 2rem' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{passed ? '🏆' : '📚'}</div>
+          <div style={{ display: 'inline-flex', marginBottom: '1rem', padding: '0.35rem 0.75rem', background: 'var(--accent-glow)', border: '1px solid var(--border-strong)', borderRadius: '0.5rem', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>
+            {passed ? 'Passed' : 'Needs Review'}
+          </div>
           <h2>{passed ? 'You Tested Out!' : 'Keep Learning!'}</h2>
           <p style={{ color: 'var(--text-muted)' }}>
             You scored {score} out of {displayPretest.length}.
@@ -117,13 +119,13 @@ export default function Pretest() {
           <span style={{ fontWeight: '600' }}>{progressPercent}%</span>
         </div>
         <div style={{ height: '8px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${progressPercent}%`, background: '#eab308', transition: 'width 0.3s ease' }} />
+          <div style={{ height: '100%', width: `${progressPercent}%`, background: 'var(--accent)', transition: 'width 0.3s ease' }} />
         </div>
       </div>
 
       <div className="modules__card" style={{ padding: '2.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ margin: 0, color: '#eab308' }}>Module {id} Pre-Test</h2>
+          <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Module {id} Pre-Test</h2>
           <button 
             onClick={() => setShowSkipDialog(true)}
             style={{
@@ -151,7 +153,7 @@ export default function Pretest() {
               style={{
                 padding: '1.25rem', textAlign: 'left',
                 background: selectedAnswer === idx ? 'var(--surface-hover)' : 'transparent',
-                border: selectedAnswer === idx ? '2px solid #eab308' : '2px solid var(--border)',
+                border: selectedAnswer === idx ? '2px solid var(--accent)' : '2px solid var(--border)',
                 borderRadius: '0.75rem', color: 'var(--text-primary)', fontSize: '1rem', cursor: 'pointer'
               }}
             >
@@ -163,7 +165,7 @@ export default function Pretest() {
 
       <button 
         className="modules__card-btn" 
-        style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: '#eab308', color: '#000' }}
+        style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: 'var(--accent)', color: 'var(--text-primary)' }}
         onClick={handleNext}
         disabled={selectedAnswer === null}
       >

@@ -67,9 +67,9 @@
 }
 
 .calculator__section {
-  background: var(--surface);
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 2rem;
 }
 
@@ -94,11 +94,11 @@
 .calculator__account-card {
   border: 2px solid var(--border);
   border-left: 5px solid var(--accent);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: var(--surface-hover);
+  background: var(--surface);
 }
 
 .calculator__account-card:hover {
@@ -174,32 +174,37 @@
 
 .calculator__result {
   grid-column: 1 / -1;
-  background: linear-gradient(135deg, var(--accent) 0%, #d4af37 100%);
-  border-radius: 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--accent);
+  border-radius: 0.5rem;
   padding: 2rem;
   text-align: center;
-  color: #fff;
+  color: var(--text-primary);
   margin-top: 1rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .calculator__result p:first-child {
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 700;
   margin: 0 0 0.5rem 0;
-  opacity: 0.9;
+  color: var(--text-muted);
 }
 
 .calculator__result-value {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+  font-weight: 800;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .calculator__result-gain,
 .calculator__result-info {
-  font-size: 0.95rem;
+  font-size: 1rem;
   margin-top: 0.5rem;
-  opacity: 0.9;
+  color: var(--text-muted);
 }
 
 .calculator__grid-layout {
@@ -227,9 +232,9 @@
 }
 
 .calculator__chart-container {
-  background: var(--surface-hover);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   margin-top: 1.5rem;
 }
@@ -262,7 +267,5 @@
 .calculator__section h2 {
   font-size: 1.75rem;
   margin-bottom: 1rem;
-  background: linear-gradient(to right, var(--text-primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
 }

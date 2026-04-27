@@ -112,7 +112,7 @@ export default function BlockchainDemo() {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <span style={{ background: tamperedBlock !== null ? '#ef444433' : '#22c55e33', color: tamperedBlock !== null ? '#ef4444' : '#22c55e', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-            {tamperedBlock !== null ? '⚠ Chain Broken' : '✓ Chain Valid'}
+            {tamperedBlock !== null ? 'Chain Broken' : 'Chain Valid'}
           </span>
           <span style={{ background: '#6366f133', color: '#6366f1', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 'bold' }}>
             {chain.length} blocks
@@ -175,7 +175,7 @@ export default function BlockchainDemo() {
                       border: '1px solid #ef444444', borderRadius: '0.375rem', color: '#ef4444',
                       fontSize: '0.7rem', cursor: 'pointer', fontWeight: 'bold'
                     }}>
-                      🔓 Tamper
+                      Tamper
                     </button>
                   )}
                 </div>
@@ -188,7 +188,7 @@ export default function BlockchainDemo() {
       {isMining && (
         <div style={{ marginTop: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-            <span style={{ color: '#eab308', fontSize: '0.8rem', fontWeight: 'bold' }}>⛏ Mining new block...</span>
+            <span style={{ color: '#eab308', fontSize: '0.8rem', fontWeight: 'bold' }}>Mining new block...</span>
             <span style={{ color: '#888', fontSize: '0.8rem' }}>{miningProgress}%</span>
           </div>
           <div style={{ height: '4px', background: '#1a1a2e', borderRadius: '99px', overflow: 'hidden' }}>
@@ -203,7 +203,7 @@ export default function BlockchainDemo() {
           background: '#22c55e', color: 'black', fontWeight: 'bold', fontSize: '0.85rem',
           opacity: isMining || chain.length >= 6 ? 0.5 : 1,
         }}>
-          ⛏ Mine Block
+          Mine Block
         </button>
         <button onClick={resetChain} style={{
           padding: '0.6rem 1rem', border: '1px solid #333', borderRadius: '0.5rem', cursor: 'pointer',

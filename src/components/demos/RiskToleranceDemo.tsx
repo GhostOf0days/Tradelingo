@@ -4,40 +4,39 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 interface Scenario {
   label: string;
   description: string;
-  icon: string;
 }
 
 const QUESTIONS: { question: string; options: Scenario[] }[] = [
   {
     question: 'Your $10,000 investment drops 20% in one week. What do you do?',
     options: [
-      { label: 'Sell immediately', description: 'Cut losses and protect capital', icon: '🛑' },
-      { label: 'Hold and wait', description: 'Stay calm and ride it out', icon: '⏳' },
-      { label: 'Buy more', description: 'Stocks are on sale!', icon: '🛒' },
+      { label: 'Sell immediately', description: 'Cut losses and protect capital' },
+      { label: 'Hold and wait', description: 'Stay calm and ride it out' },
+      { label: 'Buy more', description: 'Stocks are on sale!' },
     ],
   },
   {
     question: 'Which best describes your investment timeline?',
     options: [
-      { label: 'Under 5 years', description: 'Need the money soon', icon: '📅' },
-      { label: '5–15 years', description: 'Mid-term goals', icon: '📆' },
-      { label: '15+ years', description: 'Long-term wealth building', icon: '🏗️' },
+      { label: 'Under 5 years', description: 'Need the money soon' },
+      { label: '5-15 years', description: 'Mid-term goals' },
+      { label: '15+ years', description: 'Long-term wealth building' },
     ],
   },
   {
     question: 'How would you allocate a bonus of $5,000?',
     options: [
-      { label: 'Savings account', description: 'Safe and accessible', icon: '🏦' },
-      { label: 'Index fund', description: 'Balanced growth', icon: '📊' },
-      { label: 'Individual stocks', description: 'Higher risk, higher reward', icon: '🚀' },
+      { label: 'Savings account', description: 'Safe and accessible' },
+      { label: 'Index fund', description: 'Balanced growth' },
+      { label: 'Individual stocks', description: 'Higher risk, higher reward' },
     ],
   },
 ];
 
 const PROFILES = [
-  { name: 'Conservative', color: '#22c55e', stocks: 20, bonds: 60, cash: 20, returns: '3–5%', icon: '🛡️' },
-  { name: 'Moderate', color: '#eab308', stocks: 60, bonds: 30, cash: 10, returns: '6–8%', icon: '⚖️' },
-  { name: 'Aggressive', color: '#ef4444', stocks: 90, bonds: 5, cash: 5, returns: '8–12%', icon: '🔥' },
+  { name: 'Conservative', color: '#22c55e', stocks: 20, bonds: 60, cash: 20, returns: '3-5%' },
+  { name: 'Moderate', color: '#eab308', stocks: 60, bonds: 30, cash: 10, returns: '6-8%' },
+  { name: 'Aggressive', color: '#ef4444', stocks: 90, bonds: 5, cash: 5, returns: '8-12%' },
 ];
 
 export default function RiskToleranceDemo() {
@@ -162,7 +161,6 @@ export default function RiskToleranceDemo() {
                 onMouseOver={e => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.background = '#6366f115'; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = '#222'; e.currentTarget.style.background = '#111'; }}
               >
-                <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
                 <div>
                   <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{opt.label}</div>
                   <div style={{ color: '#888', fontSize: '0.75rem' }}>{opt.description}</div>
@@ -178,7 +176,6 @@ export default function RiskToleranceDemo() {
             background: `${profile.color}15`, border: `1px solid ${profile.color}33`,
             borderRadius: '0.75rem',
           }}>
-            <div style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>{profile.icon}</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: profile.color }}>{profile.name} Investor</div>
             <div style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem' }}>
               Score: {score}/{(QUESTIONS.length - 1) * 2}
@@ -194,7 +191,7 @@ export default function RiskToleranceDemo() {
                 background: i === profileIdx ? `${p.color}22` : '#111',
                 border: i === profileIdx ? `1px solid ${p.color}44` : '1px solid transparent',
               }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: p.color }}>{p.icon} {p.name}</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: p.color }}>{p.name}</div>
                 <div style={{ fontSize: '0.65rem', color: '#888' }}>{p.returns}/yr</div>
               </div>
             ))}
@@ -205,7 +202,7 @@ export default function RiskToleranceDemo() {
             borderRadius: '0.5rem', background: 'transparent', color: '#888', cursor: 'pointer',
             fontSize: '0.85rem',
           }}>
-            ↺ Retake Quiz
+            Retake Quiz
           </button>
         </>
       )}

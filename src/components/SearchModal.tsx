@@ -1,7 +1,7 @@
 // Client-only search UI: filters a static index of modules, articles, and quizzes.
 // (Not wired to the backend; good enough for demos and quick discovery.)
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import '../styles/Search.css';
 
 interface SearchProps {
@@ -87,10 +87,8 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
       case 'module':
         return 'var(--accent)';
       case 'article':
-        // highlight article rows in green.
-        return '#10b981';
       case 'quiz':
-        return 'var(--xp-yellow)';
+        return 'var(--accent)';
       default:
         return 'var(--text-muted)';
     }
@@ -117,7 +115,7 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
               autoFocus
             />
             <button onClick={handleSearch} className="search-modal__search-btn">
-              🔍
+              <Search size={18} />
             </button>
           </div>
           <button className="search-modal__close" onClick={onClose}>
@@ -128,12 +126,12 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
         <div className="search-modal__content">
           {!hasSearched ? (
             <div className="search-modal__empty">
-              <p>🔍 Start typing to search</p>
+              <p>Start typing to search</p>
               <p className="search-modal__hint">Search across modules, articles, and quizzes</p>
             </div>
           ) : results.length === 0 ? (
             <div className="search-modal__empty">
-              <p>❌ No results found for "{query}"</p>
+              <p>No results found for "{query}"</p>
               <p className="search-modal__hint">Try different keywords</p>
             </div>
           ) : (

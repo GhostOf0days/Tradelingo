@@ -55,6 +55,16 @@ describe('Auth API', () => {
     expect(res.body.lastActivityDate).toBeNull();
   });
 
+  it('POST /api/register accepts the strong password format reported from the app', async () => {
+    const app = await getApp();
+    const res = await request(app)
+      .post('/api/register')
+      .send({ email: 'dwjwjio@gmail.com', password: 'edui289!aH' })
+      .expect(201);
+
+    expect(res.body.email).toBe('dwjwjio@gmail.com');
+  });
+
   it('POST /api/register rejects weak passwords with 400', async () => {
     const app = await getApp();
     const res = await request(app)

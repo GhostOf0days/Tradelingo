@@ -13,6 +13,8 @@ const PASSWORD_RULES = [
   { label: 'One symbol', test: (value: string) => /[^A-Za-z0-9]/.test(value) },
 ];
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +41,12 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      setError("Enter a valid email address");
+      return;
+    }
+
     const missingRule = passwordChecks.find((check) => !check.valid);
     if (missingRule) {
       setError(`Password needs: ${missingRule.label.toLowerCase()}`);
@@ -53,24 +61,35 @@ export default function Register() {
       const response = await fetch('/api/register', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      let data: { error?: string; displayName?: string; experiencePoints?: number } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: "Registration service returned an invalid response" };
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to register");
       }
 
       setUser({
-        email,
-        displayName: data.displayName,
-        experiencePoints: data.experiencePoints,
+        email: normalizedEmail,
+        displayName: data.displayName ?? normalizedEmail.split("@")[0],
+        experiencePoints: data.experiencePoints ?? 0,
       });
       navigate("/");
       
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes("expected pattern") || message.includes("Failed to fetch")) {
+        setError("Registration service is unavailable. Please try again in a moment.");
+        return;
+      }
+      setError(message);
     }
   };
 
@@ -81,15 +100,18 @@ export default function Register() {
         
         {error && <div className="auth__error">{error}</div>}
 
-        <form className="auth__form" onSubmit={handleSubmit}>
+        <form className="auth__form" onSubmit={handleSubmit} noValidate>
           <div className="auth__field">
             <label className="auth__label">Email</label>
             <input
               className="auth__input"
-              type="email"
+              type="text"
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="trader@example.com"
+              autoCapitalize="none"
+              autoComplete="email"
               required
             />
           </div>
@@ -133,7 +155,7 @@ export default function Register() {
                       key={check.label}
                       className={check.valid ? 'auth__password-rule--valid' : ''}
                     >
-                      {check.valid ? '✓' : '•'} {check.label}
+                      {check.valid ? 'Met:' : 'Need:'} {check.label}
                     </li>
                   ))}
                 </ul>

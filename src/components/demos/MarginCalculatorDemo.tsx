@@ -138,8 +138,8 @@ export default function MarginCalculatorDemo() {
         }}>
           <span style={{ color: isLiquidated ? '#ef4444' : '#eab308', fontWeight: 'bold', fontSize: '0.85rem' }}>
             {isLiquidated
-              ? '💀 LIQUIDATED — Your equity is wiped out. You may owe the broker money!'
-              : '⚠️ MARGIN CALL — Equity below 30%. Deposit more cash or positions will be force-sold!'}
+              ? 'LIQUIDATED - Your equity is wiped out. You may owe the broker money!'
+              : 'MARGIN CALL - Equity below 30%. Deposit more cash or positions will be force-sold!'}
           </span>
         </div>
       )}
