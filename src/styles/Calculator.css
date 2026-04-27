@@ -92,6 +92,7 @@
 }
 
 .calculator__account-card {
+  min-width: 0;
   border: 2px solid var(--border);
   border-left: 5px solid var(--accent);
   border-radius: 0.5rem;
@@ -132,12 +133,14 @@
 }
 
 .calculator__account-details {
+  min-width: 0;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
 }
 
 .calculator__form {
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
@@ -173,6 +176,8 @@
 }
 
 .calculator__result {
+  min-width: 0;
+  max-width: 100%;
   grid-column: 1 / -1;
   background: var(--card-bg);
   border: 1px solid var(--border-strong);
@@ -183,6 +188,7 @@
   color: var(--text-primary);
   margin-top: 1rem;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .calculator__result p:first-child {
@@ -193,11 +199,16 @@
 }
 
 .calculator__result-value {
-  font-size: clamp(2rem, 5vw, 3rem);
+  display: block;
+  max-width: 100%;
+  font-size: clamp(1.65rem, 4vw, 2.35rem);
   line-height: 1.1;
   font-weight: 800;
   margin: 0;
   color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .calculator__result-gain,
@@ -228,6 +239,18 @@
   .calculator__tab {
     padding: 0.85rem 1rem;
     font-size: 1rem;
+  }
+
+  .calculator__result {
+    padding: 1.5rem;
+  }
+
+  .calculator__result p:first-child {
+    font-size: 1rem;
+  }
+
+  .calculator__result-value {
+    font-size: clamp(1.45rem, 8vw, 2rem);
   }
 }
 
