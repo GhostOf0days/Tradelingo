@@ -42,6 +42,7 @@
 }
 
 .auth__input {
+  width: 100%;
   background: var(--main-bg-elevated);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -56,6 +57,40 @@
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.auth__input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.auth__password-input {
+  position: relative;
+}
+
+.auth__password-input .auth__input {
+  padding-right: 2.75rem;
+}
+
+.auth__password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 0.2s;
+}
+
+.auth__password-toggle:hover {
+  color: var(--text-primary);
 }
 
 .auth__submit {
@@ -149,4 +184,14 @@
   margin: 0.75rem 0 0;
   color: var(--text-muted-strong);
   font-size: 0.82rem;
+}
+
+.auth__field-help {
+  margin: 0;
+  color: var(--text-muted-strong);
+  font-size: 0.82rem;
+}
+
+.auth__field-help--error {
+  color: var(--danger);
 }

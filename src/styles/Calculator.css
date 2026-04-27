@@ -25,17 +25,21 @@
   gap: 1rem;
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
 }
 
 .calculator__tab {
-  padding: 1rem 1.5rem;
+  flex: 0 0 auto;
+  padding: 1rem 1.75rem;
   background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-weight: 500;
+  font-size: 1.08rem;
+  font-weight: 700;
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .calculator__tab:hover {
@@ -208,6 +212,17 @@
 @media (max-width: 1024px) {
   .calculator__grid-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .calculator__tabs {
+    gap: 0.5rem;
+  }
+
+  .calculator__tab {
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
   }
 }
 

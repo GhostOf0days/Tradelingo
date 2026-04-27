@@ -1,6 +1,7 @@
 // Creates an account via POST /api/register and logs the user in immediately afterward.
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useUser } from "../contexts/UserContext";
 import '../styles/Register.css';
 
@@ -15,6 +16,9 @@ const PASSWORD_RULES = [
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   
   const { setUser } = useUser();
@@ -27,6 +31,8 @@ export default function Register() {
   const passwordStrength =
     passwordScore <= 2 ? 'weak' : passwordScore <= 4 ? 'good' : 'strong';
   const hasPasswordIssues = password.length > 0 && passwordScore < PASSWORD_RULES.length;
+  const hasConfirmPasswordIssue =
+    confirmPassword.length > 0 && password !== confirmPassword;
 
   /** POST /api/register; server hashes password and returns the public profile fields. */
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +42,10 @@ export default function Register() {
     const missingRule = passwordChecks.find((check) => !check.valid);
     if (missingRule) {
       setError(`Password needs: ${missingRule.label.toLowerCase()}`);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
@@ -86,16 +96,26 @@ export default function Register() {
 
           <div className="auth__field">
             <label className="auth__label">Password</label>
-            <input
-              className="auth__input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Use a strong password"
-              autoComplete="new-password"
-              aria-invalid={hasPasswordIssues}
-              required
-            />
+            <div className="auth__password-input">
+              <input
+                className="auth__input"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Use a strong password"
+                autoComplete="new-password"
+                aria-invalid={hasPasswordIssues}
+                required
+              />
+              <button
+                className="auth__password-toggle"
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             {password.length > 0 && (
               <div className="auth__password-panel">
                 <div className="auth__strength-row">
@@ -123,6 +143,33 @@ export default function Register() {
                   </p>
                 )}
               </div>
+            )}
+          </div>
+
+          <div className="auth__field">
+            <label className="auth__label">Confirm Password</label>
+            <div className="auth__password-input">
+              <input
+                className="auth__input"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter your password"
+                autoComplete="new-password"
+                aria-invalid={hasConfirmPasswordIssue}
+                required
+              />
+              <button
+                className="auth__password-toggle"
+                type="button"
+                onClick={() => setShowConfirmPassword((current) => !current)}
+                aria-label={showConfirmPassword ? "Hide confirmed password" : "Show confirmed password"}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {hasConfirmPasswordIssue && (
+              <p className="auth__field-help auth__field-help--error">Passwords do not match.</p>
             )}
           </div>
 
