@@ -1,3 +1,22 @@
+/**
+ * Design Pattern: Strategy Pattern
+ *
+ * Purpose:
+ * Provides interchangeable financial projection algorithms
+ * without coupling the Calculator UI to any one formula.
+ *
+ * How:
+ * RetirementCalculator exposes three static methods — project,
+ * compound, and projectSavings — each encapsulating a different
+ * financial formula. The Calculator page selects which to invoke
+ * based on the active Account type.
+ *
+ * Benefit:
+ * New projection strategies (e.g. inflation-adjusted returns)
+ * can be added as additional static methods without changing
+ * the calling component or the Account data structure.
+ */
+
 import { Account } from './Account';
 
 // Pure numeric helpers shared by the Calculator page (FV of annuities, compound growth, formatting).
