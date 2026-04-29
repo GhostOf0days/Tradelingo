@@ -2,9 +2,9 @@ import tls from 'tls';
 import type { Express } from 'express';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-import { createApp } from '../server/app';
-import { runUserMigrations } from '../server/migrations';
-import { seedModulesIfEmpty } from '../server/seedModules';
+import { createApp } from '../server/app.js';
+import { runUserMigrations } from '../server/migrations.js';
+import { seedModulesIfEmpty } from '../server/seedModules.js';
 
 dotenv.config();
 

@@ -4,7 +4,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import type { Collection } from 'mongodb';
 import { fileURLToPath } from 'url';
-import { calculateLevel } from './level';
+import { calculateLevel } from './level.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARTICLE_BASE_LIKES = new Map<number, number>([

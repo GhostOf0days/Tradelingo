@@ -1,5 +1,5 @@
 import type { Collection } from 'mongodb';
-import { MODULES } from '../src/data/modules';
+import { MODULES } from '../src/data/modules.js';
 
 // insert curriculum rows from the same source as the client when the modules collection is empty.
 export async function seedModulesIfEmpty(modulesCollection: Collection): Promise<void> {
