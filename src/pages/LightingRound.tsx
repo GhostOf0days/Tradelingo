@@ -11,8 +11,8 @@ const QUESTION_TIME = 10;
 const TOTAL_QUESTIONS = 10;
 const XP_PER_CORRECT = 150;
 const TIME_BONUS_PER_CORRECT = 50;
-const PERFECT_BONUS = 500;
-const MAX_TOTAL_XP = (XP_PER_CORRECT + TIME_BONUS_PER_CORRECT) * TOTAL_QUESTIONS + PERFECT_BONUS;
+const PERFECT_TOTAL_XP = 2500;
+const MAX_TOTAL_XP = PERFECT_TOTAL_XP;
 
 type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
 
@@ -186,13 +186,13 @@ export default function LightingRound() {
     setTimeout(() => advanceQuestion(), 1200);
   };
 
-  // Persist total XP once when leaving `playing` (depends on score + perfect-run bonus).
+  // Persist total XP once when leaving `playing`; a perfect run earns the advertised max.
   useEffect(() => {
     if (gameState !== 'finished' || xpPostedRef.current) return;
     xpPostedRef.current = true;
 
     const isPerfect = correctCount === TOTAL_QUESTIONS;
-    const totalXp = score + (isPerfect ? PERFECT_BONUS : 0);
+    const totalXp = isPerfect ? PERFECT_TOTAL_XP : score;
     setXpEarned(totalXp);
 
     if (user && totalXp > 0) {
@@ -276,7 +276,7 @@ export default function LightingRound() {
           </div>
           <div className="lr__lobby-rules">
             <p>Answer faster for bonus XP</p>
-            <p>Perfect score earns +{PERFECT_BONUS} bonus XP</p>
+            <p>Perfect score earns +{PERFECT_TOTAL_XP} XP</p>
             <p>Random questions from all modules</p>
           </div>
           {!user && (
@@ -318,7 +318,7 @@ export default function LightingRound() {
             <span className="lr__results-pct">{pct}% correct</span>
           </div>
           {isPerfect && (
-            <div className="lr__perfect-badge">Perfect Bonus: +{PERFECT_BONUS} XP</div>
+            <div className="lr__perfect-badge">Perfect Score: +{PERFECT_TOTAL_XP} XP</div>
           )}
           <div className="lr__results-xp">
             +{xpEarned} XP {user ? 'added to your account!' : '(log in to save XP)'}
