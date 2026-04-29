@@ -78,7 +78,7 @@ export default function Lesson() {
           setCurrentLessonIdx(0);
           setPhase('reading');
         } else {
-          const res = await fetch(`/api/progress/${user.email}`);
+          const res = await fetch(`/api/progress?email=${encodeURIComponent(user.email)}`);
           if (!res.ok) throw new Error('Failed to reach database');
           const data = await res.json();
           const currentIdx = data.progressByModuleId?.[moduleId]?.lessonCurrent || 0;

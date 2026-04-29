@@ -29,7 +29,7 @@ function Modules() {
         return;
       }
       try {
-        const response = await fetch(`/api/progress/${user.email}`);
+        const response = await fetch(`/api/progress?email=${encodeURIComponent(user.email)}`);
         if (response.ok) {
           const data = await response.json();
           setProgressByModuleId(data.progressByModuleId);

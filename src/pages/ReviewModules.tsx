@@ -21,7 +21,7 @@ export default function ReviewModules() {
     const fetchProgress = async () => {
       if (!user) return;
       try {
-        const res = await fetch(`/api/progress/${user.email}`);
+        const res = await fetch(`/api/progress?email=${encodeURIComponent(user.email)}`);
         if (res.ok) {
           const data = await res.json();
           const progressMap = data.progressByModuleId || {};

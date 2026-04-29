@@ -146,6 +146,16 @@ describe('Progress and XP API', () => {
     });
   });
 
+  it('GET /api/progress?email= returns progress for deployed single-segment API routing', async () => {
+    const app = await getApp();
+    const res = await request(app).get('/api/progress').query({ email: 'progress@example.com' }).expect(200);
+
+    expect(res.body).toMatchObject({
+      lastUnlockedModuleId: 1,
+      progressByModuleId: {},
+    });
+  });
+
   it('GET /api/progress/:email returns 404 for unknown user', async () => {
     const app = await getApp();
     await request(app).get('/api/progress/unknown@example.com').expect(404);
@@ -223,6 +233,12 @@ describe('Progress and XP API', () => {
 
     expect(retry.body.experiencePoints).toBe(600);
     expect(retry.body.completedModules).toHaveLength(1);
+
+    const completedModules = await request(app)
+      .get('/api/completed-modules')
+      .query({ email: 'progress@example.com' })
+      .expect(200);
+    expect(completedModules.body).toHaveLength(1);
   });
 });
 
@@ -252,6 +268,21 @@ describe('User profile API', () => {
   it('GET /api/user/:email returns full profile', async () => {
     const app = await getApp();
     const res = await request(app).get('/api/user/profile@example.com').expect(200);
+
+    expect(res.body).toMatchObject({
+      email: 'profile@example.com',
+      displayName: 'profile',
+      experiencePoints: 0,
+      streakDays: 0,
+      lastUnlockedModuleId: 1,
+    });
+    expect(Array.isArray(res.body.completedModules)).toBe(true);
+    expect(typeof res.body.progressByModuleId).toBe('object');
+  });
+
+  it('GET /api/user?email= returns full profile for deployed single-segment API routing', async () => {
+    const app = await getApp();
+    const res = await request(app).get('/api/user').query({ email: 'profile@example.com' }).expect(200);
 
     expect(res.body).toMatchObject({
       email: 'profile@example.com',

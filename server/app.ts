@@ -43,6 +43,11 @@ function getPasswordValidationError(password: unknown): string | null {
   return null;
 }
 
+function normalizeEmailInput(email: unknown): string {
+  if (Array.isArray(email)) return normalizeEmailInput(email[0]);
+  return typeof email === 'string' ? email.toLowerCase().trim() : '';
+}
+
 async function seedArticleLikesIfMissing(articleLikesCollection: Collection): Promise<void> {
   const now = new Date();
   await Promise.all(
@@ -156,6 +161,50 @@ export function createApp(
     }
   });
 
+  const sendProgress = async (email: unknown, res: express.Response) => {
+    const normalizedEmail = normalizeEmailInput(email);
+    if (!normalizedEmail) return res.status(400).json({ error: 'Email is required' });
+
+    const user = await usersCollection.findOne({ email: normalizedEmail });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    return res.status(200).json({
+      lastUnlockedModuleId: user.lastUnlockedModuleId || 1,
+      progressByModuleId: user.progressByModuleId || {},
+    });
+  };
+
+  const sendCompletedModules = async (email: unknown, res: express.Response) => {
+    const normalizedEmail = normalizeEmailInput(email);
+    if (!normalizedEmail) return res.status(400).json({ error: 'Email is required' });
+
+    const user = await usersCollection.findOne({ email: normalizedEmail });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    return res.status(200).json(user.completedModules || []);
+  };
+
+  const sendUserProfile = async (email: unknown, res: express.Response) => {
+    const normalizedEmail = normalizeEmailInput(email);
+    if (!normalizedEmail) return res.status(400).json({ error: 'Email is required' });
+
+    const user = await usersCollection.findOne({ email: normalizedEmail });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const xp = (user.experiencePoints as number) || 0;
+    return res.status(200).json({
+      email: user.email,
+      displayName: user.displayName,
+      experiencePoints: user.experiencePoints,
+      level: user.level || calculateLevel(xp),
+      streakDays: user.streakDays || 0,
+      lastActivityDate: user.lastActivityDate,
+      lastUnlockedModuleId: user.lastUnlockedModuleId,
+      progressByModuleId: user.progressByModuleId || {},
+      completedModules: user.completedModules || [],
+    });
+  };
+
   // apply a delta to xp and recompute level from the running total.
   app.post('/api/update-xp', async (req, res) => {
     try {
@@ -188,15 +237,18 @@ export function createApp(
   });
 
   // report lesson progress per module and the furthest unlocked module id.
+  app.get('/api/progress', async (req, res) => {
+    try {
+      await sendProgress(req.query.email, res);
+    } catch (error) {
+      console.warn(error);
+      res.status(500).json({ error: 'Server error fetching progress' });
+    }
+  });
+
   app.get('/api/progress/:email', async (req, res) => {
     try {
-      const user = await usersCollection.findOne({ email: req.params.email });
-      if (!user) return res.status(404).json({ error: 'User not found' });
-
-      res.status(200).json({
-        lastUnlockedModuleId: user.lastUnlockedModuleId || 1,
-        progressByModuleId: user.progressByModuleId || {},
-      });
+      await sendProgress(req.params.email, res);
     } catch (error) {
       console.warn(error);
       res.status(500).json({ error: 'Server error fetching progress' });
@@ -479,12 +531,18 @@ export function createApp(
   });
 
   // list stored completions for dashboard history views.
+  app.get('/api/completed-modules', async (req, res) => {
+    try {
+      await sendCompletedModules(req.query.email, res);
+    } catch (error) {
+      console.warn(error);
+      res.status(500).json({ error: 'Server error fetching completed modules' });
+    }
+  });
+
   app.get('/api/completed-modules/:email', async (req, res) => {
     try {
-      const user = await usersCollection.findOne({ email: req.params.email });
-      if (!user) return res.status(404).json({ error: 'User not found' });
-
-      res.status(200).json(user.completedModules || []);
+      await sendCompletedModules(req.params.email, res);
     } catch (error) {
       console.warn(error);
       res.status(500).json({ error: 'Server error fetching completed modules' });
@@ -588,23 +646,18 @@ export function createApp(
   });
 
   // richer user payload with progress maps and no password field.
+  app.get('/api/user', async (req, res) => {
+    try {
+      await sendUserProfile(req.query.email, res);
+    } catch (error) {
+      console.warn(error);
+      res.status(500).json({ error: 'Server error fetching user profile' });
+    }
+  });
+
   app.get('/api/user/:email', async (req, res) => {
     try {
-      const user = await usersCollection.findOne({ email: req.params.email });
-      if (!user) return res.status(404).json({ error: 'User not found' });
-
-      const xp = (user.experiencePoints as number) || 0;
-      res.status(200).json({
-        email: user.email,
-        displayName: user.displayName,
-        experiencePoints: user.experiencePoints,
-        level: user.level || calculateLevel(xp),
-        streakDays: user.streakDays || 0,
-        lastActivityDate: user.lastActivityDate,
-        lastUnlockedModuleId: user.lastUnlockedModuleId,
-        progressByModuleId: user.progressByModuleId || {},
-        completedModules: user.completedModules || [],
-      });
+      await sendUserProfile(req.params.email, res);
     } catch (error) {
       console.warn(error);
       res.status(500).json({ error: 'Server error fetching user profile' });

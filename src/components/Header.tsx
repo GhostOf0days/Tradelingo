@@ -53,7 +53,7 @@ function Header() {
     const fetchUnfinished = async () => {
       if (!user) { setUnfinishedModules([]); return; }
       try {
-        const res = await fetch(`/api/progress/${user.email}`);
+        const res = await fetch(`/api/progress?email=${encodeURIComponent(user.email)}`);
         if (!res.ok) return;
         const data = await res.json();
         const progressMap = data.progressByModuleId || {};
