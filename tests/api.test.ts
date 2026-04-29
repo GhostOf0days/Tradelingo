@@ -194,6 +194,36 @@ describe('Progress and XP API', () => {
     expect(res.body.experiencePoints).toBe(300);
     expect(res.body.level).toBeGreaterThanOrEqual(1);
   });
+
+  it('POST /api/complete-module marks progress complete and awards XP once', async () => {
+    const app = await getApp();
+    const completion = {
+      email: 'progress@example.com',
+      moduleId: 1,
+      title: 'Stock Market Fundamentals',
+      score: 90,
+      xpEarned: 600,
+      lessonsTotal: 12,
+    };
+
+    const res = await request(app).post('/api/complete-module').send(completion).expect(200);
+
+    expect(res.body.experiencePoints).toBe(600);
+    expect(res.body.lastUnlockedModuleId).toBe(2);
+    expect(res.body.progressByModuleId[1].lessonCurrent).toBe(12);
+    expect(res.body.completedModules).toHaveLength(1);
+    expect(res.body.completedModules[0]).toMatchObject({
+      moduleId: 1,
+      title: 'Stock Market Fundamentals',
+      xpEarned: 600,
+      lessons: 12,
+    });
+
+    const retry = await request(app).post('/api/complete-module').send(completion).expect(200);
+
+    expect(retry.body.experiencePoints).toBe(600);
+    expect(retry.body.completedModules).toHaveLength(1);
+  });
 });
 
 describe('Streak API', () => {

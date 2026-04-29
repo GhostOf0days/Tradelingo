@@ -29,6 +29,10 @@ const ARTICLE_BASE_LIKES = new Map<number, number>([
 ]);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type CompletedModuleRecord = {
+  moduleId?: number | string;
+};
+
 function getPasswordValidationError(password: unknown): string | null {
   if (typeof password !== 'string') return 'Password is required';
   if (password.length < 8) return 'Password must be at least 8 characters';
@@ -499,34 +503,67 @@ export function createApp(
         return res.status(400).json({ error: 'Valid moduleId is required' });
       }
 
+      const moduleDoc = await modulesCollection.findOne({ moduleId });
+      const resolvedLessonsTotal =
+        typeof lessonsTotal === 'number' && lessonsTotal > 0
+          ? Math.floor(lessonsTotal)
+          : Array.isArray(moduleDoc?.lessons)
+            ? moduleDoc.lessons.length
+            : 0;
+      if (resolvedLessonsTotal < 1) {
+        return res.status(400).json({ error: 'lessonsTotal must be a positive number' });
+      }
+
+      const rawXpEarned = xpEarned === undefined ? moduleDoc?.experiencePoints : xpEarned;
+      const safeXpEarned = Number(rawXpEarned);
+      if (!Number.isFinite(safeXpEarned) || safeXpEarned < 0 || safeXpEarned > 10000) {
+        return res.status(400).json({ error: 'xpEarned must be a number between 0 and 10000' });
+      }
+
+      const safeScore = Number.isFinite(Number(score)) ? Number(score) : 0;
+      const moduleTitle =
+        typeof title === 'string' && title.trim()
+          ? title.trim()
+          : typeof moduleDoc?.title === 'string'
+            ? moduleDoc.title
+            : `Module ${moduleId}`;
       const completedDate = new Date().toISOString().split('T')[0];
       const completedModule = {
         moduleId,
-        title,
-        description: `Completed module for ${title}`,
+        title: moduleTitle,
+        description: `Completed module for ${moduleTitle}`,
         completedDate,
-        xpEarned: xpEarned || 0,
-        score: score || 0,
-        lessons: lessonsTotal || 0,
+        xpEarned: Math.floor(safeXpEarned),
+        score: safeScore,
+        lessons: resolvedLessonsTotal,
       };
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
       if (!user) return res.status(404).json({ error: 'User not found' });
 
+      if (user.completedModules !== undefined && !Array.isArray(user.completedModules)) {
+        await usersCollection.updateOne({ email: normalizedEmail }, { $set: { completedModules: [] } });
+      }
+
+      const existingCompletedModules = Array.isArray(user.completedModules)
+        ? (user.completedModules as CompletedModuleRecord[])
+        : [];
+      const alreadyCompleted = existingCompletedModules.some((module) => Number(module.moduleId) === moduleId);
       const newUnlockedId = Math.max(user.lastUnlockedModuleId || 1, moduleId + 1);
 
-      // typings disallow push and set together so cast the update payload.
-      const newXp = (user.experiencePoints || 0) + (xpEarned || 0);
+      const newXp = (user.experiencePoints || 0) + (alreadyCompleted ? 0 : Math.floor(safeXpEarned));
       const newLevel = calculateLevel(newXp);
+      const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
 
       const combinedUpdate = {
-        $push: { completedModules: completedModule },
         $set: { 
           lastUnlockedModuleId: newUnlockedId,
           experiencePoints: newXp,
           level: newLevel,
+          [progressField]: resolvedLessonsTotal,
         },
+        ...(alreadyCompleted ? {} : { $push: { completedModules: completedModule } }),
       };
       const result = await usersCollection.findOneAndUpdate(
         { email: normalizedEmail },
@@ -540,6 +577,9 @@ export function createApp(
         message: 'Module marked as completed',
         completedModules: result.completedModules,
         lastUnlockedModuleId: result.lastUnlockedModuleId,
+        progressByModuleId: result.progressByModuleId,
+        experiencePoints: result.experiencePoints,
+        level: result.level,
       });
     } catch (error) {
       console.warn(error);

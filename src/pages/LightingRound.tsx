@@ -9,8 +9,10 @@ import '../styles/LightingRound.css';
 
 const QUESTION_TIME = 10;
 const TOTAL_QUESTIONS = 10;
-const XP_PER_CORRECT = 100;
+const XP_PER_CORRECT = 150;
+const TIME_BONUS_PER_CORRECT = 50;
 const PERFECT_BONUS = 500;
+const MAX_TOTAL_XP = (XP_PER_CORRECT + TIME_BONUS_PER_CORRECT) * TOTAL_QUESTIONS + PERFECT_BONUS;
 
 type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
 
@@ -170,7 +172,7 @@ export default function LightingRound() {
 
     const correct = questions[currentIndex].q.isCorrectAnswer(index);
     if (correct) {
-      const timeBonus = Math.round((timeLeft / QUESTION_TIME) * 50);
+      const timeBonus = Math.round((timeLeft / QUESTION_TIME) * TIME_BONUS_PER_CORRECT);
       const gained = XP_PER_CORRECT + timeBonus;
       setScore(prev => prev + gained);
       setCorrectCount(prev => prev + 1);
@@ -268,7 +270,7 @@ export default function LightingRound() {
               <span className="lr__stat-label">Per Question</span>
             </div>
             <div className="lr__stat">
-              <span className="lr__stat-value">+{XP_PER_CORRECT * TOTAL_QUESTIONS}</span>
+              <span className="lr__stat-value">+{MAX_TOTAL_XP}</span>
               <span className="lr__stat-label">Max XP</span>
             </div>
           </div>

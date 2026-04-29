@@ -151,17 +151,9 @@ export default function Lesson() {
       });
     }
 
-    // Backend tracks per-lesson increments; we fire one request per lesson, then finalize the module.
+    // Backend completes progress, unlocks the next module, and awards XP in one atomic request.
     if (user && !isReviewMode && passed) {
       try {
-        for (let i = 0; i < moduleLessons.length; i++) {
-          await fetch('/api/complete-lesson', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email, moduleId })
-          });
-        }
-
         const completeRes = await fetch('/api/complete-module', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -174,15 +166,14 @@ export default function Lesson() {
             lessonsTotal: moduleLessons.length
           })
         });
+        if (!completeRes.ok) throw new Error('Failed to complete module');
         const completeData = await completeRes.json();
 
-        const userRes = await fetch(`/api/user/${user.email}`);
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser({ ...user, experiencePoints: userData.experiencePoints });
-        } else {
-          setUser({ ...user, experiencePoints: (completeData.experiencePoints || user.experiencePoints) });
-        }
+        setUser({
+          ...user,
+          experiencePoints: completeData.experiencePoints ?? user.experiencePoints,
+          ...(typeof completeData.level === 'number' ? { level: completeData.level } : {}),
+        });
         updateStreak();
       } catch (err) {
         console.warn('Error completing module:', err);
