@@ -12,6 +12,7 @@ export default function StreakCounter() {
 
   return (
     <div className="streak-counter" title={`${streakDays} day streak! Keep it up!`}>
+      <span className="streak-counter__icon" aria-hidden="true">🔥</span>
       <span className="streak-counter__text">{streakDays}</span>
     </div>
   );
