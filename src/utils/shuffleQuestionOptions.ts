@@ -1,14 +1,14 @@
 /** Fisher–Yates shuffle of multiple-choice options; returns a new order and the updated correct index. */
-export function shuffleQuestionOptions(
+export default function shuffleQuestionOptions(
   options: readonly string[],
-  correctIndex: number,
+  correctIndex: number
 ): { options: string[]; correctIndex: number } {
   const n = options.length;
   if (n <= 1) {
     return { options: [...options], correctIndex };
   }
   const order = Array.from({ length: n }, (_, i) => i);
-  for (let i = n - 1; i > 0; i--) {
+  for (let i = n - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
   }

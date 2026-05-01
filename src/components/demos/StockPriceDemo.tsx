@@ -9,11 +9,35 @@ interface Candle {
   volume: number;
 }
 
+type Trend = 'bull' | 'bear' | 'neutral';
+
+function getTrendBias(trend: Trend): number {
+  if (trend === 'bull') return 0.2;
+  if (trend === 'bear') return -0.2;
+  return 0;
+}
+
+function getTrendColor(trend: Trend): string {
+  if (trend === 'bull') return '#22c55e';
+  if (trend === 'bear') return '#ef4444';
+  return '#6366f1';
+}
+
+function getTrendTextColor(trend: Trend): string {
+  return trend === 'neutral' ? 'white' : 'black';
+}
+
+function getTrendLabel(trend: Trend): string {
+  if (trend === 'bull') return 'Bull';
+  if (trend === 'bear') return 'Bear';
+  return 'Neutral';
+}
+
 export default function StockPriceDemo() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [candles, setCandles] = useState<Candle[]>([]);
   const [price, setPrice] = useState(150);
-  const [trend, setTrend] = useState<'bull' | 'bear' | 'neutral'>('neutral');
+  const [trend, setTrend] = useState<Trend>('neutral');
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const priceRef = useRef(150);
@@ -27,7 +51,13 @@ export default function StockPriceDemo() {
     const close = Math.max(10, open + change);
     const high = Math.max(open, close) + Math.random() * 2;
     const low = Math.min(open, close) - Math.random() * 2;
-    return { open, close, high: Math.max(10, high), low: Math.max(5, low), volume: 50 + Math.random() * 100 };
+    return {
+      open,
+      close,
+      high: Math.max(10, high),
+      low: Math.max(5, low),
+      volume: 50 + Math.random() * 100,
+    };
   }, []);
 
   /** Renders grid, candles, volume bars, and last-price guide on the canvas. */
@@ -50,7 +80,7 @@ export default function StockPriceDemo() {
 
     if (data.length === 0) return;
 
-    const allPrices = data.flatMap(c => [c.high, c.low]);
+    const allPrices = data.flatMap((c) => [c.high, c.low]);
     const minP = Math.min(...allPrices) - 5;
     const maxP = Math.max(...allPrices) + 5;
     const range = maxP - minP || 1;
@@ -62,7 +92,7 @@ export default function StockPriceDemo() {
     ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 1;
     const gridLines = 5;
-    for (let i = 0; i <= gridLines; i++) {
+    for (let i = 0; i <= gridLines; i += 1) {
       const y = chartY + (chartH / gridLines) * i;
       ctx.beginPath();
       ctx.moveTo(40, y);
@@ -126,22 +156,23 @@ export default function StockPriceDemo() {
     drawChart(candles);
   }, [candles, drawChart]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+    },
+    []
+  );
 
   /** Appends candles on an interval; keeps last 60 for performance. */
   const startSimulation = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setIsRunning(true);
     intervalRef.current = setInterval(() => {
-      const bias = trend === 'bull' ? 0.2 : trend === 'bear' ? -0.2 : 0;
+      const bias = getTrendBias(trend);
       const newCandle = generateCandle(priceRef.current, bias);
       priceRef.current = newCandle.close;
       setPrice(newCandle.close);
-      setCandles(prev => {
+      setCandles((prev) => {
         const updated = [...prev, newCandle];
         return updated.slice(-60);
       });
@@ -165,14 +196,37 @@ export default function StockPriceDemo() {
   };
 
   return (
-    <div style={{ background: '#0a0a0a', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #222' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+    <div
+      style={{
+        background: '#0a0a0a',
+        borderRadius: '1rem',
+        padding: '1.5rem',
+        border: '1px solid #222',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+        }}
+      >
         <div>
           <span style={{ color: '#888', fontSize: '0.8rem' }}>TRADELINGO SIMULATOR</span>
-          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', color: 'white' }}>Live Stock Price</h3>
+          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', color: 'white' }}>
+            Live Stock Price
+          </h3>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: price >= 150 ? '#22c55e' : '#ef4444', fontFamily: 'monospace' }}>
+          <div
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: price >= 150 ? '#22c55e' : '#ef4444',
+              fontFamily: 'monospace',
+            }}
+          >
             ${price.toFixed(2)}
           </div>
           <div style={{ fontSize: '0.75rem', color: price >= 150 ? '#22c55e' : '#ef4444' }}>
@@ -188,34 +242,61 @@ export default function StockPriceDemo() {
 
       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: '0.25rem', flex: 1 }}>
-          {(['bull', 'neutral', 'bear'] as const).map(t => (
-            <button
-              key={t}
-              onClick={() => setTrend(t)}
-              style={{
-                flex: 1, padding: '0.5rem', border: 'none', borderRadius: '0.5rem', cursor: 'pointer',
-                fontWeight: 'bold', fontSize: '0.75rem', textTransform: 'uppercase',
-                background: trend === t
-                  ? t === 'bull' ? '#22c55e' : t === 'bear' ? '#ef4444' : '#6366f1'
-                  : '#1a1a2e',
-                color: trend === t ? (t === 'neutral' ? 'white' : 'black') : '#888',
-              }}
-            >
-              {t === 'bull' ? 'Bull' : t === 'bear' ? 'Bear' : 'Neutral'}
-            </button>
-          ))}
+          {(['bull', 'neutral', 'bear'] as const).map((t) => {
+            const selectedTrend = trend === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTrend(t)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  background: selectedTrend ? getTrendColor(t) : '#1a1a2e',
+                  color: selectedTrend ? getTrendTextColor(t) : '#888',
+                }}
+              >
+                {getTrendLabel(t)}
+              </button>
+            );
+          })}
         </div>
         <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button onClick={isRunning ? stopSimulation : startSimulation} style={{
-            padding: '0.5rem 1rem', border: 'none', borderRadius: '0.5rem', cursor: 'pointer',
-            background: isRunning ? '#ef4444' : '#22c55e', color: isRunning ? 'white' : 'black', fontWeight: 'bold', fontSize: '0.8rem'
-          }}>
+          <button
+            type="button"
+            onClick={isRunning ? stopSimulation : startSimulation}
+            style={{
+              padding: '0.5rem 1rem',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              background: isRunning ? '#ef4444' : '#22c55e',
+              color: isRunning ? 'white' : 'black',
+              fontWeight: 'bold',
+              fontSize: '0.8rem',
+            }}
+          >
             {isRunning ? 'Pause' : 'Start'}
           </button>
-          <button onClick={resetSimulation} style={{
-            padding: '0.5rem 0.75rem', border: '1px solid #333', borderRadius: '0.5rem', cursor: 'pointer',
-            background: 'transparent', color: '#888', fontSize: '0.8rem'
-          }}>
+          <button
+            type="button"
+            onClick={resetSimulation}
+            style={{
+              padding: '0.5rem 0.75rem',
+              border: '1px solid #333',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              background: 'transparent',
+              color: '#888',
+              fontSize: '0.8rem',
+            }}
+          >
             Reset
           </button>
         </div>

@@ -2,9 +2,9 @@
 import tls from 'tls';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-import { createApp } from './app.js';
-import { runUserMigrations } from './migrations.js';
-import { seedModulesIfEmpty } from './seedModules.js';
+import createApp from './app.js';
+import runUserMigrations from './migrations.js';
+import seedModulesIfEmpty from './seedModules.js';
 
 dotenv.config();
 
@@ -30,7 +30,9 @@ const usersCollection = db.collection('users');
 const modulesCollection = db.collection('modules');
 const articleLikesCollection = db.collection('articleLikes');
 
-export const app = createApp(usersCollection, modulesCollection, articleLikesCollection);
+const app = createApp(usersCollection, modulesCollection, articleLikesCollection);
+
+export default app;
 
 async function runStartupTasks(): Promise<void> {
   await runUserMigrations(usersCollection);

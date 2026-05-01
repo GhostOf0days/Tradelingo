@@ -17,7 +17,10 @@ const STOCKS: Stock[] = [
 ];
 
 /** Monte-Carlo-ish yearly step: each selected line gets a random shock around its base return. */
-function simulate(selectedStocks: boolean[], years: number): { year: number; values: number[]; portfolioValue: number }[] {
+function simulate(
+  selectedStocks: boolean[],
+  years: number
+): { year: number; values: number[]; portfolioValue: number }[] {
   const activeCount = selectedStocks.filter(Boolean).length;
   if (activeCount === 0) return [];
 
@@ -25,16 +28,17 @@ function simulate(selectedStocks: boolean[], years: number): { year: number; val
   const values = STOCKS.map(() => 10000);
   const rng = seedRandom(42);
 
-  for (let y = 0; y <= years; y++) {
+  for (let y = 0; y <= years; y += 1) {
     const activeValues = values.filter((_, i) => selectedStocks[i]);
     const portfolioValue = activeValues.reduce((a, b) => a + b, 0) / activeCount;
     data.push({ year: y, values: [...values], portfolioValue });
 
-    for (let i = 0; i < STOCKS.length; i++) {
-      if (!selectedStocks[i]) continue;
-      const shock = (rng() - 0.5) * 2 * STOCKS[i].volatility;
-      const returnRate = STOCKS[i].baseReturn + shock;
-      values[i] = Math.max(100, values[i] * (1 + returnRate));
+    for (let i = 0; i < STOCKS.length; i += 1) {
+      if (selectedStocks[i]) {
+        const shock = (rng() - 0.5) * 2 * STOCKS[i].volatility;
+        const returnRate = STOCKS[i].baseReturn + shock;
+        values[i] = Math.max(100, values[i] * (1 + returnRate));
+      }
     }
   }
   return data;
@@ -74,13 +78,18 @@ export default function DiversificationDemo() {
     ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, W, H);
 
-    const padL = 55, padR = 15, padT = 15, padB = 35;
+    const padL = 55;
+    const padR = 15;
+    const padT = 15;
+    const padB = 35;
     const cW = W - padL - padR;
     const cH = H - padT - padB;
 
     const allVals: number[] = [];
-    data.forEach(d => {
-      d.values.forEach((v, i) => { if (selected[i]) allVals.push(v); });
+    data.forEach((d) => {
+      d.values.forEach((v, i) => {
+        if (selected[i]) allVals.push(v);
+      });
       allVals.push(d.portfolioValue);
     });
     const maxV = Math.max(...allVals) * 1.1;
@@ -92,7 +101,7 @@ export default function DiversificationDemo() {
 
     ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
+    for (let i = 0; i <= 4; i += 1) {
       const y = padT + (cH / 4) * i;
       ctx.beginPath();
       ctx.moveTo(padL, y);
@@ -119,7 +128,7 @@ export default function DiversificationDemo() {
         if (i === 0) ctx.moveTo(toX(0), toY(d.values[si]));
         else ctx.lineTo(toX(i), toY(d.values[si]));
       });
-      ctx.strokeStyle = stock.color + '66';
+      ctx.strokeStyle = `${stock.color}66`;
       ctx.lineWidth = 1.5;
       ctx.stroke();
     });
@@ -134,14 +143,16 @@ export default function DiversificationDemo() {
     ctx.stroke();
   }, [data, selected]);
 
-  useEffect(() => { drawChart(); }, [drawChart]);
+  useEffect(() => {
+    drawChart();
+  }, [drawChart]);
 
   /** Flip inclusion; ensures at least one name stays on so the chart never divides by zero. */
   const toggleStock = (idx: number) => {
-    setSelected(prev => {
+    setSelected((prev) => {
       const next = [...prev];
       next[idx] = !next[idx];
-      if (next.every(s => !s)) next[idx] = true;
+      if (next.every((s) => !s)) next[idx] = true;
       return next;
     });
   };
@@ -149,32 +160,66 @@ export default function DiversificationDemo() {
   const activeCount = selected.filter(Boolean).length;
   const lastData = data[data.length - 1];
   const finalPortfolio = lastData?.portfolioValue ?? 10000;
-  const maxSingleStock = lastData ? Math.max(...lastData.values.filter((_, i) => selected[i])) : 10000;
-  const minSingleStock = lastData ? Math.min(...lastData.values.filter((_, i) => selected[i])) : 10000;
+  const maxSingleStock = lastData
+    ? Math.max(...lastData.values.filter((_, i) => selected[i]))
+    : 10000;
+  const minSingleStock = lastData
+    ? Math.min(...lastData.values.filter((_, i) => selected[i]))
+    : 10000;
 
   return (
-    <div style={{ background: '#0a0a0a', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #222' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+    <div
+      style={{
+        background: '#0a0a0a',
+        borderRadius: '1rem',
+        padding: '1.5rem',
+        border: '1px solid #222',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+        }}
+      >
         <div>
           <span style={{ color: '#888', fontSize: '0.8rem' }}>TRADELINGO SIMULATOR</span>
-          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', color: 'white' }}>Diversification Explorer</h3>
+          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', color: 'white' }}>
+            Diversification Explorer
+          </h3>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: '#888' }}>{activeCount} stock{activeCount !== 1 ? 's' : ''} selected</div>
+          <div style={{ fontSize: '0.75rem', color: '#888' }}>
+            {activeCount} stock{activeCount !== 1 ? 's' : ''} selected
+          </div>
         </div>
       </div>
 
-      <canvas ref={canvasRef} style={{ width: '100%', height: '200px', borderRadius: '0.5rem', display: 'block' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ width: '100%', height: '200px', borderRadius: '0.5rem', display: 'block' }}
+      />
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginTop: '1rem' }}>
         {STOCKS.map((stock, i) => (
-          <button key={i} onClick={() => toggleStock(i)} style={{
-            padding: '0.4rem 0.75rem', borderRadius: '0.375rem', cursor: 'pointer',
-            fontSize: '0.75rem', fontWeight: 'bold', border: 'none',
-            background: selected[i] ? stock.color + '33' : '#1a1a2e',
-            color: selected[i] ? stock.color : '#555',
-            outline: selected[i] ? `1px solid ${stock.color}55` : 'none',
-          }}>
+          <button
+            key={stock.name}
+            type="button"
+            onClick={() => toggleStock(i)}
+            style={{
+              padding: '0.4rem 0.75rem',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              border: 'none',
+              background: selected[i] ? `${stock.color}33` : '#1a1a2e',
+              color: selected[i] ? stock.color : '#555',
+              outline: selected[i] ? `1px solid ${stock.color}55` : 'none',
+            }}
+          >
             {stock.name}
           </button>
         ))}
@@ -184,30 +229,74 @@ export default function DiversificationDemo() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '1rem' }}>
-        <div style={{ background: '#111', borderRadius: '0.5rem', padding: '0.6rem', textAlign: 'center' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: '0.5rem',
+          marginTop: '1rem',
+        }}
+      >
+        <div
+          style={{
+            background: '#111',
+            borderRadius: '0.5rem',
+            padding: '0.6rem',
+            textAlign: 'center',
+          }}
+        >
           <div style={{ fontSize: '0.65rem', color: '#888' }}>Portfolio Avg</div>
-          <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', fontFamily: 'monospace' }}>
+          <div
+            style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', fontFamily: 'monospace' }}
+          >
             ${(finalPortfolio / 1000).toFixed(1)}K
           </div>
         </div>
-        <div style={{ background: '#111', borderRadius: '0.5rem', padding: '0.6rem', textAlign: 'center' }}>
+        <div
+          style={{
+            background: '#111',
+            borderRadius: '0.5rem',
+            padding: '0.6rem',
+            textAlign: 'center',
+          }}
+        >
           <div style={{ fontSize: '0.65rem', color: '#888' }}>Best Stock</div>
-          <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#22c55e', fontFamily: 'monospace' }}>
+          <div
+            style={{
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              color: '#22c55e',
+              fontFamily: 'monospace',
+            }}
+          >
             ${(maxSingleStock / 1000).toFixed(1)}K
           </div>
         </div>
-        <div style={{ background: '#111', borderRadius: '0.5rem', padding: '0.6rem', textAlign: 'center' }}>
+        <div
+          style={{
+            background: '#111',
+            borderRadius: '0.5rem',
+            padding: '0.6rem',
+            textAlign: 'center',
+          }}
+        >
           <div style={{ fontSize: '0.65rem', color: '#888' }}>Worst Stock</div>
-          <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ef4444', fontFamily: 'monospace' }}>
+          <div
+            style={{
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              color: '#ef4444',
+              fontFamily: 'monospace',
+            }}
+          >
             ${(minSingleStock / 1000).toFixed(1)}K
           </div>
         </div>
       </div>
 
       <p style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.75rem', textAlign: 'center' }}>
-        Toggle stocks to see how diversification smooths out the ride. The white line (portfolio average)
-        is less volatile than any single stock.
+        Toggle stocks to see how diversification smooths out the ride. The white line (portfolio
+        average) is less volatile than any single stock.
       </p>
     </div>
   );

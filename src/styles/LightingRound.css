@@ -8,16 +8,30 @@
   transition: background 0.15s;
 }
 
-.lr--flash-correct { animation: flashGreen 0.4s ease; }
-.lr--flash-wrong   { animation: flashRed 0.4s ease; }
+.lr--flash-correct {
+  animation: flashGreen 0.4s ease;
+}
+.lr--flash-wrong {
+  animation: flashRed 0.4s ease;
+}
 
 @keyframes flashGreen {
-  0%, 100% { background: transparent; }
-  50%       { background: rgba(34, 197, 94, 0.15); }
+  0%,
+  100% {
+    background: transparent;
+  }
+  50% {
+    background: rgba(34, 197, 94, 0.15);
+  }
 }
 @keyframes flashRed {
-  0%, 100% { background: transparent; }
-  50%       { background: rgba(239, 68, 68, 0.15); }
+  0%,
+  100% {
+    background: transparent;
+  }
+  50% {
+    background: rgba(239, 68, 68, 0.15);
+  }
 }
 
 /* ── Lobby ───────────────────────────────────────────────────────────── */
@@ -46,8 +60,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .lr__lobby-title {
@@ -130,13 +149,20 @@
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
   width: 100%;
   margin-top: 0.5rem;
 }
 
-.lr__start-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
-.lr__start-btn:active { transform: translateY(0); }
+.lr__start-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.lr__start-btn:active {
+  transform: translateY(0);
+}
 
 /* ── Countdown ───────────────────────────────────────────────────────── */
 .lr__countdown {
@@ -153,8 +179,14 @@
 }
 
 @keyframes countPop {
-  0%   { transform: scale(1.5); opacity: 0; }
-  100% { transform: scale(1);   opacity: 1; }
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .lr__countdown p {
@@ -263,7 +295,10 @@
   font-size: 0.9rem;
   color: var(--text-primary);
   text-align: left;
-  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.1s;
   line-height: 1.4;
 }
 
@@ -273,7 +308,9 @@
   transform: translateY(-1px);
 }
 
-.lr__answer:disabled { cursor: default; }
+.lr__answer:disabled {
+  cursor: default;
+}
 
 .lr__answer--selected {
   border-color: var(--accent);
@@ -387,7 +424,9 @@
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 
 .lr__home-btn:hover {
@@ -397,7 +436,13 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 90%) {
-  .lr__answers { grid-template-columns: 1fr; }
-  .lr__lobby-stats { gap: 1rem; }
-  .lr__results-fraction { font-size: 2.25rem; }
+  .lr__answers {
+    grid-template-columns: 1fr;
+  }
+  .lr__lobby-stats {
+    gap: 1rem;
+  }
+  .lr__results-fraction {
+    font-size: 2.25rem;
+  }
 }

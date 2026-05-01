@@ -36,6 +36,7 @@ export default function StreakNotification() {
             <p>Complete a lesson today to keep your {user.streakDays || 0}-day streak alive!</p>
           </div>
           <button
+            type="button"
             className="streak-notification__close"
             onClick={() => setShowNotification(false)}
           >

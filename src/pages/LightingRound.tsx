@@ -3,8 +3,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Zap } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
-import { QuizQuestion } from '../models/QuizQuestion';
-import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
+import QuizQuestion from '../models/QuizQuestion';
+import shuffleQuestionOptions from '../utils/shuffleQuestionOptions';
 import '../styles/LightingRound.css';
 
 const QUESTION_TIME = 10;
@@ -19,11 +19,18 @@ type GameState = 'lobby' | 'countdown' | 'playing' | 'finished';
 // shuffle a copy so the untouched pool stays ordered for later runs.
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
+  for (let i = a.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+function getResultStatus(correctCount: number, isPerfect: boolean): string {
+  if (isPerfect) return 'Perfect';
+  if (correctCount >= 7) return 'Strong';
+  if (correctCount >= 4) return 'Complete';
+  return 'Needs Review';
 }
 
 export default function LightingRound() {
@@ -54,10 +61,18 @@ export default function LightingRound() {
   // load every pretest into one array when the component mounts.
   useEffect(() => {
     fetch('/api/modules')
-      .then(res => res.json())
-      .then(modules => {
-        const questions = modules.flatMap((module: { title: string; pretest: unknown[] }) =>
-          (module.pretest as { question: string; options: string[]; correct?: number; correctIndex?: number; explanation?: string }[]).map((q) => {
+      .then((res) => res.json())
+      .then((modules) => {
+        const loadedQuestions = modules.flatMap((module: { title: string; pretest: unknown[] }) =>
+          (
+            module.pretest as {
+              question: string;
+              options: string[];
+              correct?: number;
+              correctIndex?: number;
+              explanation?: string;
+            }[]
+          ).map((q) => {
             const key = q.correct ?? q.correctIndex ?? 0;
             return {
               q: new QuizQuestion(q.question, q.options, key, q.explanation ?? ''),
@@ -65,10 +80,10 @@ export default function LightingRound() {
             };
           })
         );
-        setAllQuestions(questions);
+        setAllQuestions(loadedQuestions);
         setIsLoadingQuestions(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.warn('Failed to load questions', err);
         setLoadError(true);
         setIsLoadingQuestions(false);
@@ -89,7 +104,7 @@ export default function LightingRound() {
     setTimeLeft(QUESTION_TIME);
 
     // advance or end the round but stay on the last index so xp posts correctly.
-    setCurrentIndex(prev => {
+    setCurrentIndex((prev) => {
       const next = prev + 1;
       if (next >= TOTAL_QUESTIONS) {
         setGameState('finished');
@@ -101,11 +116,11 @@ export default function LightingRound() {
 
   // 3-2-1 overlay before the first question; then flip to `playing` and the question timer starts.
   useEffect(() => {
-    if (gameState !== 'countdown') return;
+    if (gameState !== 'countdown') return undefined;
     // brief pause before the question timer begins.
     setCountdown(3);
     countdownRef.current = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(countdownRef.current!);
           setGameState('playing');
@@ -119,12 +134,12 @@ export default function LightingRound() {
 
   // Per-question countdown: when it hits zero we treat it as a wrong answer and auto-advance.
   useEffect(() => {
-    if (gameState !== 'playing' || isAnswered) return;
+    if (gameState !== 'playing' || isAnswered) return undefined;
     setTimeLeft(QUESTION_TIME);
 
     // countdown halts after an answer so the speed bonus uses a frozen clock.
     timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
           // running out of time marks wrong, flashes, then moves on.
@@ -145,13 +160,15 @@ export default function LightingRound() {
   const startGame = () => {
     clearTimers();
     xpPostedRef.current = false;
-    const picked = shuffle(allQuestions).slice(0, TOTAL_QUESTIONS).map((item) => {
-      const { options, correctIndex } = shuffleQuestionOptions(item.q.options, item.q.correct);
-      return {
-        q: new QuizQuestion(item.q.question, options, correctIndex, item.q.explanation),
-        category: item.category,
-      };
-    });
+    const picked = shuffle(allQuestions)
+      .slice(0, TOTAL_QUESTIONS)
+      .map((item) => {
+        const { options, correctIndex } = shuffleQuestionOptions(item.q.options, item.q.correct);
+        return {
+          q: new QuizQuestion(item.q.question, options, correctIndex, item.q.explanation),
+          category: item.category,
+        };
+      });
     setQuestions(picked);
     setCurrentIndex(0);
     setScore(0);
@@ -174,8 +191,8 @@ export default function LightingRound() {
     if (correct) {
       const timeBonus = Math.round((timeLeft / QUESTION_TIME) * TIME_BONUS_PER_CORRECT);
       const gained = XP_PER_CORRECT + timeBonus;
-      setScore(prev => prev + gained);
-      setCorrectCount(prev => prev + 1);
+      setScore((prev) => prev + gained);
+      setCorrectCount((prev) => prev + 1);
       setFlashCorrect(true);
       setTimeout(() => setFlashCorrect(false), 400);
     } else {
@@ -201,8 +218,8 @@ export default function LightingRound() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email, xpEarned: totalXp }),
       })
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data.experiencePoints !== undefined) {
             setUser({
               ...user,
@@ -241,7 +258,7 @@ export default function LightingRound() {
           </div>
           <h2 style={{ color: 'var(--text-primary)' }}>Failed to load questions</h2>
           <p style={{ color: 'var(--text-muted)' }}>Please check your connection and try again.</p>
-          <button className="lr__start-btn" onClick={() => window.location.reload()}>
+          <button type="button" className="lr__start-btn" onClick={() => window.location.reload()}>
             Retry
           </button>
         </div>
@@ -281,10 +298,13 @@ export default function LightingRound() {
           </div>
           {!user && (
             <p className="lr__login-warning">
-              <button className="lr__link-btn" onClick={() => navigate('/login')}>Log in</button> to save your XP
+              <button type="button" className="lr__link-btn" onClick={() => navigate('/login')}>
+                Log in
+              </button>{' '}
+              to save your XP
             </p>
           )}
-          <button className="lr__start-btn" onClick={startGame}>
+          <button type="button" className="lr__start-btn" onClick={startGame}>
             Start Lightning Round
           </button>
         </div>
@@ -306,15 +326,16 @@ export default function LightingRound() {
   if (gameState === 'finished') {
     const isPerfect = correctCount === TOTAL_QUESTIONS;
     const pct = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
+    const resultStatus = getResultStatus(correctCount, isPerfect);
     return (
       <div className="lr">
         <div className="lr__results">
-          <div className="lr__results-status">
-            {isPerfect ? 'Perfect' : correctCount >= 7 ? 'Strong' : correctCount >= 4 ? 'Complete' : 'Needs Review'}
-          </div>
+          <div className="lr__results-status">{resultStatus}</div>
           <h1 className="lr__results-title">{isPerfect ? 'Perfect Score!' : 'Round Complete!'}</h1>
           <div className="lr__results-score">
-            <span className="lr__results-fraction">{correctCount} / {TOTAL_QUESTIONS}</span>
+            <span className="lr__results-fraction">
+              {correctCount} / {TOTAL_QUESTIONS}
+            </span>
             <span className="lr__results-pct">{pct}% correct</span>
           </div>
           {isPerfect && (
@@ -324,8 +345,12 @@ export default function LightingRound() {
             +{xpEarned} XP {user ? 'added to your account!' : '(log in to save XP)'}
           </div>
           <div className="lr__results-actions">
-            <button className="lr__start-btn" onClick={startGame}>Play Again</button>
-            <button className="lr__home-btn" onClick={() => navigate('/')}>Back to Modules</button>
+            <button type="button" className="lr__start-btn" onClick={startGame}>
+              Play Again
+            </button>
+            <button type="button" className="lr__home-btn" onClick={() => navigate('/')}>
+              Back to Modules
+            </button>
           </div>
         </div>
       </div>
@@ -335,11 +360,15 @@ export default function LightingRound() {
   if (!currentQ) return null;
 
   return (
-    <div className={`lr ${flashCorrect ? 'lr--flash-correct' : ''} ${flashWrong ? 'lr--flash-wrong' : ''}`}>
+    <div
+      className={`lr ${flashCorrect ? 'lr--flash-correct' : ''} ${flashWrong ? 'lr--flash-wrong' : ''}`}
+    >
       <div className="lr__game">
         <div className="lr__header">
           <span className="lr__category-badge">{currentQ.category}</span>
-          <span className="lr__question-count">{currentIndex + 1} / {TOTAL_QUESTIONS}</span>
+          <span className="lr__question-count">
+            {currentIndex + 1} / {TOTAL_QUESTIONS}
+          </span>
           <div className="lr__score-display">{score} XP</div>
         </div>
 
@@ -353,7 +382,9 @@ export default function LightingRound() {
             }}
           />
         </div>
-        <div className="lr__timer-label" style={{ color: timerColor }}>{timeLeft}s</div>
+        <div className="lr__timer-label" style={{ color: timerColor }}>
+          {timeLeft}s
+        </div>
 
         <div className="lr__question-card">
           <p className="lr__question-text">{currentQ.q.question}</p>
@@ -369,7 +400,13 @@ export default function LightingRound() {
               cls += ' lr__answer--selected';
             }
             return (
-              <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={isAnswered}>
+              <button
+                type="button"
+                key={option}
+                className={cls}
+                onClick={() => handleAnswer(i)}
+                disabled={isAnswered}
+              >
                 <span className="lr__answer-letter">{String.fromCharCode(65 + i)}</span>
                 {option}
               </button>

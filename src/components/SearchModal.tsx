@@ -23,33 +23,195 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
   const [hasSearched, setHasSearched] = useState(false);
 
   const allContent: SearchResult[] = [
-    { id: '1', title: 'What is a Stock?', description: 'Learn about stock ownership and fractional stakes', source: 'module', category: 'Stocks' },
-    { id: '2', title: 'Stock Exchanges', description: 'How stocks are traded on NYSE and NASDAQ', source: 'module', category: 'Stocks' },
-    { id: '3', title: 'Bulls vs Bears', description: 'Market sentiment and price trends explained', source: 'module', category: 'Markets' },
-    { id: '4', title: 'Dividends', description: 'Profit sharing payments to shareholders', source: 'module', category: 'Income' },
-    { id: '5', title: 'Market Capitalization', description: 'Total value of company shares', source: 'module', category: 'Strategy' },
-    { id: '6', title: 'IPOs', description: 'Initial Public Offering - going public process', source: 'module', category: 'Markets' },
-    { id: '7', title: 'Ticker Symbols', description: 'Stock abbreviations like AAPL, MSFT, GOOGL', source: 'module', category: 'Stocks' },
-    { id: '8', title: 'Market Orders', description: 'Buy or sell instantly at current price', source: 'module', category: 'Trading' },
-    { id: '9', title: 'Limit Orders', description: 'Buy or sell only at specific price or better', source: 'module', category: 'Trading' },
-    { id: '10', title: 'Portfolios', description: 'Collection of financial investments and assets', source: 'module', category: 'Strategy' },
-    { id: '11', title: 'Diversification', description: 'Spread investments to reduce risk', source: 'module', category: 'Strategy' },
-    { id: '12', title: 'Volatility', description: 'Price fluctuations and market risk measurement', source: 'module', category: 'Risk' },
-    { id: '13', title: 'Blue Chip Stocks', description: 'Large, established, financially sound companies', source: 'module', category: 'Stocks' },
-    { id: '14', title: 'ETFs', description: 'Exchange-traded funds for instant diversification', source: 'module', category: 'Funds' },
-    { id: '15', title: 'Risk Tolerance', description: 'How much market risk you can handle emotionally', source: 'module', category: 'Strategy' },
-    { id: '16', title: 'How to Start Investing with Just $100', description: 'A beginner\'s guide to fractional shares and low-cost ETFs', source: 'article', category: 'Learning' },
-    { id: '17', title: 'Understanding Stock Market Crashes', description: 'Historical perspective on market crashes and staying calm', source: 'article', category: 'Analysis' },
-    { id: '18', title: 'The Power of Dollar-Cost Averaging', description: 'Reduce risk by investing fixed amounts regularly', source: 'article', category: 'Strategy' },
-    { id: '19', title: 'Tax-Loss Harvesting Strategies', description: 'Maximize returns by offsetting capital gains with losses', source: 'article', category: 'Taxes' },
-    { id: '20', title: 'Introduction to Bonds and Fixed Income', description: 'Understand bonds and why they matter in your portfolio', source: 'article', category: 'Learning' },
-    { id: '21', title: 'Behavioral Finance: Why We Make Bad Decisions', description: 'Learn about cognitive biases in investing', source: 'article', category: 'Psychology' },
-    { id: '22', title: 'Stock Basics Challenge', description: 'Test your knowledge of stock market fundamentals', source: 'quiz', category: 'Assessment' },
-    { id: '23', title: 'Market Volatility Quiz', description: 'Understand price fluctuations and market risk', source: 'quiz', category: 'Assessment' },
-    { id: '24', title: 'Portfolio Strategy Exam', description: 'Master diversification and asset allocation', source: 'quiz', category: 'Assessment' },
-    { id: '25', title: 'Dividend Investor Quiz', description: 'Learn about dividend investing and income strategies', source: 'quiz', category: 'Assessment' },
-    { id: '26', title: 'ETF Master Class', description: 'Become an expert on exchange-traded funds', source: 'quiz', category: 'Assessment' },
-    { id: '27', title: 'Retirement Planning Sprint', description: 'Test your retirement account knowledge', source: 'quiz', category: 'Assessment' },
+    {
+      id: '1',
+      title: 'What is a Stock?',
+      description: 'Learn about stock ownership and fractional stakes',
+      source: 'module',
+      category: 'Stocks',
+    },
+    {
+      id: '2',
+      title: 'Stock Exchanges',
+      description: 'How stocks are traded on NYSE and NASDAQ',
+      source: 'module',
+      category: 'Stocks',
+    },
+    {
+      id: '3',
+      title: 'Bulls vs Bears',
+      description: 'Market sentiment and price trends explained',
+      source: 'module',
+      category: 'Markets',
+    },
+    {
+      id: '4',
+      title: 'Dividends',
+      description: 'Profit sharing payments to shareholders',
+      source: 'module',
+      category: 'Income',
+    },
+    {
+      id: '5',
+      title: 'Market Capitalization',
+      description: 'Total value of company shares',
+      source: 'module',
+      category: 'Strategy',
+    },
+    {
+      id: '6',
+      title: 'IPOs',
+      description: 'Initial Public Offering - going public process',
+      source: 'module',
+      category: 'Markets',
+    },
+    {
+      id: '7',
+      title: 'Ticker Symbols',
+      description: 'Stock abbreviations like AAPL, MSFT, GOOGL',
+      source: 'module',
+      category: 'Stocks',
+    },
+    {
+      id: '8',
+      title: 'Market Orders',
+      description: 'Buy or sell instantly at current price',
+      source: 'module',
+      category: 'Trading',
+    },
+    {
+      id: '9',
+      title: 'Limit Orders',
+      description: 'Buy or sell only at specific price or better',
+      source: 'module',
+      category: 'Trading',
+    },
+    {
+      id: '10',
+      title: 'Portfolios',
+      description: 'Collection of financial investments and assets',
+      source: 'module',
+      category: 'Strategy',
+    },
+    {
+      id: '11',
+      title: 'Diversification',
+      description: 'Spread investments to reduce risk',
+      source: 'module',
+      category: 'Strategy',
+    },
+    {
+      id: '12',
+      title: 'Volatility',
+      description: 'Price fluctuations and market risk measurement',
+      source: 'module',
+      category: 'Risk',
+    },
+    {
+      id: '13',
+      title: 'Blue Chip Stocks',
+      description: 'Large, established, financially sound companies',
+      source: 'module',
+      category: 'Stocks',
+    },
+    {
+      id: '14',
+      title: 'ETFs',
+      description: 'Exchange-traded funds for instant diversification',
+      source: 'module',
+      category: 'Funds',
+    },
+    {
+      id: '15',
+      title: 'Risk Tolerance',
+      description: 'How much market risk you can handle emotionally',
+      source: 'module',
+      category: 'Strategy',
+    },
+    {
+      id: '16',
+      title: 'How to Start Investing with Just $100',
+      description: "A beginner's guide to fractional shares and low-cost ETFs",
+      source: 'article',
+      category: 'Learning',
+    },
+    {
+      id: '17',
+      title: 'Understanding Stock Market Crashes',
+      description: 'Historical perspective on market crashes and staying calm',
+      source: 'article',
+      category: 'Analysis',
+    },
+    {
+      id: '18',
+      title: 'The Power of Dollar-Cost Averaging',
+      description: 'Reduce risk by investing fixed amounts regularly',
+      source: 'article',
+      category: 'Strategy',
+    },
+    {
+      id: '19',
+      title: 'Tax-Loss Harvesting Strategies',
+      description: 'Maximize returns by offsetting capital gains with losses',
+      source: 'article',
+      category: 'Taxes',
+    },
+    {
+      id: '20',
+      title: 'Introduction to Bonds and Fixed Income',
+      description: 'Understand bonds and why they matter in your portfolio',
+      source: 'article',
+      category: 'Learning',
+    },
+    {
+      id: '21',
+      title: 'Behavioral Finance: Why We Make Bad Decisions',
+      description: 'Learn about cognitive biases in investing',
+      source: 'article',
+      category: 'Psychology',
+    },
+    {
+      id: '22',
+      title: 'Stock Basics Challenge',
+      description: 'Test your knowledge of stock market fundamentals',
+      source: 'quiz',
+      category: 'Assessment',
+    },
+    {
+      id: '23',
+      title: 'Market Volatility Quiz',
+      description: 'Understand price fluctuations and market risk',
+      source: 'quiz',
+      category: 'Assessment',
+    },
+    {
+      id: '24',
+      title: 'Portfolio Strategy Exam',
+      description: 'Master diversification and asset allocation',
+      source: 'quiz',
+      category: 'Assessment',
+    },
+    {
+      id: '25',
+      title: 'Dividend Investor Quiz',
+      description: 'Learn about dividend investing and income strategies',
+      source: 'quiz',
+      category: 'Assessment',
+    },
+    {
+      id: '26',
+      title: 'ETF Master Class',
+      description: 'Become an expert on exchange-traded funds',
+      source: 'quiz',
+      category: 'Assessment',
+    },
+    {
+      id: '27',
+      title: 'Retirement Planning Sprint',
+      description: 'Test your retirement account knowledge',
+      source: 'quiz',
+      category: 'Assessment',
+    },
   ];
 
   /** Case-insensitive match on title, description, or category across the static catalog. */
@@ -95,15 +257,65 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
   };
 
   /** Human-readable label for the source pill (module / article / quiz). */
-  const getSourceLabel = (source: string) => {
-    return source.charAt(0).toUpperCase() + source.slice(1);
+  const getSourceLabel = (source: string) => source.charAt(0).toUpperCase() + source.slice(1);
+
+  const getResultHref = (source: SearchResult['source']) => {
+    if (source === 'module') return '/';
+    if (source === 'article') return '/explore';
+    return '/quizzes';
   };
 
   if (!isOpen) return null;
 
+  let content;
+  if (!hasSearched) {
+    content = (
+      <div className="search-modal__empty">
+        <p>Start typing to search</p>
+        <p className="search-modal__hint">Search across modules, articles, and quizzes</p>
+      </div>
+    );
+  } else if (results.length === 0) {
+    content = (
+      <div className="search-modal__empty">
+        <p>
+          No results found for &quot;
+          {query}
+          &quot;
+        </p>
+        <p className="search-modal__hint">Try different keywords</p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="search-modal__results">
+        {results.map((result) => (
+          <a
+            key={result.id}
+            href={getResultHref(result.source)}
+            className="search-modal__result-item"
+            onClick={onClose}
+          >
+            <div className="search-modal__result-header">
+              <h4>{result.title}</h4>
+              <span
+                className="search-modal__result-source"
+                style={{ backgroundColor: getSourceColor(result.source) }}
+              >
+                {getSourceLabel(result.source)}
+              </span>
+            </div>
+            <p>{result.description}</p>
+            <span className="search-modal__result-category">{result.category}</span>
+          </a>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="search-modal-overlay" onClick={onClose}>
-      <div className="search-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="search-modal-overlay">
+      <div className="search-modal">
         <div className="search-modal__header">
           <div className="search-modal__search-box">
             <input
@@ -112,63 +324,17 @@ export default function SearchModal({ isOpen, onClose }: SearchProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              autoFocus
             />
-            <button onClick={handleSearch} className="search-modal__search-btn">
+            <button type="button" onClick={handleSearch} className="search-modal__search-btn">
               <Search size={18} />
             </button>
           </div>
-          <button className="search-modal__close" onClick={onClose}>
+          <button type="button" className="search-modal__close" onClick={onClose}>
             <X size={24} />
           </button>
         </div>
 
-        <div className="search-modal__content">
-          {!hasSearched ? (
-            <div className="search-modal__empty">
-              <p>Start typing to search</p>
-              <p className="search-modal__hint">Search across modules, articles, and quizzes</p>
-            </div>
-          ) : results.length === 0 ? (
-            <div className="search-modal__empty">
-              <p>No results found for "{query}"</p>
-              <p className="search-modal__hint">Try different keywords</p>
-            </div>
-          ) : (
-            <div className="search-modal__results">
-              {results.map((result) => (
-                <a
-                  key={result.id}
-                  href="#"
-                  className="search-modal__result-item"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onClose();
-                    if (result.source === 'module') {
-                      window.location.href = `/`;
-                    } else if (result.source === 'article') {
-                      window.location.href = `/explore`;
-                    } else if (result.source === 'quiz') {
-                      window.location.href = `/quizzes`;
-                    }
-                  }}
-                >
-                  <div className="search-modal__result-header">
-                    <h4>{result.title}</h4>
-                    <span
-                      className="search-modal__result-source"
-                      style={{ backgroundColor: getSourceColor(result.source) }}
-                    >
-                      {getSourceLabel(result.source)}
-                    </span>
-                  </div>
-                  <p>{result.description}</p>
-                  <span className="search-modal__result-category">{result.category}</span>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="search-modal__content">{content}</div>
       </div>
     </div>
   );

@@ -38,7 +38,8 @@ const ARTICLES: FullArticle[] = [
     id: 1,
     title: 'What Is an ETF?',
     category: 'articles',
-    description: 'A clear breakdown of exchange-traded funds, diversification, expenses, and beginner use cases.',
+    description:
+      'A clear breakdown of exchange-traded funds, diversification, expenses, and beginner use cases.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/e/etf.asp',
     readTime: '8 min',
@@ -48,13 +49,14 @@ const ARTICLES: FullArticle[] = [
 
 The main advantages are broad exposure, low fees, transparent holdings, and intraday liquidity. Many investors use broad-market ETFs as the core of a long-term portfolio, then add smaller satellite positions when they have a specific view.
 
-Before buying, compare expense ratio, underlying index, liquidity, tracking error, and overlap with what you already own. The right ETF should make the portfolio simpler, not just add another ticker.`
+Before buying, compare expense ratio, underlying index, liquidity, tracking error, and overlap with what you already own. The right ETF should make the portfolio simpler, not just add another ticker.`,
   },
   {
     id: 2,
     title: 'How to Think Through Market Crashes',
     category: 'articles',
-    description: 'A practical playbook for volatility, drawdowns, rebalancing, and avoiding panic decisions.',
+    description:
+      'A practical playbook for volatility, drawdowns, rebalancing, and avoiding panic decisions.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/s/stock-market-crash.asp',
     readTime: '12 min',
@@ -64,13 +66,14 @@ Before buying, compare expense ratio, underlying index, liquidity, tracking erro
 
 The useful question is not whether crashes happen. They do. The useful question is whether your portfolio has enough liquidity, diversification, and time horizon alignment to survive one without forcing bad decisions.
 
-A written plan helps. Define what you will rebalance, what cash you need outside the market, and what would make your original thesis wrong. In volatile markets, process matters more than prediction.`
+A written plan helps. Define what you will rebalance, what cash you need outside the market, and what would make your original thesis wrong. In volatile markets, process matters more than prediction.`,
   },
   {
     id: 3,
     title: 'Dollar-Cost Averaging Without the Myths',
     category: 'articles',
-    description: 'How recurring investing reduces timing risk and when lump-sum investing can still make sense.',
+    description:
+      'How recurring investing reduces timing risk and when lump-sum investing can still make sense.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp',
     readTime: '10 min',
@@ -80,13 +83,14 @@ A written plan helps. Define what you will rebalance, what cash you need outside
 
 It is not magic. In a rising market, investing a lump sum earlier can outperform because more capital is exposed for longer. DCA is most useful when it helps an investor follow through consistently and avoid freezing at market highs.
 
-For most savers, automatic contributions into a diversified portfolio are the strongest version of DCA. The behavior is the edge.`
+For most savers, automatic contributions into a diversified portfolio are the strongest version of DCA. The behavior is the edge.`,
   },
   {
     id: 4,
     title: 'Tax-Loss Harvesting Basics',
     category: 'articles',
-    description: 'What tax-loss harvesting can and cannot do, including wash-sale risk and portfolio fit.',
+    description:
+      'What tax-loss harvesting can and cannot do, including wash-sale risk and portfolio fit.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/t/taxgainlossharvesting.asp',
     readTime: '15 min',
@@ -96,7 +100,7 @@ For most savers, automatic contributions into a diversified portfolio are the st
 
 The main constraint is the wash-sale rule. If you sell at a loss and buy a substantially identical security too close to the sale date, the loss can be disallowed for current tax purposes.
 
-This strategy works best in taxable brokerage accounts. It is less relevant inside tax-advantaged accounts where gains and losses are already sheltered.`
+This strategy works best in taxable brokerage accounts. It is less relevant inside tax-advantaged accounts where gains and losses are already sheltered.`,
   },
   {
     id: 5,
@@ -112,13 +116,14 @@ This strategy works best in taxable brokerage accounts. It is less relevant insi
 
 Bond prices move inversely to yields. When market rates rise, existing lower-coupon bonds usually fall in price. When market rates fall, existing higher-coupon bonds often rise.
 
-Fixed income can provide income, reduce volatility, and help fund near-term spending needs. The right mix depends on duration, credit quality, taxes, and how much stability the portfolio needs.`
+Fixed income can provide income, reduce volatility, and help fund near-term spending needs. The right mix depends on duration, credit quality, taxes, and how much stability the portfolio needs.`,
   },
   {
     id: 6,
     title: 'Behavioral Finance for Everyday Investors',
     category: 'articles',
-    description: 'Common biases that damage portfolios and practical guardrails for better decisions.',
+    description:
+      'Common biases that damage portfolios and practical guardrails for better decisions.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/b/behavioralfinance.asp',
     readTime: '13 min',
@@ -128,13 +133,14 @@ Fixed income can provide income, reduce volatility, and help fund near-term spen
 
 The best defense is a system. Use allocation targets, automatic contributions, written sell rules, and scheduled review dates. These reduce the number of emotional decisions made under stress.
 
-Markets are noisy. A good process creates enough friction between a market headline and a portfolio action.`
+Markets are noisy. A good process creates enough friction between a market headline and a portfolio action.`,
   },
   {
     id: 7,
     title: 'Asset Allocation: The Decision That Drives Risk',
     category: 'articles',
-    description: 'Why the stock, bond, and cash mix often matters more than individual security selection.',
+    description:
+      'Why the stock, bond, and cash mix often matters more than individual security selection.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/a/assetallocation.asp',
     readTime: '9 min',
@@ -144,13 +150,14 @@ Markets are noisy. A good process creates enough friction between a market headl
 
 A younger investor with stable income may accept more equity volatility. Someone funding near-term expenses may need more cash and high-quality bonds.
 
-The goal is not to find a perfect allocation. The goal is to choose one you can hold through different market environments.`
+The goal is not to find a perfect allocation. The goal is to choose one you can hold through different market environments.`,
   },
   {
     id: 8,
     title: 'Rebalancing Without Overtrading',
     category: 'articles',
-    description: 'How threshold-based rebalancing keeps portfolio risk aligned without unnecessary churn.',
+    description:
+      'How threshold-based rebalancing keeps portfolio risk aligned without unnecessary churn.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/r/rebalancing.asp',
     readTime: '7 min',
@@ -160,7 +167,7 @@ The goal is not to find a perfect allocation. The goal is to choose one you can 
 
 Calendar rebalancing is simple, but threshold rebalancing can be more efficient. For example, review quarterly but only trade when an asset class is more than five percentage points away from target.
 
-The benefit is discipline. Rebalancing forces investors to trim what has run and add to what has lagged, while keeping risk from drifting unnoticed.`
+The benefit is discipline. Rebalancing forces investors to trim what has run and add to what has lagged, while keeping risk from drifting unnoticed.`,
   },
   {
     id: 9,
@@ -176,7 +183,7 @@ The benefit is discipline. Rebalancing forces investors to trim what has run and
 
 The common guideline is three to six months of essential expenses, adjusted for job stability and household obligations. More uncertainty usually means more cash.
 
-The return on an emergency fund is not just interest. Its real return is avoiding forced selling, high-interest debt, and rushed decisions.`
+The return on an emergency fund is not just interest. Its real return is avoiding forced selling, high-interest debt, and rushed decisions.`,
   },
   {
     id: 10,
@@ -192,7 +199,7 @@ The return on an emergency fund is not just interest. Its real return is avoidin
 
 Roth can be attractive for younger workers, lower-income years, and investors who value tax-free flexibility. Traditional can make sense for high-income years where the deduction is especially valuable.
 
-Many households use both. Tax diversification gives future retirees more control over withdrawal strategy.`
+Many households use both. Tax diversification gives future retirees more control over withdrawal strategy.`,
   },
   {
     id: 11,
@@ -208,7 +215,7 @@ Many households use both. Tax diversification gives future retirees more control
 
 Cash reserves, flexible spending, bond ladders, and lower withdrawal rates can reduce the damage from an early drawdown.
 
-This risk is less important during accumulation and more important near retirement. The portfolio should gradually reflect that change.`
+This risk is less important during accumulation and more important near retirement. The portfolio should gradually reflect that change.`,
   },
   {
     id: 12,
@@ -224,7 +231,7 @@ This risk is less important during accumulation and more important near retireme
 
 Fees compound because every dollar paid in fees is also a dollar that no longer compounds for you. Over decades, the gap can become meaningful.
 
-Cost is not the only variable, but it is one of the few investors can control directly.`
+Cost is not the only variable, but it is one of the few investors can control directly.`,
   },
   {
     id: 13,
@@ -240,7 +247,7 @@ Cost is not the only variable, but it is one of the few investors can control di
 
 Stocks, real estate, inflation-linked bonds, and wage growth can all help offset inflation in different ways. Cash is useful for stability, but too much cash for too long can create silent risk.
 
-A serious plan should ask what the money will buy in the future, not only what the account balance says today.`
+A serious plan should ask what the money will buy in the future, not only what the account balance says today.`,
   },
   {
     id: 14,
@@ -256,7 +263,7 @@ A serious plan should ask what the money will buy in the future, not only what t
 
 Guidance matters because markets discount the future. A company can beat last quarter's estimates and still sell off if management lowers expectations.
 
-Read the report in context. Compare trends across several quarters, listen for changes in tone, and separate one-time items from durable business performance.`
+Read the report in context. Compare trends across several quarters, listen for changes in tone, and separate one-time items from durable business performance.`,
   },
   {
     id: 15,
@@ -272,13 +279,14 @@ Read the report in context. Compare trends across several quarters, listen for c
 
 Ratings help classify risk, but they are not a substitute for analysis. Leverage, cash flow stability, interest coverage, and industry cyclicality all matter.
 
-Higher yield is not automatically better. Sometimes the extra income is not enough compensation for the downside.`
+Higher yield is not automatically better. Sometimes the extra income is not enough compensation for the downside.`,
   },
   {
     id: 16,
     title: 'Capital Gains Taxes for Investors',
     category: 'articles',
-    description: 'The difference between short-term and long-term gains and why holding period matters.',
+    description:
+      'The difference between short-term and long-term gains and why holding period matters.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/c/capital_gains_tax.asp',
     readTime: '7 min',
@@ -288,13 +296,14 @@ Higher yield is not automatically better. Sometimes the extra income is not enou
 
 Taxes should not be the only reason to hold or sell, but they are part of after-tax return. A good investment decision can still be weakened by unnecessary turnover.
 
-Before making large taxable trades, estimate the tax impact and consider whether rebalancing through new contributions can reduce realized gains.`
+Before making large taxable trades, estimate the tax impact and consider whether rebalancing through new contributions can reduce realized gains.`,
   },
   {
     id: 17,
     title: 'Crypto Allocation: Position Sizing First',
     category: 'articles',
-    description: 'A risk-first framework for approaching digital assets without letting volatility dominate the plan.',
+    description:
+      'A risk-first framework for approaching digital assets without letting volatility dominate the plan.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/cryptocurrency-4427699',
     readTime: '10 min',
@@ -304,13 +313,14 @@ Before making large taxable trades, estimate the tax impact and consider whether
 
 A small allocation can express a view without putting the full financial plan at risk. Custody, liquidity, tax reporting, and security practices matter as much as the asset thesis.
 
-If a position can force emotional decisions during a drawdown, it is probably too large.`
+If a position can force emotional decisions during a drawdown, it is probably too large.`,
   },
   {
     id: 18,
     title: 'Building an Investment Policy Statement',
     category: 'articles',
-    description: 'Turn goals, constraints, allocation, and behavior rules into one operating document.',
+    description:
+      'Turn goals, constraints, allocation, and behavior rules into one operating document.',
     author: 'Investopedia',
     url: 'https://www.investopedia.com/terms/i/ips.asp',
     readTime: '11 min',
@@ -320,8 +330,8 @@ If a position can force emotional decisions during a drawdown, it is probably to
 
 The document is most valuable when markets are stressful. It gives the investor a reference point that was written before panic or excitement took over.
 
-Keep it short enough to use. A one-page policy that is followed beats a long document that never affects behavior.`
-  }
+Keep it short enough to use. A one-page policy that is followed beats a long document that never affects behavior.`,
+  },
 ];
 
 const ARTICLE_TYPES: ArticleType[] = [
@@ -399,11 +409,16 @@ export default function Explore() {
     });
   }, [articles, searchQuery, selectedType]);
 
-  const openArticle = openArticleId === null ? null : articles.find((article) => article.id === openArticleId) ?? null;
+  const openArticle =
+    openArticleId === null
+      ? null
+      : (articles.find((article) => article.id === openArticleId) ?? null);
 
   const updateLocalLike = (id: number, liked: boolean, likes: number) => {
     setArticles((prev) =>
-      prev.map((article) => (article.id === id ? { ...article, likes: Math.max(0, likes) } : article))
+      prev.map((article) =>
+        article.id === id ? { ...article, likes: Math.max(0, likes) } : article
+      )
     );
     setLikedArticles((prev) => {
       const next = new Set(prev);
@@ -460,7 +475,11 @@ export default function Explore() {
     return (
       <div className="explore">
         <div className="explore__article-shell">
-          <button className="explore__back-btn" onClick={() => setOpenArticleId(null)}>
+          <button
+            type="button"
+            className="explore__back-btn"
+            onClick={() => setOpenArticleId(null)}
+          >
             <ArrowLeft size={16} />
             Articles
           </button>
@@ -484,6 +503,7 @@ export default function Explore() {
             </div>
             <div className="explore__article-actions">
               <button
+                type="button"
                 onClick={() => handleLike(openArticle.id)}
                 className={`explore__like-btn ${likedArticles.has(openArticle.id) ? 'liked' : ''}`}
                 disabled={pendingLikes.has(openArticle.id)}
@@ -512,7 +532,10 @@ export default function Explore() {
       <div className="explore__hero">
         <span className="explore__eyebrow">Research Library</span>
         <h1>Market education for disciplined investors</h1>
-        <p>Concise articles on portfolio construction, risk, taxes, retirement planning, and market behavior.</p>
+        <p>
+          Concise articles on portfolio construction, risk, taxes, retirement planning, and market
+          behavior.
+        </p>
       </div>
 
       <div className="explore__search">
@@ -529,6 +552,7 @@ export default function Explore() {
 
       <div className="explore__filters" aria-label="Article categories">
         <button
+          type="button"
           className={`explore__filter-btn ${selectedType === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedType('all')}
         >
@@ -536,6 +560,7 @@ export default function Explore() {
         </button>
         {ARTICLE_TYPES.map((type) => (
           <button
+            type="button"
             key={type}
             className={`explore__filter-btn ${selectedType === type ? 'active' : ''}`}
             onClick={() => setSelectedType(type)}
@@ -563,6 +588,7 @@ export default function Explore() {
               </div>
               <div className="explore__card-footer">
                 <button
+                  type="button"
                   onClick={() => handleLike(article.id)}
                   className={`explore__like-btn ${likedArticles.has(article.id) ? 'liked' : ''}`}
                   disabled={pendingLikes.has(article.id)}
@@ -570,7 +596,11 @@ export default function Explore() {
                   <ThumbsUp size={16} />
                   {likedArticles.has(article.id) ? 'Liked' : 'Like'} {article.likes}
                 </button>
-                <button className="explore__read-btn" onClick={() => setOpenArticleId(article.id)}>
+                <button
+                  type="button"
+                  className="explore__read-btn"
+                  onClick={() => setOpenArticleId(article.id)}
+                >
                   Read
                   <ArrowRight size={16} />
                 </button>
@@ -579,8 +609,9 @@ export default function Explore() {
           ))
         ) : (
           <div className="explore__empty">
-            <p>No articles match "{searchQuery}".</p>
+            <p>No articles match &quot;{searchQuery}&quot;.</p>
             <button
+              type="button"
               onClick={() => {
                 setSearchQuery('');
                 setSelectedType('all');
@@ -597,8 +628,8 @@ export default function Explore() {
         <span className="explore__eyebrow">Market Insight</span>
         <h2>Most long-term portfolio results come from allocation, costs, taxes, and behavior.</h2>
         <p>
-          Security selection can matter, but a repeatable process usually matters more. Keep the plan simple enough to
-          follow when markets are noisy.
+          Security selection can matter, but a repeatable process usually matters more. Keep the
+          plan simple enough to follow when markets are noisy.
         </p>
       </div>
     </div>

@@ -17,14 +17,18 @@
  * the calling component or the Account data structure.
  */
 
-import { Account } from './Account';
+import Account from './Account';
 
 // Pure numeric helpers shared by the Calculator page (FV of annuities, compound growth, formatting).
-export class RetirementCalculator {
+export default class RetirementCalculator {
   private static readonly MAX_MONEY = 1_000_000_000;
+
   private static readonly MAX_YEARS = 100;
+
   private static readonly MIN_RATE = -100;
+
   private static readonly MAX_RATE = 100;
+
   private static readonly MAX_COMPOUND_FREQUENCY = 365;
 
   private static clamp(value: number, min: number, max: number = Number.MAX_SAFE_INTEGER): number {
@@ -72,10 +76,19 @@ export class RetirementCalculator {
 
   /** Future value: current balance grows with lump FV + annuity of annual contributions (+ match). */
   static project(account: Account, annualReturn: number = 7): number {
-    const employeeContribution = this.clamp(account.annualContribution, 0, account.contributionLimit);
+    const employeeContribution = this.clamp(
+      account.annualContribution,
+      0,
+      account.contributionLimit
+    );
     const employerMatch = this.clamp(account.employerMatch, 0, this.MAX_MONEY);
     const annualContribution = employeeContribution + employerMatch;
-    return this.projectMonthly(account.currentBalance, annualContribution, annualReturn, account.years);
+    return this.projectMonthly(
+      account.currentBalance,
+      annualContribution,
+      annualReturn,
+      account.years
+    );
   }
 
   /** Standard compound-interest formula A = P(1 + r/n)^(nt). */
@@ -83,7 +96,7 @@ export class RetirementCalculator {
     principal: number,
     annualRate: number,
     years: number,
-    compoundFreq: number,
+    compoundFreq: number
   ): number {
     const safePrincipal = this.clamp(principal, 0, this.MAX_MONEY);
     const safeYears = this.clamp(years, 0, this.MAX_YEARS);
@@ -94,7 +107,7 @@ export class RetirementCalculator {
     const r = this.safeRate(annualRate);
 
     if (safeYears === 0 || r === 0) return safePrincipal;
-    const amount = safePrincipal * Math.pow(1 + r / safeCompoundFreq, safeCompoundFreq * safeYears);
+    const amount = safePrincipal * (1 + r / safeCompoundFreq) ** (safeCompoundFreq * safeYears);
     return Number.isFinite(amount) ? Math.max(0, amount) : 0;
   }
 
@@ -103,7 +116,7 @@ export class RetirementCalculator {
     currentSavings: number,
     annualContribution: number,
     annualReturn: number,
-    years: number,
+    years: number
   ): number {
     return this.projectMonthly(currentSavings, annualContribution, annualReturn, years);
   }

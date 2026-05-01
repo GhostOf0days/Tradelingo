@@ -2,9 +2,9 @@ import tls from 'tls';
 import type { Express } from 'express';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-import { createApp } from '../server/app.js';
-import { runUserMigrations } from '../server/migrations.js';
-import { seedModulesIfEmpty } from '../server/seedModules.js';
+import createApp from '../server/app.js';
+import runUserMigrations from '../server/migrations.js';
+import seedModulesIfEmpty from '../server/seedModules.js';
 
 dotenv.config();
 
@@ -54,5 +54,6 @@ export default async function handler(req: Parameters<Express>[0], res: Paramete
     res.statusCode = 500;
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ error: 'Server failed to initialize' }));
+    return undefined;
   }
 }

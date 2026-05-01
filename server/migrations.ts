@@ -1,7 +1,7 @@
 import type { Collection } from 'mongodb';
 
 // patch older users that lack fields added in later releases.
-export async function runUserMigrations(usersCollection: Collection): Promise<void> {
+export default async function runUserMigrations(usersCollection: Collection): Promise<void> {
   try {
     await usersCollection.updateMany(
       { lastUnlockedModuleId: { $exists: false } },

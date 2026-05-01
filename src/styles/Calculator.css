@@ -152,8 +152,10 @@
 }
 
 .calculator__input-group label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
   color: var(--text-primary);
 }
 

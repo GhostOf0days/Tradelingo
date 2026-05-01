@@ -1,14 +1,24 @@
 // Top bar: primary navigation, theme toggle, search, "unfinished module" reminders,
 // streak badge, and account summary. Pulls progress from the API when a user is logged in.
 import { useState, useEffect } from 'react';
-import { LayoutGrid, Compass, Calculator, Zap, Search, Bell, LogOut, Sun, Moon } from 'lucide-react';
-import { useUser } from '../contexts/UserContext';
-import './Header.css';
+import {
+  LayoutGrid,
+  Compass,
+  Calculator,
+  Zap,
+  Search,
+  Bell,
+  LogOut,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
+import MODULES from '../data/modules';
 import StreakCounter from './StreakCounter';
 import SearchModal from './SearchModal';
 import StreakNotification from './StreakNotification';
-import { MODULES } from '../data/modules';
+import './Header.css';
 
 const navigationItems = [
   { id: 'modules', label: 'Modules', icon: LayoutGrid, path: '/' },
@@ -33,7 +43,7 @@ function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unfinishedModules, setUnfinishedModules] = useState<UnfinishedModule[]>([]);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-  
+
   const { user, setUser, level } = useUser();
   const navigate = useNavigate();
 
@@ -45,13 +55,16 @@ function Header() {
 
   // Flip light/dark; styles key off `data-theme` on the document element.
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   // Build the notification list: unlocked modules that still have lessons left.
   useEffect(() => {
     const fetchUnfinished = async () => {
-      if (!user) { setUnfinishedModules([]); return; }
+      if (!user) {
+        setUnfinishedModules([]);
+        return;
+      }
       try {
         const res = await fetch(`/api/progress?email=${encodeURIComponent(user.email)}`);
         if (!res.ok) return;
@@ -104,15 +117,39 @@ function Header() {
     <>
       <StreakNotification />
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-      
+
       <header className="header">
         <div className="header__left">
           <div className="header__brand">
             <div className="header__logo" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2L2 7L12 12L22 7L12 2Z"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 17L12 22L22 17"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 12L12 17L22 12"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
             <span className="header__title">Tradelingo</span>
@@ -138,9 +175,9 @@ function Header() {
           </nav>
         </div>
         <div className="header__actions">
-          <button 
-            type="button" 
-            className="header__icon-btn" 
+          <button
+            type="button"
+            className="header__icon-btn"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -150,81 +187,193 @@ function Header() {
 
           {user ? (
             <>
-              <button 
-                type="button" 
-                className="header__icon-btn" 
+              <button
+                type="button"
+                className="header__icon-btn"
                 aria-label="Search"
                 onClick={() => setSearchOpen(true)}
                 title="Search modules and articles"
               >
                 <Search size={20} />
               </button>
-              
+
               <div style={{ position: 'relative' }}>
-                <button 
-                  type="button" 
-                  className="header__icon-btn header__icon-btn--badge" 
+                <button
+                  type="button"
+                  className="header__icon-btn header__icon-btn--badge"
                   aria-label="Notifications"
                   onClick={handleNotificationClick}
                   title="Module reminders"
                 >
                   <Bell size={20} />
                   {unfinishedModules.length > 0 && (
-                    <span style={{
-                      position: 'absolute', top: '-2px', right: '-2px',
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      background: '#ef4444', color: 'white', fontSize: '0.65rem',
-                      fontWeight: 'bold', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', border: '2px solid var(--main-bg)',
-                    }}>{unfinishedModules.length}</span>
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-2px',
+                        right: '-2px',
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#ef4444',
+                        color: 'white',
+                        fontSize: '0.65rem',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid var(--main-bg)',
+                      }}
+                    >
+                      {unfinishedModules.length}
+                    </span>
                   )}
                 </button>
                 {showNotifications && (
-                  <div style={{
-                    position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem',
-                    width: '320px', background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: '0.75rem', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-                    zIndex: 1000, overflow: 'hidden',
-                  }}>
-                    <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 'bold', color: 'var(--text-primary)', fontSize: '0.9rem' }}>Reminders</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{unfinishedModules.length} unfinished</span>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '0.5rem',
+                      width: '320px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.75rem',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                      zIndex: 1000,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        padding: '0.75rem 1rem',
+                        borderBottom: '1px solid var(--border)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontWeight: 'bold',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        Reminders
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        {unfinishedModules.length} unfinished
+                      </span>
                     </div>
                     {unfinishedModules.length === 0 ? (
-                      <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <p style={{ margin: 0, fontSize: '0.875rem' }}>All caught up! No unfinished modules.</p>
+                      <div
+                        style={{
+                          padding: '1.5rem',
+                          textAlign: 'center',
+                          color: 'var(--text-muted)',
+                        }}
+                      >
+                        <p style={{ margin: 0, fontSize: '0.875rem' }}>
+                          All caught up! No unfinished modules.
+                        </p>
                       </div>
                     ) : (
                       <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        {unfinishedModules.map(mod => (
+                        {unfinishedModules.map((mod) => (
                           <button
+                            type="button"
                             key={mod.id}
-                            onClick={() => { navigate(`/lesson/${mod.id}`); setShowNotifications(false); }}
+                            onClick={() => {
+                              navigate(`/lesson/${mod.id}`);
+                              setShowNotifications(false);
+                            }}
                             style={{
-                              width: '100%', padding: '0.75rem 1rem', background: 'transparent',
-                              border: 'none', borderBottom: '1px solid var(--border)', cursor: 'pointer',
-                              textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '0.375rem',
+                              width: '100%',
+                              padding: '0.75rem 1rem',
+                              background: 'transparent',
+                              border: 'none',
+                              borderBottom: '1px solid var(--border)',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.375rem',
                               transition: 'background 0.2s',
                             }}
-                            onMouseOver={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
-                            onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'var(--surface-hover)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                            }}
+                            onFocus={(e) => {
+                              e.currentTarget.style.background = 'var(--surface-hover)';
+                            }}
+                            onBlur={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                            }}
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontWeight: 600,
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.875rem',
+                                }}
+                              >
                                 {mod.title}
                               </span>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 'bold' }}>{mod.percent}%</span>
+                              <span
+                                style={{
+                                  fontSize: '0.75rem',
+                                  color: 'var(--accent)',
+                                  fontWeight: 'bold',
+                                }}
+                              >
+                                {mod.percent}%
+                              </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <div style={{ flex: 1, height: '4px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${mod.percent}%`, background: 'var(--accent)', borderRadius: '99px' }} />
+                              <div
+                                style={{
+                                  flex: 1,
+                                  height: '4px',
+                                  background: 'var(--surface-hover)',
+                                  borderRadius: '99px',
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    height: '100%',
+                                    width: `${mod.percent}%`,
+                                    background: 'var(--accent)',
+                                    borderRadius: '99px',
+                                  }}
+                                />
                               </div>
-                              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                              <span
+                                style={{
+                                  fontSize: '0.7rem',
+                                  color: 'var(--text-muted)',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
                                 {mod.lessonCurrent}/{mod.lessonsTotal} lessons
                               </span>
                             </div>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              {mod.lessonCurrent === 0 ? 'You haven\'t started this module yet!' : 'Continue where you left off →'}
+                              {mod.lessonCurrent === 0
+                                ? "You haven't started this module yet!"
+                                : 'Continue where you left off →'}
                             </span>
                           </button>
                         ))}
@@ -245,9 +394,13 @@ function Header() {
                 </button>
                 {showStreakInfo && (
                   <div className="header__streak-info">
-                    <p><strong>{user.streakDays || 0} Day Streak!</strong></p>
+                    <p>
+                      <strong>{user.streakDays || 0} Day Streak!</strong>
+                    </p>
                     <p>Keep it going!</p>
-                    <p style={{ fontSize: '0.85rem', color: '#999' }}>Complete 1 activity per day</p>
+                    <p style={{ fontSize: '0.85rem', color: '#999' }}>
+                      Complete 1 activity per day
+                    </p>
                   </div>
                 )}
               </div>
@@ -269,9 +422,9 @@ function Header() {
                 </div>
               </div>
 
-              <button 
-                type="button" 
-                className="header__icon-btn" 
+              <button
+                type="button"
+                className="header__icon-btn"
                 aria-label="Log out"
                 style={{ marginLeft: '0.5rem' }}
                 onClick={() => {
@@ -291,8 +444,8 @@ function Header() {
               >
                 Register
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="header__auth-btn header__auth-btn--login"
                 onClick={() => navigate('/login')}
               >

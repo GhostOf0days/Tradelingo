@@ -4,9 +4,9 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import type { Collection } from 'mongodb';
 import { fileURLToPath } from 'url';
-import { calculateLevel } from './level.js';
+import calculateLevel from './level.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARTICLE_BASE_LIKES = new Map<number, number>([
   [1, 234],
   [2, 456],
@@ -61,7 +61,7 @@ async function seedArticleLikesIfMissing(articleLikesCollection: Collection): Pr
   );
 }
 
-export function createApp(
+export default function createApp(
   usersCollection: Collection,
   modulesCollection: Collection,
   articleLikesCollection: Collection
@@ -81,16 +81,19 @@ export function createApp(
 
       // basic email checks with a hard max length on registration.
       if (!EMAIL_PATTERN.test(normalizedEmail) || normalizedEmail.length > 320) {
-        return res.status(400).json({ error: 'Valid email is required' });
+        res.status(400).json({ error: 'Valid email is required' });
+        return;
       }
       const passwordError = getPasswordValidationError(password);
       if (passwordError) {
-        return res.status(400).json({ error: passwordError });
+        res.status(400).json({ error: passwordError });
+        return;
       }
 
       const existingUser = await usersCollection.findOne({ email: normalizedEmail });
       if (existingUser) {
-        return res.status(400).json({ error: 'User already exists' });
+        res.status(400).json({ error: 'User already exists' });
+        return;
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -133,17 +136,20 @@ export function createApp(
       const { email, password } = req.body;
       const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
       if (!EMAIL_PATTERN.test(normalizedEmail) || typeof password !== 'string') {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        res.status(401).json({ error: 'Invalid email or password' });
+        return;
       }
       const user = await usersCollection.findOne({ email: normalizedEmail });
 
       if (!user) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        res.status(401).json({ error: 'Invalid email or password' });
+        return;
       }
 
       const isMatch = await bcrypt.compare(password, user.password as string);
       if (!isMatch) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        res.status(401).json({ error: 'Invalid email or password' });
+        return;
       }
 
       res.status(200).json({
@@ -209,15 +215,22 @@ export function createApp(
   app.post('/api/update-xp', async (req, res) => {
     try {
       const { email, xpToAdd } = req.body;
-      if (!email || typeof email !== 'string') return res.status(400).json({ error: 'Email is required' });
+      if (!email || typeof email !== 'string') {
+        res.status(400).json({ error: 'Email is required' });
+        return;
+      }
       // reject xp updates outside a safe numeric window.
       if (typeof xpToAdd !== 'number' || xpToAdd < 0 || xpToAdd > 10000) {
-        return res.status(400).json({ error: 'xpToAdd must be a number between 0 and 10000' });
+        res.status(400).json({ error: 'xpToAdd must be a number between 0 and 10000' });
+        return;
       }
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
 
       const newXp = (user.experiencePoints || 0) + xpToAdd;
       const newLevel = calculateLevel(newXp);
@@ -228,7 +241,10 @@ export function createApp(
         { returnDocument: 'after' }
       );
 
-      if (!result) return res.status(404).json({ error: 'User not found' });
+      if (!result) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
       res.status(200).json({ experiencePoints: result.experiencePoints, level: result.level });
     } catch (error) {
       console.warn(error);
@@ -275,7 +291,10 @@ export function createApp(
       const module = await modulesCollection.findOne({
         moduleId: Number(req.params.moduleId),
       });
-      if (!module) return res.status(404).json({ error: 'Module not found' });
+      if (!module) {
+        res.status(404).json({ error: 'Module not found' });
+        return;
+      }
       res.status(200).json(module);
     } catch (error) {
       console.warn(error);
@@ -303,10 +322,12 @@ export function createApp(
       const action = req.body?.action;
 
       if (!Number.isInteger(articleId) || !ARTICLE_BASE_LIKES.has(articleId)) {
-        return res.status(400).json({ error: 'Valid articleId is required' });
+        res.status(400).json({ error: 'Valid articleId is required' });
+        return;
       }
       if (action !== 'like' && action !== 'unlike') {
-        return res.status(400).json({ error: 'action must be like or unlike' });
+        res.status(400).json({ error: 'action must be like or unlike' });
+        return;
       }
 
       await articleLikesCollection.updateOne(
@@ -331,7 +352,8 @@ export function createApp(
 
       if (!result) {
         const current = await articleLikesCollection.findOne({ articleId });
-        return res.status(200).json({ articleId, likes: Math.max(0, Number(current?.likes ?? 0)) });
+        res.status(200).json({ articleId, likes: Math.max(0, Number(current?.likes ?? 0)) });
+        return;
       }
 
       res.status(200).json({ articleId, likes: Math.max(0, Number(result.likes ?? 0)) });
@@ -347,20 +369,26 @@ export function createApp(
       const { email, moduleId, xpToAdd } = req.body;
 
       if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'Email is required' });
+        res.status(400).json({ error: 'Email is required' });
+        return;
       }
       if (!moduleId || typeof moduleId !== 'number') {
-        return res.status(400).json({ error: 'Valid moduleId is required' });
+        res.status(400).json({ error: 'Valid moduleId is required' });
+        return;
       }
       const safeXp = xpToAdd === undefined ? 0 : Number(xpToAdd);
       if (!Number.isFinite(safeXp) || safeXp < 0 || safeXp > 10000) {
-        return res.status(400).json({ error: 'xpToAdd must be a number between 0 and 10000' });
+        res.status(400).json({ error: 'xpToAdd must be a number between 0 and 10000' });
+        return;
       }
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
-      if (!user) return res.status(404).json({ error: 'User not found' });
-  
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+
       const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
       const newXp = (user.experiencePoints || 0) + safeXp;
       const newLevel = calculateLevel(newXp);
@@ -378,7 +406,8 @@ export function createApp(
       );
 
       if (!result) {
-        return res.status(404).json({ error: 'User not found' });
+        res.status(404).json({ error: 'User not found' });
+        return;
       }
 
       res.status(200).json({
@@ -397,16 +426,21 @@ export function createApp(
     try {
       const { email, xpEarned } = req.body;
       if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'Email is required' });
+        res.status(400).json({ error: 'Email is required' });
+        return;
       }
       const rawXp = Number(xpEarned);
       if (!Number.isFinite(rawXp) || rawXp < 0 || rawXp > 50000) {
-        return res.status(400).json({ error: 'xpEarned must be a number between 0 and 50000' });
+        res.status(400).json({ error: 'xpEarned must be a number between 0 and 50000' });
+        return;
       }
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
 
       const newXp = (user.experiencePoints || 0) + Math.floor(rawXp);
       const newLevel = calculateLevel(newXp);
@@ -433,25 +467,30 @@ export function createApp(
       const { email, moduleId, xpToAdd, totalLessons } = req.body;
       const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
       if (!normalizedEmail) {
-        return res.status(400).json({ error: 'Email is required' });
+        res.status(400).json({ error: 'Email is required' });
+        return;
       }
       if (typeof moduleId !== 'number' || moduleId < 1) {
-        return res.status(400).json({ error: 'Valid moduleId is required' });
+        res.status(400).json({ error: 'Valid moduleId is required' });
+        return;
       }
       if (typeof totalLessons !== 'number' || totalLessons < 1) {
-        return res.status(400).json({ error: 'totalLessons must be a positive number' });
+        res.status(400).json({ error: 'totalLessons must be a positive number' });
+        return;
       }
       const safeXp = Math.max(0, Math.min(10000, Number(xpToAdd) || 0));
 
       const user = await usersCollection.findOne({ email: normalizedEmail });
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
 
       const newXp = (user.experiencePoints || 0) + safeXp;
       const newLevel = calculateLevel(newXp);
       const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
       let newUnlocked = user.lastUnlockedModuleId;
-      // loose equality keeps string ids from json aligned with numeric ids in mongo.
-      if (moduleId == user.lastUnlockedModuleId) {
+      if (moduleId === Number(user.lastUnlockedModuleId)) {
         newUnlocked = moduleId + 1;
       }
 
@@ -485,11 +524,15 @@ export function createApp(
     try {
       const { email } = req.body;
       if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'Email is required' });
+        res.status(400).json({ error: 'Email is required' });
+        return;
       }
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
 
       const today = new Date().toISOString().split('T')[0];
       const lastActivity = user.lastActivityDate;
@@ -555,36 +598,41 @@ export function createApp(
       const { email, moduleId, title, score, xpEarned, lessonsTotal } = req.body;
 
       if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'Email is required' });
+        res.status(400).json({ error: 'Email is required' });
+        return;
       }
       if (!moduleId || typeof moduleId !== 'number') {
-        return res.status(400).json({ error: 'Valid moduleId is required' });
+        res.status(400).json({ error: 'Valid moduleId is required' });
+        return;
       }
 
       const moduleDoc = await modulesCollection.findOne({ moduleId });
-      const resolvedLessonsTotal =
-        typeof lessonsTotal === 'number' && lessonsTotal > 0
-          ? Math.floor(lessonsTotal)
-          : Array.isArray(moduleDoc?.lessons)
-            ? moduleDoc.lessons.length
-            : 0;
+      let resolvedLessonsTotal = 0;
+      if (typeof lessonsTotal === 'number' && lessonsTotal > 0) {
+        resolvedLessonsTotal = Math.floor(lessonsTotal);
+      } else if (Array.isArray(moduleDoc?.lessons)) {
+        resolvedLessonsTotal = moduleDoc.lessons.length;
+      }
       if (resolvedLessonsTotal < 1) {
-        return res.status(400).json({ error: 'lessonsTotal must be a positive number' });
+        res.status(400).json({ error: 'lessonsTotal must be a positive number' });
+        return;
       }
 
       const rawXpEarned = xpEarned === undefined ? moduleDoc?.experiencePoints : xpEarned;
       const safeXpEarned = Number(rawXpEarned);
       if (!Number.isFinite(safeXpEarned) || safeXpEarned < 0 || safeXpEarned > 10000) {
-        return res.status(400).json({ error: 'xpEarned must be a number between 0 and 10000' });
+        res.status(400).json({ error: 'xpEarned must be a number between 0 and 10000' });
+        return;
       }
 
       const safeScore = Number.isFinite(Number(score)) ? Number(score) : 0;
-      const moduleTitle =
-        typeof title === 'string' && title.trim()
-          ? title.trim()
-          : typeof moduleDoc?.title === 'string'
-            ? moduleDoc.title
-            : `Module ${moduleId}`;
+      let moduleTitle = `Module ${moduleId}`;
+      if (typeof moduleDoc?.title === 'string') {
+        moduleTitle = moduleDoc.title;
+      }
+      if (typeof title === 'string' && title.trim()) {
+        moduleTitle = title.trim();
+      }
       const completedDate = new Date().toISOString().split('T')[0];
       const completedModule = {
         moduleId,
@@ -598,24 +646,33 @@ export function createApp(
 
       const normalizedEmail = email.toLowerCase().trim();
       const user = await usersCollection.findOne({ email: normalizedEmail });
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
 
       if (user.completedModules !== undefined && !Array.isArray(user.completedModules)) {
-        await usersCollection.updateOne({ email: normalizedEmail }, { $set: { completedModules: [] } });
+        await usersCollection.updateOne(
+          { email: normalizedEmail },
+          { $set: { completedModules: [] } }
+        );
       }
 
       const existingCompletedModules = Array.isArray(user.completedModules)
         ? (user.completedModules as CompletedModuleRecord[])
         : [];
-      const alreadyCompleted = existingCompletedModules.some((module) => Number(module.moduleId) === moduleId);
+      const alreadyCompleted = existingCompletedModules.some(
+        (module) => Number(module.moduleId) === moduleId
+      );
       const newUnlockedId = Math.max(user.lastUnlockedModuleId || 1, moduleId + 1);
 
-      const newXp = (user.experiencePoints || 0) + (alreadyCompleted ? 0 : Math.floor(safeXpEarned));
+      const newXp =
+        (user.experiencePoints || 0) + (alreadyCompleted ? 0 : Math.floor(safeXpEarned));
       const newLevel = calculateLevel(newXp);
       const progressField = `progressByModuleId.${moduleId}.lessonCurrent`;
 
       const combinedUpdate = {
-        $set: { 
+        $set: {
           lastUnlockedModuleId: newUnlockedId,
           experiencePoints: newXp,
           level: newLevel,
@@ -629,7 +686,10 @@ export function createApp(
         { returnDocument: 'after' }
       );
 
-      if (!result) return res.status(404).json({ error: 'User not found' });
+      if (!result) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
 
       res.status(200).json({
         message: 'Module marked as completed',
@@ -665,7 +725,7 @@ export function createApp(
   });
 
   if (process.env.NODE_ENV === 'production') {
-    const distPath = path.join(__dirname, '..', 'dist');
+    const distPath = path.join(dirname, '..', 'dist');
     app.use(express.static(distPath));
     // fall back to the spa shell for unknown paths so client routing can recover.
     app.get('/{*path}', (_req, res) => res.sendFile(path.join(distPath, 'index.html')));

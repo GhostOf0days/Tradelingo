@@ -1,25 +1,155 @@
 // Module 4: choosing brokers, order types, and platform safety — pairs with BROKERS_LESSONS below.
 export const BROKERS_PRETEST = [
-  { question: "What is a broker?", options: ["A bank", "An intermediary that executes trades on your behalf", "A type of stock", "An investment advisor"], correctIndex: 1 },
-  { question: "What are the main types of brokers?", options: ["Full-service only", "Discount and full-service", "Government brokers", "Bank brokers"], correctIndex: 1 },
-  { question: "What is a commission in trading?", options: ["Government tax", "Fee charged by broker for executing trades", "Profit from your trades", "A type of stock"], correctIndex: 1 },
-  { question: "What are fractional shares?", options: ["Broken shares", "Ability to own portions of shares instead of whole shares", "Free shares", "Shares at a discount"], correctIndex: 1 },
-  { question: "What is a margin account?", options: ["An account with borders", "Brokerage account that allows you to borrow money to trade", "A savings account", "A type of stock"], correctIndex: 1 },
-  { question: "What is a settlement date?", options: ["Date you buy", "Date broker receives funds", "Date you receive your shares after trade", "Trading deadline"], correctIndex: 2 },
-  { question: "What is T+2 settlement?", options: ["Trade in 2 days", "Settlement 2 days after trade date", "2 second transaction", "Two-tier trading"], correctIndex: 1 },
-  { question: "What is a market order?", options: ["Order placed in market hours", "Buy/sell at current market price immediately", "An order for entire market", "Selling entire portfolio"], correctIndex: 1 },
-  { question: "What is a limit order?", options: ["Order with limits", "Buy/sell only at specific price or better", "Order to limit losses", "Selling only some shares"], correctIndex: 1 },
-  { question: "What is day trading?", options: ["Trading during day only", "Buying and selling securities on same day", "Trading 5 days a week", "Long-term trading"], correctIndex: 1 },
-  { question: "What is the Pattern Day Trader (PDT) rule?", options: ["Trading pattern strategy", "Need $25K minimum to day trade in US", "Daily limit on trades", "Pattern matching trading"], correctIndex: 1 },
-  { question: "What is a watchlist?", options: ["List of people watching you", "List of stocks you're monitoring", "Most watched stocks", "Trending stocks"], correctIndex: 1 },
-  { question: "What are trading hours?", options: ["Any time", "9:30 AM - 4:00 PM ET (US market)", "Broker dependent", "24 hours"], correctIndex: 1 },
-  { question: "What is after-hours trading?", options: ["Trading after you close app", "Trading outside regular market hours", "Late night trading", "Trading after profit"], correctIndex: 1 },
-  { question: "What is short selling?", options: ["Selling small amounts", "Borrowing shares to sell, then buying back cheaper", "Quick profit strategy", "Selling before buying"], correctIndex: 1 }
+  {
+    question: 'What is a broker?',
+    options: [
+      'A bank',
+      'An intermediary that executes trades on your behalf',
+      'A type of stock',
+      'An investment advisor',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What are the main types of brokers?',
+    options: [
+      'Full-service only',
+      'Discount and full-service',
+      'Government brokers',
+      'Bank brokers',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a commission in trading?',
+    options: [
+      'Government tax',
+      'Fee charged by broker for executing trades',
+      'Profit from your trades',
+      'A type of stock',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What are fractional shares?',
+    options: [
+      'Broken shares',
+      'Ability to own portions of shares instead of whole shares',
+      'Free shares',
+      'Shares at a discount',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a margin account?',
+    options: [
+      'An account with borders',
+      'Brokerage account that allows you to borrow money to trade',
+      'A savings account',
+      'A type of stock',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a settlement date?',
+    options: [
+      'Date you buy',
+      'Date broker receives funds',
+      'Date you receive your shares after trade',
+      'Trading deadline',
+    ],
+    correctIndex: 2,
+  },
+  {
+    question: 'What is T+2 settlement?',
+    options: [
+      'Trade in 2 days',
+      'Settlement 2 days after trade date',
+      '2 second transaction',
+      'Two-tier trading',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a market order?',
+    options: [
+      'Order placed in market hours',
+      'Buy/sell at current market price immediately',
+      'An order for entire market',
+      'Selling entire portfolio',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a limit order?',
+    options: [
+      'Order with limits',
+      'Buy/sell only at specific price or better',
+      'Order to limit losses',
+      'Selling only some shares',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is day trading?',
+    options: [
+      'Trading during day only',
+      'Buying and selling securities on same day',
+      'Trading 5 days a week',
+      'Long-term trading',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is the Pattern Day Trader (PDT) rule?',
+    options: [
+      'Trading pattern strategy',
+      'Need $25K minimum to day trade in US',
+      'Daily limit on trades',
+      'Pattern matching trading',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a watchlist?',
+    options: [
+      'List of people watching you',
+      "List of stocks you're monitoring",
+      'Most watched stocks',
+      'Trending stocks',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What are trading hours?',
+    options: ['Any time', '9:30 AM - 4:00 PM ET (US market)', 'Broker dependent', '24 hours'],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is after-hours trading?',
+    options: [
+      'Trading after you close app',
+      'Trading outside regular market hours',
+      'Late night trading',
+      'Trading after profit',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is short selling?',
+    options: [
+      'Selling small amounts',
+      'Borrowing shares to sell, then buying back cheaper',
+      'Quick profit strategy',
+      'Selling before buying',
+    ],
+    correctIndex: 1,
+  },
 ];
 
 export const BROKERS_LESSONS = [
   {
-    title: "Lesson 1: What is a Broker?",
+    title: 'Lesson 1: What is a Broker?',
     content: `A broker is an intermediary that executes trades on your behalf. Think of them as a middleman between you and the stock exchange.
 
 How brokers work:
@@ -197,10 +327,10 @@ Remember:
 • Fee difference minimal now
 • Focus on ease of use and education`,
     question: BROKERS_PRETEST[0],
-    demo: 'order-book'
+    demo: 'order-book',
   },
   {
-    title: "Lesson 2: Broker Types and Models",
+    title: 'Lesson 2: Broker Types and Models',
     content: `Different brokers operate with different business models, affecting costs and conflicts of interest.
 
 Full-service brokers:
@@ -387,10 +517,10 @@ Choose robo-advisor if:
 
 Key takeaway:
 Model matters less than total costs. Compare all-in costs (fees + execution quality) when choosing.`,
-    question: BROKERS_PRETEST[1]
+    question: BROKERS_PRETEST[1],
   },
   {
-    title: "Lesson 3: Order Types and Execution",
+    title: 'Lesson 3: Order Types and Execution',
     content: `Understanding order types is critical to executing trades the way you want.
 
 Market orders:
@@ -596,10 +726,10 @@ Different orders suit different situations. Master these 4:
 2. Limit (price control)
 3. Stop-loss (downside protection)
 4. Trailing stop (profit protection)`,
-    question: BROKERS_PRETEST[3]
+    question: BROKERS_PRETEST[3],
   },
   {
-    title: "Lesson 4: Trading Hours and Execution",
+    title: 'Lesson 4: Trading Hours and Execution',
     content: `Understanding market hours and execution rules is critical for effective trading.
 
 Regular trading hours:
@@ -816,10 +946,10 @@ For most traders:
 • Wait for settlement before relying on funds
 • Never use leverage if inexperienced
 • Plan trades with 2-day settlement in mind`,
-    question: BROKERS_PRETEST[6]
+    question: BROKERS_PRETEST[6],
   },
   {
-    title: "Lesson 5: Margin and Leverage",
+    title: 'Lesson 5: Margin and Leverage',
     content: `Margin is borrowing money from your broker to trade. It can amplify both gains and losses.
 
 How margin works:
@@ -1038,10 +1168,10 @@ Most successful investors rarely use margin. Warren Buffett uses minimal leverag
 Key takeaway:
 Margin amplifies both gains and losses. Most retail traders lose money with margin. Only use if you understand the risks and have specific strategy. Better to trade with cash and grow slowly than to blow up account with leverage.`,
     question: BROKERS_PRETEST[4],
-    demo: 'margin-calculator'
+    demo: 'margin-calculator',
   },
   {
-    title: "Lesson 6: Broker Tools and Research",
+    title: 'Lesson 6: Broker Tools and Research',
     content: `Modern brokers provide extensive tools for research and analysis.
 
 Charting tools:
@@ -1282,10 +1412,10 @@ Advanced:
 
 Remember:
 More tools don't equal better results. Focus on understanding few tools well rather than mastering many poorly.`,
-    question: BROKERS_PRETEST[9]
+    question: BROKERS_PRETEST[9],
   },
   {
-    title: "Lesson 7: Risk Management and Psychology",
+    title: 'Lesson 7: Risk Management and Psychology',
     content: `Technical trading skills matter less than risk management and emotional control.
 
 Risk management basics:
@@ -1521,10 +1651,10 @@ The failed traders:
 Emotional, overconfident, undisciplined, chasing.
 
 Which will you be?`,
-    question: BROKERS_PRETEST[11]
+    question: BROKERS_PRETEST[11],
   },
   {
-    title: "Lesson 8: Account Types and Taxes",
+    title: 'Lesson 8: Account Types and Taxes',
     content: `Different account types have different tax treatments and advantages.
 
 Taxable brokerage account:
@@ -1787,10 +1917,10 @@ Tax planning tips:
 Most important:
 Many traders ignore taxes and blow up when tax bills come due.
 Plan for taxes when planning trades.`,
-    question: BROKERS_PRETEST[12]
+    question: BROKERS_PRETEST[12],
   },
   {
-    title: "Lesson 9: Getting Started as a Trader",
+    title: 'Lesson 9: Getting Started as a Trader',
     content: `Now that you understand brokers and trading, let's create an action plan.
 
 Step 1: Choose your broker (1 week)
@@ -2144,10 +2274,10 @@ Learn from mistakes.
 Enjoy the journey.
 
 Welcome to the trading journey!`,
-    question: BROKERS_PRETEST[14]
+    question: BROKERS_PRETEST[14],
   },
   {
-    title: "Lesson 10: Advanced Trading Strategies",
+    title: 'Lesson 10: Advanced Trading Strategies',
     content: `Now for some more sophisticated trading approaches.
 
 Momentum trading:
@@ -2451,6 +2581,6 @@ Now comes the hard part: Executing with discipline.
 Most traders have knowledge.
 Few have discipline.
 Be the few.`,
-    question: BROKERS_PRETEST[13]
-  }
+    question: BROKERS_PRETEST[13],
+  },
 ];

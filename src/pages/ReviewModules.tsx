@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import '../styles/ReviewModules.css';
-import { MODULES } from '../data/modules';
+import MODULES from '../data/modules';
 import { CompletedModule } from '../models/CompletedModule';
 
 const MODULES_LIST = Object.entries(MODULES).map(([id, data]) => ({
   id: Number(id),
-  ...data
+  ...data,
 }));
 
 export default function ReviewModules() {
@@ -26,16 +26,16 @@ export default function ReviewModules() {
           const data = await res.json();
           const progressMap = data.progressByModuleId || {};
           // Infer "completed" from lesson counter vs static lesson length (not /api/completed-modules).
-          const finishedModules = MODULES_LIST.filter(m => {
+          const finishedModules = MODULES_LIST.filter((m) => {
             const currentLesson = progressMap[m.id]?.lessonCurrent || 0;
             return currentLesson >= m.lessons.length && m.lessons.length > 0;
-          }).map(m => ({
+          }).map((m) => ({
             moduleId: m.id,
             title: m.title,
             completedDate: new Date().toISOString(),
             xpEarned: m.experiencePoints,
             score: 100,
-            lessons: m.lessons.length
+            lessons: m.lessons.length,
           }));
 
           setCompletedModules(finishedModules);
@@ -63,15 +63,15 @@ export default function ReviewModules() {
     <div className="review-modules">
       <div className="review-modules__header">
         <h1>Completed Modules</h1>
-        <p>Review and refresh your knowledge on modules you've already mastered</p>
+        <p>Review and refresh your knowledge on modules you&apos;ve already mastered</p>
       </div>
 
       {completedModules.length === 0 ? (
         <div className="review-modules__empty">
-          <div className="review-modules__empty-icon"></div>
+          <div className="review-modules__empty-icon" />
           <h2>No Completed Modules Yet</h2>
           <p>Complete your first module to unlock the ability to review it here</p>
-          <button className="review-modules__cta" onClick={() => navigate('/')}>
+          <button type="button" className="review-modules__cta" onClick={() => navigate('/')}>
             Go to Modules
           </button>
         </div>
@@ -83,7 +83,7 @@ export default function ReviewModules() {
                 <h3>{module.title}</h3>
                 <span className="review-modules__badge">Completed</span>
               </div>
-              
+
               <div className="review-modules__meta">
                 <div className="review-modules__meta-item">
                   <div className="review-modules__label">Completed on</div>
@@ -95,11 +95,10 @@ export default function ReviewModules() {
                 </div>
               </div>
 
-              <div className="review-modules__xp-badge">
-                +{module.xpEarned} XP Earned
-              </div>
+              <div className="review-modules__xp-badge">+{module.xpEarned} XP Earned</div>
 
               <button
+                type="button"
                 className="review-modules__btn review-modules__btn--secondary"
                 onClick={() => handleReviewLesson(module.moduleId)}
               >

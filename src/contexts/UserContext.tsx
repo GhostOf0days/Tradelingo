@@ -1,16 +1,18 @@
 /**
- * Design Pattern: Singleton Pattern (shared global instance)
+ * Design Pattern: Singleton Pattern
  *
  * Purpose:
- * Provides one centralized source of user state for the application.
+ * Provides one centralized source of user state for the application,
+ * including authentication, XP, level, and daily streak.
  *
  * How:
- * A single UserProvider is mounted near the root of the app and exposes
- * authentication state, XP, level, and streak data through React Context.
+ * UserProvider is mounted once near the root of Tradelingo and acts as
+ * the single shared state manager. Child components access that state
+ * through the useUser hook instead of maintaining independent user state.
  *
  * Benefit:
- * Prevents duplicated or inconsistent user state across pages and
- * ensures all components read from the same source of truth.
+ * Prevents separate pages from showing conflicting XP, level, or streak
+ * counts, ensuring consistent user data across the app.
  *
  * Additional Pattern: Observer
  * Components using useUser() automatically re-render when context state changes.
@@ -18,7 +20,15 @@
 
 // Global auth + gamification state: who is logged in, XP, level, and daily streak.
 // Persists to localStorage so a refresh keeps you signed in (demo-style; no JWT).
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 
 // small user snapshot in the browser while the full row lives in mongo.
 export type User = {
@@ -55,7 +65,6 @@ function shouldResetStreak(lastActivityDate: string | undefined): boolean {
   return lastActivityDate !== today;
 }
 
-// Singleton access point for shared user state throughout Tradelingo.
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('tradelingo_user');
@@ -86,22 +95,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   /** Replaces session user; stamps activity date and derives level when logging in. */
-  const setUser = (newUser: User | null) => {
-    if (newUser) {
-      // Treat "just logged in" as activity for the streak UI (server may refine this).
-      const today = new Date().toISOString().split('T')[0];
-      newUser.lastActivityDate = today;
-      newUser.streakDays = newUser.streakDays || 1;
-      if (!newUser.level) {
-        newUser.level = calculateLevel(newUser.experiencePoints || 0);
-      }
+  const setUser = useCallback((newUser: User | null) => {
+    if (!newUser) {
+      setUserState(null);
+      return;
     }
-    setUserState(newUser);
-  };
+
+    // Treat "just logged in" as activity for the streak UI (server may refine this).
+    const today = new Date().toISOString().split('T')[0];
+    setUserState({
+      ...newUser,
+      lastActivityDate: today,
+      streakDays: newUser.streakDays || 1,
+      level: newUser.level || calculateLevel(newUser.experiencePoints || 0),
+    });
+  }, []);
 
   // Call after meaningful actions (e.g. finishing a module). Bumps streak once per calendar day
   // in the client and POSTs to the API so Mongo stays the source of truth.
-  const updateStreak = async () => {
+  const updateStreak = useCallback(async () => {
     if (user) {
       const today = new Date().toISOString().split('T')[0];
       // touch streak once per utc day locally then sync with the backend.
@@ -116,23 +128,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
           await fetch('/api/update-streak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.email })
+            body: JSON.stringify({ email: user.email }),
           });
         } catch (err) {
           console.warn('Failed to update streak on backend:', err);
         }
       }
     }
-  };
+  }, [user]);
 
   // fill in level from xp when older caches never stored it.
   const level = user?.level || calculateLevel(user?.experiencePoints || 0);
-
-  return (
-    <UserContext.Provider value={{ user, setUser, updateStreak, level }}>
-      {children}
-    </UserContext.Provider>
+  const contextValue = useMemo(
+    () => ({ user, setUser, updateStreak, level }),
+    [level, setUser, updateStreak, user]
   );
+
+  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 }
 
 /** Throws if used outside the provider so mistakes fail fast instead of returning null silently. */

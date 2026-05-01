@@ -1,12 +1,19 @@
 // legacy article model for explore helpers while the page mostly uses plain objects.
-export class Article {
+export default class Article {
   id: number;
+
   title: string;
+
   category: string;
+
   description: string;
+
   author: string;
+
   url: string;
+
   readTime: string;
+
   likes: number;
 
   constructor(
@@ -17,7 +24,7 @@ export class Article {
     author: string,
     url: string,
     readTime: string = '5 min',
-    likes: number = 0,
+    likes: number = 0
   ) {
     this.id = id;
     this.title = title;
@@ -37,7 +44,7 @@ export class Article {
     updates: Partial<{
       readTime: string;
       likes: number;
-    }>,
+    }>
   ): Article {
     return new Article(
       this.id,
@@ -47,7 +54,7 @@ export class Article {
       this.author,
       this.url,
       updates.readTime ?? this.readTime,
-      updates.likes ?? this.likes,
+      updates.likes ?? this.likes
     );
   }
 }

@@ -8,26 +8,24 @@ import {
   mockArticleLikesCollection,
 } from './mockDb';
 
-vi.mock('mongodb', () => {
-  return {
-    MongoClient: function () {
-      return {
-        connect: () => Promise.resolve(),
-        db: () => ({
-          collection: (name: string) => {
-            if (name === 'modules') return mockModulesCollection;
-            if (name === 'articleLikes') return mockArticleLikesCollection;
-            return mockUsersCollection;
-          },
-        }),
-      };
-    },
-  };
-});
+vi.mock('mongodb', () => ({
+  MongoClient: function MongoClient() {
+    return {
+      connect: () => Promise.resolve(),
+      db: () => ({
+        collection: (name: string) => {
+          if (name === 'modules') return mockModulesCollection;
+          if (name === 'articleLikes') return mockArticleLikesCollection;
+          return mockUsersCollection;
+        },
+      }),
+    };
+  },
+}));
 
 // defer importing the server until after the mongo mock is installed.
 const getApp = async () => {
-  const { app } = await import('../server/index');
+  const { default: app } = await import('../server/index');
   return app;
 };
 
@@ -102,7 +100,10 @@ describe('Auth API', () => {
 
   it('POST /api/login succeeds and returns user data', async () => {
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'user@example.com', password: STRONG_PASSWORD }).expect(201);
+    await request(app)
+      .post('/api/register')
+      .send({ email: 'user@example.com', password: STRONG_PASSWORD })
+      .expect(201);
 
     const res = await request(app)
       .post('/api/login')
@@ -120,7 +121,10 @@ describe('Auth API', () => {
 
   it('POST /api/login returns 401 for wrong password', async () => {
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'u@example.com', password: STRONG_PASSWORD }).expect(201);
+    await request(app)
+      .post('/api/register')
+      .send({ email: 'u@example.com', password: STRONG_PASSWORD })
+      .expect(201);
 
     await request(app)
       .post('/api/login')
@@ -133,7 +137,10 @@ describe('Progress and XP API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'progress@example.com', password: STRONG_PASSWORD }).expect(201);
+    await request(app)
+      .post('/api/register')
+      .send({ email: 'progress@example.com', password: STRONG_PASSWORD })
+      .expect(201);
   });
 
   it('GET /api/progress/:email returns progress', async () => {
@@ -148,7 +155,10 @@ describe('Progress and XP API', () => {
 
   it('GET /api/progress?email= returns progress for deployed single-segment API routing', async () => {
     const app = await getApp();
-    const res = await request(app).get('/api/progress').query({ email: 'progress@example.com' }).expect(200);
+    const res = await request(app)
+      .get('/api/progress')
+      .query({ email: 'progress@example.com' })
+      .expect(200);
 
     expect(res.body).toMatchObject({
       lastUnlockedModuleId: 1,
@@ -246,12 +256,18 @@ describe('Streak API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'streak@example.com', password: STRONG_PASSWORD }).expect(201);
+    await request(app)
+      .post('/api/register')
+      .send({ email: 'streak@example.com', password: STRONG_PASSWORD })
+      .expect(201);
   });
 
   it('POST /api/update-streak sets first activity day', async () => {
     const app = await getApp();
-    const res = await request(app).post('/api/update-streak').send({ email: 'streak@example.com' }).expect(200);
+    const res = await request(app)
+      .post('/api/update-streak')
+      .send({ email: 'streak@example.com' })
+      .expect(200);
 
     expect(res.body.streakDays).toBe(1);
     expect(res.body.lastActivityDate).toBeDefined();
@@ -262,7 +278,10 @@ describe('User profile API', () => {
   beforeEach(async () => {
     resetMockDb();
     const app = await getApp();
-    await request(app).post('/api/register').send({ email: 'profile@example.com', password: STRONG_PASSWORD }).expect(201);
+    await request(app)
+      .post('/api/register')
+      .send({ email: 'profile@example.com', password: STRONG_PASSWORD })
+      .expect(201);
   });
 
   it('GET /api/user/:email returns full profile', async () => {
@@ -282,7 +301,10 @@ describe('User profile API', () => {
 
   it('GET /api/user?email= returns full profile for deployed single-segment API routing', async () => {
     const app = await getApp();
-    const res = await request(app).get('/api/user').query({ email: 'profile@example.com' }).expect(200);
+    const res = await request(app)
+      .get('/api/user')
+      .query({ email: 'profile@example.com' })
+      .expect(200);
 
     expect(res.body).toMatchObject({
       email: 'profile@example.com',
@@ -323,7 +345,10 @@ describe('Article likes API', () => {
 
   it('GET /api/article-likes returns stored article counters', async () => {
     const app = await getApp();
-    await request(app).post('/api/article-likes/3').send({ action: 'like', baseLikes: 312 }).expect(200);
+    await request(app)
+      .post('/api/article-likes/3')
+      .send({ action: 'like', baseLikes: 312 })
+      .expect(200);
 
     const res = await request(app).get('/api/article-likes').expect(200);
     expect(res.body).toEqual(

@@ -1,31 +1,215 @@
 // Module 3: crypto basics — wallet concepts, volatility, regulation (large static lesson blob).
 export const CRYPTOCURRENCIES_PRETEST = [
-  { question: "What is blockchain?", options: ["A type of stock market", "A distributed ledger technology that records transactions across many computers", "A block of currencies", "A bank's security system"], correctIndex: 1 },
-  { question: "What is Bitcoin?", options: ["A currency used in banks", "The first and largest cryptocurrency", "A type of blockchain", "A payment method"], correctIndex: 1 },
-  { question: "Who created Bitcoin?", options: ["The Federal Reserve", "A mysterious person or group named Satoshi Nakamoto", "Mark Zuckerberg", "Elon Musk"], correctIndex: 1 },
-  { question: "What is mining in cryptocurrency?", options: ["Extracting coins from the ground", "Process of validating transactions and creating new coins", "A type of trading", "Storing cryptocurrency"], correctIndex: 1 },
-  { question: "What is a wallet in crypto?", options: ["Your bank account", "A digital tool that holds and manages cryptocurrency", "Physical money storage", "A crypto exchange"], correctIndex: 1 },
-  { question: "What is Ethereum?", options: ["A coin similar to Bitcoin", "A blockchain platform that allows smart contracts and decentralized apps", "A type of trading strategy", "A wallet service"], correctIndex: 1 },
-  { question: "What is a smart contract?", options: ["A traditional legal contract", "Self-executing code that runs on blockchain when conditions are met", "A type of cryptocurrency", "A trading agreement"], correctIndex: 1 },
-  { question: "What is DeFi?", options: ["A type of cryptocurrency", "Decentralized Finance - financial services using blockchain", "A digital wallet", "A trading platform"], correctIndex: 1 },
-  { question: "What is an altcoin?", options: ["A gold coin", "Any cryptocurrency other than Bitcoin", "A type of blockchain", "A mining pool"], correctIndex: 1 },
-  { question: "What is volatility in crypto?", options: ["A feature of computers", "Rapid price fluctuations typical of cryptocurrencies", "A mining technique", "A type of wallet"], correctIndex: 1 },
-  { question: "What is a crypto exchange?", options: ["A person who exchanges currencies", "A platform where you buy and sell cryptocurrencies", "A type of blockchain", "A mining operation"], correctIndex: 1 },
-  { question: "What is a private key?", options: ["A hidden password for a wallet", "Secret code that gives you access and control of your cryptocurrency", "A type of Bitcoin", "A mining tool"], correctIndex: 1 },
-  { question: "What is a public key?", options: ["A secret code", "A wallet address you can share publicly to receive cryptocurrency", "A type of blockchain", "A mining reward"], correctIndex: 1 },
-  { question: "What is halving?", options: ["Losing half your money", "Periodic event where mining rewards are cut in half", "A type of wallet", "A trading strategy"], correctIndex: 1 },
-  { question: "What is market cap in crypto?", options: ["The capital of a mining company", "Price per coin × Total coins in circulation", "The amount miners earn", "The size of a crypto exchange"], correctIndex: 1 },
-  { question: "What is staking in crypto?", options: ["Making bets on price", "Locking up cryptocurrency to validate transactions and earn rewards", "A type of mining", "Storing coins long-term"], correctIndex: 1 },
-  { question: "What is a fork?", options: ["A type of hardware", "A change to blockchain code creating a new version", "A wallet type", "A trading tool"], correctIndex: 1 },
-  { question: "What is a rug pull?", options: ["Pulling out a rug", "Scam where creators abandon a project and steal investor funds", "A mining technique", "A type of cryptocurrency"], correctIndex: 1 },
-  { question: "What is HODL?", options: ["A technical term", "Strategy of holding cryptocurrency long-term instead of trading frequently", "A type of wallet", "A mining reward"], correctIndex: 1 },
-  { question: "What is KYC in crypto?", options: ["A cryptocurrency", "Know Your Customer - identity verification required by exchanges", "A type of blockchain", "A mining pool"], correctIndex: 1 },
-  { question: "What is the total supply of Bitcoin?", options: ["Unlimited", "1 million coins", "21 million coins", "100 million coins"], correctIndex: 2 }
+  {
+    question: 'What is blockchain?',
+    options: [
+      'A type of stock market',
+      'A distributed ledger technology that records transactions across many computers',
+      'A block of currencies',
+      "A bank's security system",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is Bitcoin?',
+    options: [
+      'A currency used in banks',
+      'The first and largest cryptocurrency',
+      'A type of blockchain',
+      'A payment method',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'Who created Bitcoin?',
+    options: [
+      'The Federal Reserve',
+      'A mysterious person or group named Satoshi Nakamoto',
+      'Mark Zuckerberg',
+      'Elon Musk',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is mining in cryptocurrency?',
+    options: [
+      'Extracting coins from the ground',
+      'Process of validating transactions and creating new coins',
+      'A type of trading',
+      'Storing cryptocurrency',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a wallet in crypto?',
+    options: [
+      'Your bank account',
+      'A digital tool that holds and manages cryptocurrency',
+      'Physical money storage',
+      'A crypto exchange',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is Ethereum?',
+    options: [
+      'A coin similar to Bitcoin',
+      'A blockchain platform that allows smart contracts and decentralized apps',
+      'A type of trading strategy',
+      'A wallet service',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a smart contract?',
+    options: [
+      'A traditional legal contract',
+      'Self-executing code that runs on blockchain when conditions are met',
+      'A type of cryptocurrency',
+      'A trading agreement',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is DeFi?',
+    options: [
+      'A type of cryptocurrency',
+      'Decentralized Finance - financial services using blockchain',
+      'A digital wallet',
+      'A trading platform',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is an altcoin?',
+    options: [
+      'A gold coin',
+      'Any cryptocurrency other than Bitcoin',
+      'A type of blockchain',
+      'A mining pool',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is volatility in crypto?',
+    options: [
+      'A feature of computers',
+      'Rapid price fluctuations typical of cryptocurrencies',
+      'A mining technique',
+      'A type of wallet',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a crypto exchange?',
+    options: [
+      'A person who exchanges currencies',
+      'A platform where you buy and sell cryptocurrencies',
+      'A type of blockchain',
+      'A mining operation',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a private key?',
+    options: [
+      'A hidden password for a wallet',
+      'Secret code that gives you access and control of your cryptocurrency',
+      'A type of Bitcoin',
+      'A mining tool',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a public key?',
+    options: [
+      'A secret code',
+      'A wallet address you can share publicly to receive cryptocurrency',
+      'A type of blockchain',
+      'A mining reward',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is halving?',
+    options: [
+      'Losing half your money',
+      'Periodic event where mining rewards are cut in half',
+      'A type of wallet',
+      'A trading strategy',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is market cap in crypto?',
+    options: [
+      'The capital of a mining company',
+      'Price per coin × Total coins in circulation',
+      'The amount miners earn',
+      'The size of a crypto exchange',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is staking in crypto?',
+    options: [
+      'Making bets on price',
+      'Locking up cryptocurrency to validate transactions and earn rewards',
+      'A type of mining',
+      'Storing coins long-term',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a fork?',
+    options: [
+      'A type of hardware',
+      'A change to blockchain code creating a new version',
+      'A wallet type',
+      'A trading tool',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is a rug pull?',
+    options: [
+      'Pulling out a rug',
+      'Scam where creators abandon a project and steal investor funds',
+      'A mining technique',
+      'A type of cryptocurrency',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is HODL?',
+    options: [
+      'A technical term',
+      'Strategy of holding cryptocurrency long-term instead of trading frequently',
+      'A type of wallet',
+      'A mining reward',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is KYC in crypto?',
+    options: [
+      'A cryptocurrency',
+      'Know Your Customer - identity verification required by exchanges',
+      'A type of blockchain',
+      'A mining pool',
+    ],
+    correctIndex: 1,
+  },
+  {
+    question: 'What is the total supply of Bitcoin?',
+    options: ['Unlimited', '1 million coins', '21 million coins', '100 million coins'],
+    correctIndex: 2,
+  },
 ];
 
 export const CRYPTOCURRENCIES_LESSONS = [
   {
-    title: "Lesson 1: What is Cryptocurrency?",
+    title: 'Lesson 1: What is Cryptocurrency?',
     content: `Cryptocurrency is digital money that uses cryptography (encryption) to secure transactions and control the creation of new units. It exists only on the internet, not as physical coins or bills.
 
 Key characteristics:
@@ -57,10 +241,10 @@ Risks:
 • Regulatory uncertainty (laws still being written)
 • Scams and fraud are common
 • Technology is complex for beginners`,
-    question: CRYPTOCURRENCIES_PRETEST[0]
+    question: CRYPTOCURRENCIES_PRETEST[0],
   },
   {
-    title: "Lesson 2: Bitcoin - The First Cryptocurrency",
+    title: 'Lesson 2: Bitcoin - The First Cryptocurrency',
     content: `Bitcoin is the first and most famous cryptocurrency, created in 2009 by Satoshi Nakamoto (whose true identity remains unknown).
 
 Bitcoin basics:
@@ -112,10 +296,10 @@ Cons:
 • Slow transactions (10 min average)
 • Energy-intensive mining
 • Irreversible transactions (can't dispute charges)`,
-    question: CRYPTOCURRENCIES_PRETEST[1]
+    question: CRYPTOCURRENCIES_PRETEST[1],
   },
   {
-    title: "Lesson 3: Ethereum and Smart Contracts",
+    title: 'Lesson 3: Ethereum and Smart Contracts',
     content: `Ethereum was created in 2015 by programmer Vitalik Buterin to go beyond just digital money. It introduced "smart contracts" - code that runs on blockchain.
 
 Key differences from Bitcoin:
@@ -168,10 +352,10 @@ Layer 2 solutions process thousands of transactions/second with lower fees:
 ETH vs BTC:
 Bitcoin: Fixed supply, limited functionality, "store of value"
 Ethereum: Complex applications, growing uses, constantly evolving`,
-    question: CRYPTOCURRENCIES_PRETEST[2]
+    question: CRYPTOCURRENCIES_PRETEST[2],
   },
   {
-    title: "Lesson 4: How Blockchain Works",
+    title: 'Lesson 4: How Blockchain Works',
     content: `Blockchain is a distributed ledger - think of it as a shared spreadsheet that no single entity controls.
 
 The basic concept:
@@ -242,10 +426,10 @@ With thousands of nodes, how do they agree on truth?
 • Proof of Stake (Ethereum 2.0): Owners of coins validate (more energy efficient)
 • Other mechanisms: Proof of Authority, Proof of History, etc.`,
     question: CRYPTOCURRENCIES_PRETEST[3],
-    demo: 'blockchain-builder'
+    demo: 'blockchain-builder',
   },
   {
-    title: "Lesson 5: Cryptocurrency Wallets",
+    title: 'Lesson 5: Cryptocurrency Wallets',
     content: `A crypto wallet is software that stores your cryptocurrency and allows you to send/receive funds.
 
 How wallets work:
@@ -309,10 +493,10 @@ Never:
 • Keep only on exchange
 
 Security tip: Use a 12-24 word seed phrase (backup). If you lose your device, you can recover with seed phrase on any wallet.`,
-    question: CRYPTOCURRENCIES_PRETEST[4]
+    question: CRYPTOCURRENCIES_PRETEST[4],
   },
   {
-    title: "Lesson 6: Altcoins and Tokens",
+    title: 'Lesson 6: Altcoins and Tokens',
     content: `After Bitcoin proved the concept, thousands of alternative cryptocurrencies ("altcoins") were created.
 
 Why so many?
@@ -384,10 +568,10 @@ Red flags (potential scams):
 • High fees or locked liquidity
 
 Remember: Most altcoins fail. Bitcoin has survived 14+ years. Most new projects die within 1-2 years.`,
-    question: CRYPTOCURRENCIES_PRETEST[5]
+    question: CRYPTOCURRENCIES_PRETEST[5],
   },
   {
-    title: "Lesson 7: Decentralized Finance (DeFi)",
+    title: 'Lesson 7: Decentralized Finance (DeFi)',
     content: `DeFi (Decentralized Finance) removes middlemen from financial services using blockchain and smart contracts.
 
 Traditional finance vs DeFi:
@@ -458,10 +642,10 @@ Best practices:
 • Understand what you're doing
 • Don't use leverage until experienced
 • Diversify across protocols`,
-    question: CRYPTOCURRENCIES_PRETEST[6]
+    question: CRYPTOCURRENCIES_PRETEST[6],
   },
   {
-    title: "Lesson 8: Trading and Volatility",
+    title: 'Lesson 8: Trading and Volatility',
     content: `Cryptocurrency trading is extremely different from stock trading due to volatility and 24/7 markets.
 
 Crypto market characteristics:
@@ -558,10 +742,10 @@ Leverage (margin) trading:
 • Amplifies both gains and losses
 • One mistake = total loss + you owe money
 • Not recommended unless professional`,
-    question: CRYPTOCURRENCIES_PRETEST[7]
+    question: CRYPTOCURRENCIES_PRETEST[7],
   },
   {
-    title: "Lesson 9: Crypto Exchanges and Security",
+    title: 'Lesson 9: Crypto Exchanges and Security',
     content: `A crypto exchange is where you buy/sell cryptocurrency, similar to stock brokers but for crypto.
 
 Major exchanges:
@@ -677,10 +861,10 @@ Benefits of KYC:
 Drawbacks:
 • Privacy concerns
 • Kyc required before you can withdraw to bank`,
-    question: CRYPTOCURRENCIES_PRETEST[8]
+    question: CRYPTOCURRENCIES_PRETEST[8],
   },
   {
-    title: "Lesson 10: Crypto Regulations and Tax",
+    title: 'Lesson 10: Crypto Regulations and Tax',
     content: `Cryptocurrency regulation is evolving rapidly. Different countries have very different approaches.
 
 Global regulations:
@@ -763,10 +947,10 @@ Compliance for serious investors:
 • Report income from mining/staking
 • Report capital gains/losses
 • File timely returns`,
-    question: CRYPTOCURRENCIES_PRETEST[9]
+    question: CRYPTOCURRENCIES_PRETEST[9],
   },
   {
-    title: "Lesson 11: Risks and Scams",
+    title: 'Lesson 11: Risks and Scams',
     content: `Cryptocurrency attracts many scams because it's largely unregulated and transactions are irreversible.
 
 Common scams:
@@ -887,10 +1071,10 @@ Cold reality:
 • Once money is gone, it's gone
 
 Prevention is your only protection.`,
-    question: CRYPTOCURRENCIES_PRETEST[10]
+    question: CRYPTOCURRENCIES_PRETEST[10],
   },
   {
-    title: "Lesson 12: Crypto Investment Strategy",
+    title: 'Lesson 12: Crypto Investment Strategy',
     content: `Developing a sound crypto investment strategy is critical in this volatile market.
 
 Investment approaches:
@@ -1015,10 +1199,10 @@ Only invest what you can afford to lose. If you lose 100%, would it significantl
 
 Crypto is high-risk. Balance with traditional investments (stocks, bonds, real estate).`,
     question: CRYPTOCURRENCIES_PRETEST[11],
-    demo: 'dollar-cost-average'
+    demo: 'dollar-cost-average',
   },
   {
-    title: "Lesson 13: NFTs and Web3",
+    title: 'Lesson 13: NFTs and Web3',
     content: `NFTs (Non-Fungible Tokens) are unique digital assets on blockchain. Unlike Bitcoin (fungible - all Bitcoins identical), NFTs are unique.
 
 What are NFTs?
@@ -1145,10 +1329,10 @@ Do:
 • Support artists you genuinely like
 • Understand you likely lose money
 • Use for real utility (gaming, collectibles, credentials)`,
-    question: CRYPTOCURRENCIES_PRETEST[12]
+    question: CRYPTOCURRENCIES_PRETEST[12],
   },
   {
-    title: "Lesson 14: Crypto Fundamentals & Future",
+    title: 'Lesson 14: Crypto Fundamentals & Future',
     content: `Understanding crypto fundamentals and where technology is headed is critical for long-term investing.
 
 Technological evolution:
@@ -1309,10 +1493,10 @@ Remember:
 • Long-term holding most reliable
 • Volatility tests your emotions
 • Only invest what you can afford to lose`,
-    question: CRYPTOCURRENCIES_PRETEST[13]
+    question: CRYPTOCURRENCIES_PRETEST[13],
   },
   {
-    title: "Lesson 15: Building Your Crypto Strategy",
+    title: 'Lesson 15: Building Your Crypto Strategy',
     content: `Now that you understand crypto, let's build a personalized strategy.
 
 Assess your situation:
@@ -1493,6 +1677,6 @@ Remember:
 • Only risk what you can afford to lose
 
 You've completed the Cryptocurrencies module! You now understand blockchain technology, investment strategies, and risks. Use this knowledge wisely.`,
-    question: CRYPTOCURRENCIES_PRETEST[14]
-  }
+    question: CRYPTOCURRENCIES_PRETEST[14],
+  },
 ];

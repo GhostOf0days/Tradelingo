@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Account } from '../src/models/Account';
-import { RetirementCalculator } from '../src/models/RetirementCalculator';
+import Account from '../src/models/Account';
+import RetirementCalculator from '../src/models/RetirementCalculator';
 
 describe('RetirementCalculator', () => {
   it('returns current balance when projection years are zero', () => {
@@ -12,7 +12,10 @@ describe('RetirementCalculator', () => {
     const overLimit = new Account('ira', 'IRA', 'Test account', 7000, false, 70000, 0, 1);
     const atLimit = new Account('ira', 'IRA', 'Test account', 7000, false, 7000, 0, 1);
 
-    expect(RetirementCalculator.project(overLimit)).toBeCloseTo(RetirementCalculator.project(atLimit), 6);
+    expect(RetirementCalculator.project(overLimit)).toBeCloseTo(
+      RetirementCalculator.project(atLimit),
+      6
+    );
   });
 
   it('handles negative compound returns without producing negative balances or NaN', () => {
@@ -24,7 +27,12 @@ describe('RetirementCalculator', () => {
   });
 
   it('clamps invalid savings inputs to safe values', () => {
-    const result = RetirementCalculator.projectSavings(Number.NaN, -500, Number.POSITIVE_INFINITY, -10);
+    const result = RetirementCalculator.projectSavings(
+      Number.NaN,
+      -500,
+      Number.POSITIVE_INFINITY,
+      -10
+    );
 
     expect(result).toBe(0);
   });

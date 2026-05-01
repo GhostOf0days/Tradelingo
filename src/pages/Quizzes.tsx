@@ -1,12 +1,12 @@
 // Standalone knowledge checks: every quiz currently shares the same QUESTION_BANK for simplicity.
 // Pass at 80% to POST XP; attempts and mistakes live only in component state (lost on refresh).
 import { useState } from 'react';
-import { useUser } from '../contexts/UserContext';
-import '../styles/Quizzes.css';
-import { QuizQuestion } from '../models/QuizQuestion';
-import { Quiz } from '../models/Quiz';
 import confetti from 'canvas-confetti';
-import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
+import { useUser } from '../contexts/UserContext';
+import QuizQuestion from '../models/QuizQuestion';
+import Quiz from '../models/Quiz';
+import shuffleQuestionOptions from '../utils/shuffleQuestionOptions';
+import '../styles/Quizzes.css';
 
 function buildSessionQuestions(source: QuizQuestion[]): QuizQuestion[] {
   return source.map((q) => {
@@ -16,20 +16,93 @@ function buildSessionQuestions(source: QuizQuestion[]): QuizQuestion[] {
 }
 
 const QUIZZES: Quiz[] = [
-  new Quiz(1, 'Stock Basics Challenge', 'Test your knowledge on stock market fundamentals', 'Easy', 'Stocks', 100, 10),
-  new Quiz(2, 'Market Volatility Quiz', 'Understand price fluctuations and market risk', 'Medium', 'Risk', 200, 15),
-  new Quiz(3, 'Portfolio Strategy Exam', 'Master diversification and asset allocation', 'Hard', 'Strategy', 300, 20),
-  new Quiz(4, 'Dividend Investor Quiz', 'Learn about dividend investing and income strategies', 'Medium', 'Income', 150, 12),
-  new Quiz(5, 'ETF Master Class', 'Become an expert on exchange-traded funds', 'Medium', 'ETFs', 180, 14),
-  new Quiz(6, 'Retirement Planning Sprint', 'Test your retirement account knowledge', 'Hard', 'Retirement', 250, 18),
+  new Quiz(
+    1,
+    'Stock Basics Challenge',
+    'Test your knowledge on stock market fundamentals',
+    'Easy',
+    'Stocks',
+    100,
+    10
+  ),
+  new Quiz(
+    2,
+    'Market Volatility Quiz',
+    'Understand price fluctuations and market risk',
+    'Medium',
+    'Risk',
+    200,
+    15
+  ),
+  new Quiz(
+    3,
+    'Portfolio Strategy Exam',
+    'Master diversification and asset allocation',
+    'Hard',
+    'Strategy',
+    300,
+    20
+  ),
+  new Quiz(
+    4,
+    'Dividend Investor Quiz',
+    'Learn about dividend investing and income strategies',
+    'Medium',
+    'Income',
+    150,
+    12
+  ),
+  new Quiz(
+    5,
+    'ETF Master Class',
+    'Become an expert on exchange-traded funds',
+    'Medium',
+    'ETFs',
+    180,
+    14
+  ),
+  new Quiz(
+    6,
+    'Retirement Planning Sprint',
+    'Test your retirement account knowledge',
+    'Hard',
+    'Retirement',
+    250,
+    18
+  ),
 ];
 
 const QUIZ_QUESTIONS: QuizQuestion[] = [
-  new QuizQuestion('What does diversification help reduce?', ['Taxes', 'Risk', 'Fees', 'Returns'], 1, 'Diversification spreads investments across different assets, which reduces overall portfolio risk. It does not directly reduce taxes, fees, or returns.'),
-  new QuizQuestion('Which is a low-cost investment vehicle?', ['Hedge Fund', 'ETF', 'Penny Stock', 'Crypto'], 1, 'ETFs (Exchange-Traded Funds) typically have low expense ratios and provide diversified exposure. Hedge funds charge high fees, while penny stocks and crypto carry high risk.'),
-  new QuizQuestion('What is a dividend?', ['A loss', 'A payment to shareholders', 'A tax', 'A fee'], 1, 'A dividend is a distribution of a portion of a company\'s earnings to its shareholders, usually paid quarterly.'),
-  new QuizQuestion('What does Beta measure?', ['Company growth', 'Volatility', 'Profit', 'Size'], 1, 'Beta measures the volatility of a stock relative to the overall market. A beta greater than 1 indicates higher volatility than the market.'),
-  new QuizQuestion('Which is the safest investment?', ['Penny stocks', 'Blue-chip stocks', 'Options', 'Futures'], 1, 'Blue-chip stocks are shares in large, well-established companies with a history of reliable performance, making them the safest option among these choices.'),
+  new QuizQuestion(
+    'What does diversification help reduce?',
+    ['Taxes', 'Risk', 'Fees', 'Returns'],
+    1,
+    'Diversification spreads investments across different assets, which reduces overall portfolio risk. It does not directly reduce taxes, fees, or returns.'
+  ),
+  new QuizQuestion(
+    'Which is a low-cost investment vehicle?',
+    ['Hedge Fund', 'ETF', 'Penny Stock', 'Crypto'],
+    1,
+    'ETFs (Exchange-Traded Funds) typically have low expense ratios and provide diversified exposure. Hedge funds charge high fees, while penny stocks and crypto carry high risk.'
+  ),
+  new QuizQuestion(
+    'What is a dividend?',
+    ['A loss', 'A payment to shareholders', 'A tax', 'A fee'],
+    1,
+    "A dividend is a distribution of a portion of a company's earnings to its shareholders, usually paid quarterly."
+  ),
+  new QuizQuestion(
+    'What does Beta measure?',
+    ['Company growth', 'Volatility', 'Profit', 'Size'],
+    1,
+    'Beta measures the volatility of a stock relative to the overall market. A beta greater than 1 indicates higher volatility than the market.'
+  ),
+  new QuizQuestion(
+    'Which is the safest investment?',
+    ['Penny stocks', 'Blue-chip stocks', 'Options', 'Futures'],
+    1,
+    'Blue-chip stocks are shares in large, well-established companies with a history of reliable performance, making them the safest option among these choices.'
+  ),
 ];
 
 type MistakeRecord = {
@@ -122,12 +195,12 @@ export default function Quizzes() {
           mistakes,
           timestamp: new Date().toISOString(),
           questionsSnapshot: sessionQuestions.map(
-            (q) => new QuizQuestion(q.question, [...q.options], q.correct, q.explanation),
+            (q) => new QuizQuestion(q.question, [...q.options], q.correct, q.explanation)
           ),
         };
-        setCompletedQuizzes(prev => [attempt, ...prev]);
+        setCompletedQuizzes((prev) => [attempt, ...prev]);
       }
-      
+
       const percentage = Math.round((newScore / quizQuestions.length) * 100);
       const passed = percentage >= 80;
 
@@ -136,7 +209,7 @@ export default function Quizzes() {
           particleCount: 150,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#2563eb', '#1d4ed8', '#60a5fa']
+          colors: ['#2563eb', '#1d4ed8', '#60a5fa'],
         });
 
         if (user && selectedQuiz) {
@@ -190,10 +263,7 @@ export default function Quizzes() {
           <div className="quizzes__progress">
             <span>{currentQuestion + 1} of 5</span>
             <div className="quizzes__progress-bar">
-              <div
-                className="quizzes__progress-fill"
-                style={{ width: `${progress}%` }}
-              />
+              <div className="quizzes__progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
         </div>
@@ -203,7 +273,8 @@ export default function Quizzes() {
           <div className="quizzes__options">
             {question.options.map((option, idx) => (
               <button
-                key={idx}
+                type="button"
+                key={option}
                 className={`quizzes__option ${selectedAnswer === idx ? 'selected' : ''}`}
                 onClick={() => handleAnswerSelect(idx)}
               >
@@ -212,6 +283,7 @@ export default function Quizzes() {
             ))}
           </div>
           <button
+            type="button"
             className="quizzes__next-btn"
             onClick={handleNextQuestion}
             disabled={selectedAnswer === null}
@@ -231,9 +303,7 @@ export default function Quizzes() {
     return (
       <div className="quizzes__results">
         <div className="quizzes__results-card">
-          <div className="quizzes__results-status">
-            {passed ? 'Passed' : 'Needs Review'}
-          </div>
+          <div className="quizzes__results-status">{passed ? 'Passed' : 'Needs Review'}</div>
           <h2>{selectedQuiz.title}</h2>
           <div className="quizzes__score">
             <p className="quizzes__score-text">Your Score</p>
@@ -254,11 +324,16 @@ export default function Quizzes() {
             </div>
           )}
           <div className="quizzes__actions">
-            <button className="quizzes__btn quizzes__btn--secondary" onClick={handleRetry}>
+            <button
+              type="button"
+              className="quizzes__btn quizzes__btn--secondary"
+              onClick={handleRetry}
+            >
               Try Again
             </button>
             {completedQuizzes.length > 0 && completedQuizzes[0].mistakes.length > 0 && (
               <button
+                type="button"
                 className="quizzes__btn quizzes__btn--secondary quizzes__btn--danger"
                 onClick={() => {
                   setReviewingAttempt(completedQuizzes[0]);
@@ -273,6 +348,7 @@ export default function Quizzes() {
               </button>
             )}
             <button
+              type="button"
               className="quizzes__btn quizzes__btn--primary"
               onClick={() => {
                 setQuizStarted(false);
@@ -301,11 +377,15 @@ export default function Quizzes() {
         <div className="quizzes__quiz-header">
           <h2>Review Mistakes — {reviewingAttempt.quizTitle}</h2>
           <div className="quizzes__progress">
-            <span>Mistake {reviewIndex + 1} of {reviewingAttempt.mistakes.length}</span>
+            <span>
+              Mistake {reviewIndex + 1} of {reviewingAttempt.mistakes.length}
+            </span>
             <div className="quizzes__progress-bar">
               <div
                 className="quizzes__progress-fill"
-                style={{ width: `${((reviewIndex + 1) / reviewingAttempt.mistakes.length) * 100}%` }}
+                style={{
+                  width: `${((reviewIndex + 1) / reviewingAttempt.mistakes.length) * 100}%`,
+                }}
               />
             </div>
           </div>
@@ -325,7 +405,7 @@ export default function Quizzes() {
                 answerNote = 'Your answer';
               }
               return (
-                <div key={idx} className={optionClass} style={{ cursor: 'default' }}>
+                <div key={option} className={optionClass} style={{ cursor: 'default' }}>
                   {answerNote && <span className="quizzes__answer-note">{answerNote}</span>}
                   {option}
                 </div>
@@ -335,6 +415,7 @@ export default function Quizzes() {
 
           {!showExplanation ? (
             <button
+              type="button"
               className="quizzes__next-btn"
               onClick={() => setShowExplanation(true)}
             >
@@ -343,9 +424,11 @@ export default function Quizzes() {
           ) : (
             <>
               <div className="quizzes__review-explanation">
-                <strong>Explanation:</strong> {q.explanation || 'The correct answer is: ' + q.getCorrectAnswer()}
+                <strong>Explanation:</strong>{' '}
+                {q.explanation || `The correct answer is: ${q.getCorrectAnswer()}`}
               </div>
               <button
+                type="button"
                 className="quizzes__next-btn"
                 onClick={() => {
                   if (isLastMistake) {
@@ -375,7 +458,11 @@ export default function Quizzes() {
           <p>Review your past quiz attempts and learn from mistakes</p>
         </div>
         <div className="quizzes__completed-nav">
-          <button className="quizzes__btn quizzes__btn--secondary" onClick={() => setViewMode('quizzes')}>
+          <button
+            type="button"
+            className="quizzes__btn quizzes__btn--secondary"
+            onClick={() => setViewMode('quizzes')}
+          >
             Back to Quizzes
           </button>
         </div>
@@ -385,22 +472,29 @@ export default function Quizzes() {
           </div>
         ) : (
           <div className="quizzes__grid">
-            {completedQuizzes.map((attempt, idx) => {
+            {completedQuizzes.map((attempt) => {
               const pct = Math.round((attempt.score / attempt.total) * 100);
               const passed = pct >= 80;
               return (
-                <div key={idx} className="quizzes__card">
-                  <div className={`quizzes__difficulty ${passed ? 'quizzes__status--passed' : 'quizzes__status--failed'}`}>
+                <div key={`${attempt.quizId}-${attempt.timestamp}`} className="quizzes__card">
+                  <div
+                    className={`quizzes__difficulty ${passed ? 'quizzes__status--passed' : 'quizzes__status--failed'}`}
+                  >
                     {passed ? 'Passed' : 'Failed'}
                   </div>
                   <h3>{attempt.quizTitle}</h3>
-                  <p>Score: {attempt.score}/{attempt.total} ({pct}%)</p>
+                  <p>
+                    Score: {attempt.score}/{attempt.total} ({pct}%)
+                  </p>
                   <div className="quizzes__meta">
-                    <span>{attempt.mistakes.length} mistake{attempt.mistakes.length !== 1 ? 's' : ''}</span>
+                    <span>
+                      {attempt.mistakes.length} mistake{attempt.mistakes.length !== 1 ? 's' : ''}
+                    </span>
                     <span>{new Date(attempt.timestamp).toLocaleDateString()}</span>
                   </div>
                   {attempt.mistakes.length > 0 && (
                     <button
+                      type="button"
                       className="quizzes__start-btn"
                       onClick={() => {
                         setReviewingAttempt(attempt);
@@ -439,18 +533,21 @@ export default function Quizzes() {
             {quizzes.reduce((sum, q) => sum + q.xpReward, 0)}
           </span>
         </div>
-        <div className="quizzes__stat" style={{ cursor: 'pointer' }} onClick={() => setViewMode('completed')}>
+        <button
+          type="button"
+          className="quizzes__stat"
+          style={{ cursor: 'pointer' }}
+          onClick={() => setViewMode('completed')}
+        >
           <span className="quizzes__stat-label">Completed</span>
           <span className="quizzes__stat-value">{completedQuizzes.length}</span>
-        </div>
+        </button>
       </div>
 
       <div className="quizzes__grid">
         {quizzes.map((quiz) => (
           <div key={quiz.id} className="quizzes__card">
-            <div
-              className={`quizzes__difficulty ${difficultyClass(quiz.difficulty)}`}
-            >
+            <div className={`quizzes__difficulty ${difficultyClass(quiz.difficulty)}`}>
               {quiz.difficulty}
             </div>
             <h3>{quiz.title}</h3>
@@ -459,7 +556,11 @@ export default function Quizzes() {
               <span>{quiz.questions} questions</span>
               <span>{quiz.xpReward} XP</span>
             </div>
-            <button className="quizzes__start-btn" onClick={() => handleStartQuiz(quiz)}>
+            <button
+              type="button"
+              className="quizzes__start-btn"
+              onClick={() => handleStartQuiz(quiz)}
+            >
               Start Quiz
             </button>
           </div>

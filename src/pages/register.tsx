@@ -1,8 +1,8 @@
 // Creates an account via POST /api/register and logs the user in immediately afterward.
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import { useUser } from "../contexts/UserContext";
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
+import { useUser } from '../contexts/UserContext';
 import '../styles/Register.css';
 
 const PASSWORD_RULES = [
@@ -15,14 +15,20 @@ const PASSWORD_RULES = [
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function getPasswordStrength(passwordScore: number): 'weak' | 'good' | 'strong' {
+  if (passwordScore <= 2) return 'weak';
+  if (passwordScore <= 4) return 'good';
+  return 'strong';
+}
+
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
-  
+  const [error, setError] = useState('');
+
   const { setUser } = useUser();
   const navigate = useNavigate();
   const passwordChecks = useMemo(
@@ -30,20 +36,18 @@ export default function Register() {
     [password]
   );
   const passwordScore = passwordChecks.filter((check) => check.valid).length;
-  const passwordStrength =
-    passwordScore <= 2 ? 'weak' : passwordScore <= 4 ? 'good' : 'strong';
+  const passwordStrength = getPasswordStrength(passwordScore);
   const hasPasswordIssues = password.length > 0 && passwordScore < PASSWORD_RULES.length;
-  const hasConfirmPasswordIssue =
-    confirmPassword.length > 0 && password !== confirmPassword;
+  const hasConfirmPasswordIssue = confirmPassword.length > 0 && password !== confirmPassword;
 
   /** POST /api/register; server hashes password and returns the public profile fields. */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!EMAIL_PATTERN.test(normalizedEmail)) {
-      setError("Enter a valid email address");
+      setError('Enter a valid email address');
       return;
     }
 
@@ -53,14 +57,14 @@ export default function Register() {
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       return;
     }
 
     try {
       const response = await fetch('/api/register', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
@@ -69,24 +73,23 @@ export default function Register() {
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
-        data = { error: "Registration service returned an invalid response" };
+        data = { error: 'Registration service returned an invalid response' };
       }
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to register");
+        throw new Error(data.error || 'Failed to register');
       }
 
       setUser({
         email: normalizedEmail,
-        displayName: data.displayName ?? normalizedEmail.split("@")[0],
+        displayName: data.displayName ?? normalizedEmail.split('@')[0],
         experiencePoints: data.experiencePoints ?? 0,
       });
-      navigate("/");
-      
+      navigate('/');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("expected pattern") || message.includes("Failed to fetch")) {
-        setError("Registration service is unavailable. Please try again in a moment.");
+      if (message.includes('expected pattern') || message.includes('Failed to fetch')) {
+        setError('Registration service is unavailable. Please try again in a moment.');
         return;
       }
       setError(message);
@@ -97,52 +100,60 @@ export default function Register() {
     <div className="auth">
       <div className="auth__card">
         <h1 className="auth__title">Create Account</h1>
-        
+
         {error && <div className="auth__error">{error}</div>}
 
         <form className="auth__form" onSubmit={handleSubmit} noValidate>
           <div className="auth__field">
-            <label className="auth__label">Email</label>
-            <input
-              className="auth__input"
-              type="text"
-              inputMode="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="trader@example.com"
-              autoCapitalize="none"
-              autoComplete="email"
-              required
-            />
+            <label className="auth__label" htmlFor="register-email">
+              Email
+              <input
+                id="register-email"
+                className="auth__input"
+                type="text"
+                inputMode="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="trader@example.com"
+                autoCapitalize="none"
+                autoComplete="email"
+                required
+              />
+            </label>
           </div>
 
           <div className="auth__field">
-            <label className="auth__label">Password</label>
-            <div className="auth__password-input">
-              <input
-                className="auth__input"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Use a strong password"
-                autoComplete="new-password"
-                aria-invalid={hasPasswordIssues}
-                required
-              />
-              <button
-                className="auth__password-toggle"
-                type="button"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+            <label className="auth__label" htmlFor="register-password">
+              Password
+              <div className="auth__password-input">
+                <input
+                  id="register-password"
+                  className="auth__input"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Use a strong password"
+                  autoComplete="new-password"
+                  aria-invalid={hasPasswordIssues}
+                  required
+                />
+                <button
+                  className="auth__password-toggle"
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </label>
             {password.length > 0 && (
               <div className="auth__password-panel">
                 <div className="auth__strength-row">
                   <span>Password strength</span>
-                  <strong className={`auth__strength-label auth__strength-label--${passwordStrength}`}>
+                  <strong
+                    className={`auth__strength-label auth__strength-label--${passwordStrength}`}
+                  >
                     {passwordStrength}
                   </strong>
                 </div>
@@ -160,36 +171,39 @@ export default function Register() {
                   ))}
                 </ul>
                 {passwordScore < PASSWORD_RULES.length && (
-                  <p className="auth__password-suggestion">
-                    Strong example: MarketSaver27!
-                  </p>
+                  <p className="auth__password-suggestion">Strong example: MarketSaver27!</p>
                 )}
               </div>
             )}
           </div>
 
           <div className="auth__field">
-            <label className="auth__label">Confirm Password</label>
-            <div className="auth__password-input">
-              <input
-                className="auth__input"
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter your password"
-                autoComplete="new-password"
-                aria-invalid={hasConfirmPasswordIssue}
-                required
-              />
-              <button
-                className="auth__password-toggle"
-                type="button"
-                onClick={() => setShowConfirmPassword((current) => !current)}
-                aria-label={showConfirmPassword ? "Hide confirmed password" : "Show confirmed password"}
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+            <label className="auth__label" htmlFor="register-confirm-password">
+              Confirm Password
+              <div className="auth__password-input">
+                <input
+                  id="register-confirm-password"
+                  className="auth__input"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  autoComplete="new-password"
+                  aria-invalid={hasConfirmPasswordIssue}
+                  required
+                />
+                <button
+                  className="auth__password-toggle"
+                  type="button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  aria-label={
+                    showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'
+                  }
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </label>
             {hasConfirmPasswordIssue && (
               <p className="auth__field-help auth__field-help--error">Passwords do not match.</p>
             )}

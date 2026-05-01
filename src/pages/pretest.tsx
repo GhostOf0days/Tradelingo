@@ -3,25 +3,25 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { MODULES } from '../data/modules';
-import { shuffleQuestionOptions } from '../utils/shuffleQuestionOptions';
+import MODULES from '../data/modules';
+import shuffleQuestionOptions from '../utils/shuffleQuestionOptions';
 
 export default function Pretest() {
   const { id } = useParams();
   const moduleId = Number(id) || 1;
   const module = MODULES[moduleId as keyof typeof MODULES] || MODULES[1];
-  const pretest = module.pretest;
+  const { pretest } = module;
   const displayPretest = useMemo(
     () =>
       pretest.map((q) => {
         const { options, correctIndex } = shuffleQuestionOptions(q.options, q.correctIndex);
         return { ...q, options, correctIndex };
       }),
-    [pretest],
+    [pretest]
   );
   const navigate = useNavigate();
   const { user, setUser, updateStreak } = useUser();
-  
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -38,7 +38,7 @@ export default function Pretest() {
     setScore(newScore);
 
     if (currentIndex < displayPretest.length - 1) {
-      setCurrentIndex(curr => curr + 1);
+      setCurrentIndex((curr) => curr + 1);
       setSelectedAnswer(null);
     } else {
       if (newScore / displayPretest.length >= 0.8 && user) {
@@ -46,12 +46,12 @@ export default function Pretest() {
           const response = await fetch('/api/pass-module', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: user.email, 
+            body: JSON.stringify({
+              email: user.email,
               moduleId: Number(id),
               xpToAdd: 500,
               totalLessons: module.lessons.length,
-            })
+            }),
           });
           if (response.ok) {
             const data = await response.json();
@@ -59,7 +59,7 @@ export default function Pretest() {
             updateStreak();
           }
         } catch (err) {
-          console.warn("Failed to save pre-test", err);
+          console.warn('Failed to save pre-test', err);
         }
       }
       setIsComplete(true);
@@ -73,10 +73,10 @@ export default function Pretest() {
         const response = await fetch('/api/update-xp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            email: user.email, 
-            xpToAdd: 25 
-          })
+          body: JSON.stringify({
+            email: user.email,
+            xpToAdd: 25,
+          }),
         });
         if (response.ok) {
           const data = await response.json();
@@ -84,7 +84,7 @@ export default function Pretest() {
           updateStreak();
         }
       } catch (err) {
-        console.warn("Failed to update XP", err);
+        console.warn('Failed to update XP', err);
       }
     }
     navigate(`/lesson/${id}`);
@@ -95,15 +95,35 @@ export default function Pretest() {
     return (
       <div style={{ padding: '2rem', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
         <div className="modules__card" style={{ padding: '3rem 2rem' }}>
-          <div style={{ display: 'inline-flex', marginBottom: '1rem', padding: '0.35rem 0.75rem', background: 'var(--accent-glow)', border: '1px solid var(--border-strong)', borderRadius: '0.5rem', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              marginBottom: '1rem',
+              padding: '0.35rem 0.75rem',
+              background: 'var(--accent-glow)',
+              border: '1px solid var(--border-strong)',
+              borderRadius: '0.5rem',
+              color: 'var(--text-primary)',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+            }}
+          >
             {passed ? 'Passed' : 'Needs Review'}
           </div>
           <h2>{passed ? 'You Tested Out!' : 'Keep Learning!'}</h2>
           <p style={{ color: 'var(--text-muted)' }}>
             You scored {score} out of {displayPretest.length}.
-            {passed ? " The next module is now unlocked and you earned +500 XP!" : " You need 80% correct to test out. Head back to take the regular lessons."}
+            {passed
+              ? ' The next module is now unlocked and you earned +500 XP!'
+              : ' You need 80% correct to test out. Head back to take the regular lessons.'}
           </p>
-          <button className="modules__card-btn" style={{ marginTop: '2rem' }} onClick={() => navigate('/')}>
+          <button
+            type="button"
+            className="modules__card-btn"
+            style={{ marginTop: '2rem' }}
+            onClick={() => navigate('/')}
+          >
             Return to Dashboard
           </button>
         </div>
@@ -118,15 +138,37 @@ export default function Pretest() {
           <span style={{ color: 'var(--text-muted)' }}>Pre-Test Progress</span>
           <span style={{ fontWeight: '600' }}>{progressPercent}%</span>
         </div>
-        <div style={{ height: '8px', background: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${progressPercent}%`, background: 'var(--accent)', transition: 'width 0.3s ease' }} />
+        <div
+          style={{
+            height: '8px',
+            background: 'var(--surface-hover)',
+            borderRadius: '99px',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: `${progressPercent}%`,
+              background: 'var(--accent)',
+              transition: 'width 0.3s ease',
+            }}
+          />
         </div>
       </div>
 
       <div className="modules__card" style={{ padding: '2.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.5rem',
+          }}
+        >
           <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Module {id} Pre-Test</h2>
-          <button 
+          <button
+            type="button"
             onClick={() => setShowSkipDialog(true)}
             style={{
               background: 'transparent',
@@ -136,7 +178,7 @@ export default function Pretest() {
               borderRadius: '0.5rem',
               cursor: 'pointer',
               fontSize: '0.9rem',
-              fontWeight: '500'
+              fontWeight: '500',
             }}
           >
             Skip
@@ -144,17 +186,23 @@ export default function Pretest() {
         </div>
 
         <p style={{ marginBottom: '2rem', fontSize: '1.125rem' }}>{currentQuestion.question}</p>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {currentQuestion.options.map((opt, idx) => (
             <button
-              key={idx}
+              type="button"
+              key={`${currentQuestion.question}-${opt}`}
               onClick={() => setSelectedAnswer(idx)}
               style={{
-                padding: '1.25rem', textAlign: 'left',
+                padding: '1.25rem',
+                textAlign: 'left',
                 background: selectedAnswer === idx ? 'var(--surface-hover)' : 'transparent',
-                border: selectedAnswer === idx ? '2px solid var(--accent)' : '2px solid var(--border)',
-                borderRadius: '0.75rem', color: 'var(--text-primary)', fontSize: '1rem', cursor: 'pointer'
+                border:
+                  selectedAnswer === idx ? '2px solid var(--accent)' : '2px solid var(--border)',
+                borderRadius: '0.75rem',
+                color: 'var(--text-primary)',
+                fontSize: '1rem',
+                cursor: 'pointer',
               }}
             >
               {opt}
@@ -163,9 +211,16 @@ export default function Pretest() {
         </div>
       </div>
 
-      <button 
-        className="modules__card-btn" 
-        style={{ width: '100%', marginTop: '2rem', justifyContent: 'center', background: 'var(--accent)', color: 'var(--text-primary)' }}
+      <button
+        type="button"
+        className="modules__card-btn"
+        style={{
+          width: '100%',
+          marginTop: '2rem',
+          justifyContent: 'center',
+          background: 'var(--accent)',
+          color: 'var(--text-primary)',
+        }}
         onClick={handleNext}
         disabled={selectedAnswer === null}
       >
@@ -174,25 +229,33 @@ export default function Pretest() {
 
       {/* Skip Dialog Modal */}
       {showSkipDialog && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.6)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div className="modules__card" style={{ padding: '2rem', maxWidth: '400px', margin: '1rem' }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="modules__card"
+            style={{ padding: '2rem', maxWidth: '400px', margin: '1rem' }}
+          >
             <h2 style={{ marginTop: 0 }}>Skip Pre-Test?</h2>
             <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>
-              You can skip the pre-test and go straight to the lessons. You'll earn +25 XP for trying, but you won't unlock the next module until you complete all lessons or pass the post-test.
+              You can skip the pre-test and go straight to the lessons. You&apos;ll earn +25 XP for
+              trying, but you won&apos;t unlock the next module until you complete all lessons or
+              pass the post-test.
             </p>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-              <button 
+              <button
+                type="button"
                 onClick={() => setShowSkipDialog(false)}
                 style={{
                   flex: 1,
@@ -202,12 +265,13 @@ export default function Pretest() {
                   color: 'var(--text-primary)',
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  fontWeight: '500'
+                  fontWeight: '500',
                 }}
               >
                 Cancel
               </button>
-              <button 
+              <button
+                type="button"
                 onClick={handleSkipModule}
                 style={{
                   flex: 1,
@@ -217,7 +281,7 @@ export default function Pretest() {
                   color: 'black',
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  fontWeight: '600'
+                  fontWeight: '600',
                 }}
               >
                 Skip & Learn

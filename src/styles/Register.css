@@ -36,6 +36,9 @@
 }
 
 .auth__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -50,7 +53,9 @@
   color: var(--text-primary);
   font-family: inherit;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .auth__input:focus {

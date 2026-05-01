@@ -1,13 +1,19 @@
 // quiz hub card metadata including reward size and question count.
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
-export class Quiz {
+export default class Quiz {
   id: number;
+
   title: string;
+
   description: string;
+
   difficulty: Difficulty;
+
   category: string;
-  private _xpReward: number;
-  private _questions: number;
+
+  private xpRewardValue: number;
+
+  private questionCount: number;
 
   constructor(
     id: number,
@@ -16,34 +22,34 @@ export class Quiz {
     difficulty: Difficulty,
     category: string,
     xpReward: number,
-    questions: number,
+    questions: number
   ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.difficulty = difficulty;
     this.category = category;
-    this._xpReward = xpReward;
-    this._questions = questions;
+    this.xpRewardValue = xpReward;
+    this.questionCount = questions;
   }
 
   get xpReward(): number {
-    return this._xpReward;
+    return this.xpRewardValue;
   }
 
   get questions(): number {
-    return this._questions;
+    return this.questionCount;
   }
 
   calculateXpEarned(score: number, totalQuestions: number): number {
-    return Math.floor((score / totalQuestions) * this._xpReward);
+    return Math.floor((score / totalQuestions) * this.xpRewardValue);
   }
 
   copyWith(
     updates: Partial<{
       xpReward: number;
       questions: number;
-    }>,
+    }>
   ): Quiz {
     return new Quiz(
       this.id,
@@ -51,8 +57,8 @@ export class Quiz {
       this.description,
       this.difficulty,
       this.category,
-      updates.xpReward ?? this._xpReward,
-      updates.questions ?? this._questions,
+      updates.xpReward ?? this.xpRewardValue,
+      updates.questions ?? this.questionCount
     );
   }
 }

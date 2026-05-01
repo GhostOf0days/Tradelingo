@@ -14,7 +14,7 @@ vi.mock('mongodb', () => {
     modules: modulesMock.collection,
   };
   return {
-    MongoClient: function () {
+    MongoClient: function MongoClient() {
       return {
         connect: () => Promise.resolve(),
         db: () => ({
@@ -43,8 +43,16 @@ describe('Load tests – 1000 concurrent users', () => {
     process.env.NODE_ENV = 'test';
 
     modulesMock.store.push(
-      { moduleId: 1, title: 'Stock Market Fundamentals', pretest: [{ question: 'Q1?', options: ['A', 'B'], correct: 0 }] },
-      { moduleId: 2, title: 'Retirement Planning', pretest: [{ question: 'Q2?', options: ['A', 'B'], correct: 1 }] },
+      {
+        moduleId: 1,
+        title: 'Stock Market Fundamentals',
+        pretest: [{ question: 'Q1?', options: ['A', 'B'], correct: 0 }],
+      },
+      {
+        moduleId: 2,
+        title: 'Retirement Planning',
+        pretest: [{ question: 'Q2?', options: ['A', 'B'], correct: 1 }],
+      }
     );
 
     usersMock.store.push({
@@ -60,7 +68,7 @@ describe('Load tests – 1000 concurrent users', () => {
       completedModules: [],
     });
 
-    const { app } = await import('../server/index');
+    const { default: app } = await import('../server/index');
     await new Promise<void>((resolve) => {
       server = app.listen(0, () => resolve());
     });

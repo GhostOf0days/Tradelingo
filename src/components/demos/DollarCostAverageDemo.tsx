@@ -5,8 +5,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 function generatePricePath(months: number, seed: number): number[] {
   const prices = [100];
   let s = seed;
-  const rng = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-  for (let i = 1; i <= months; i++) {
+  const rng = () => {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+  for (let i = 1; i <= months; i += 1) {
     const trend = 0.005;
     const noise = (rng() - 0.5) * 0.12;
     const cyclical = Math.sin(i / 6) * 0.03;
@@ -48,7 +51,10 @@ export default function DollarCostAverageDemo() {
     ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, W, H);
 
-    const padL = 50, padR = 15, padT = 15, padB = 30;
+    const padL = 50;
+    const padR = 15;
+    const padT = 15;
+    const padB = 30;
     const cW = W - padL - padR;
     const cH = H - padT - padB;
 
@@ -61,7 +67,7 @@ export default function DollarCostAverageDemo() {
 
     ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
+    for (let i = 0; i <= 4; i += 1) {
       const y = padT + (cH / 4) * i;
       ctx.beginPath();
       ctx.moveTo(padL, y);
@@ -120,79 +126,200 @@ export default function DollarCostAverageDemo() {
     }
   }, [prices, dcaAvgPrice]);
 
-  useEffect(() => { drawChart(); }, [drawChart]);
+  useEffect(() => {
+    drawChart();
+  }, [drawChart]);
 
   const dcaReturn = ((dcaValue - dcaTotalInvested) / dcaTotalInvested) * 100;
   const lumpReturn = ((lumpValue - dcaTotalInvested) / dcaTotalInvested) * 100;
 
   return (
-    <div style={{ background: '#0a0a0a', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #222' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+    <div
+      style={{
+        background: '#0a0a0a',
+        borderRadius: '1rem',
+        padding: '1.5rem',
+        border: '1px solid #222',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+        }}
+      >
         <div>
           <span style={{ color: '#888', fontSize: '0.8rem' }}>TRADELINGO SIMULATOR</span>
-          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', color: 'white' }}>Dollar-Cost Averaging</h3>
+          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', color: 'white' }}>
+            Dollar-Cost Averaging
+          </h3>
         </div>
       </div>
 
-      <canvas ref={canvasRef} style={{ width: '100%', height: '200px', borderRadius: '0.5rem', display: 'block' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ width: '100%', height: '200px', borderRadius: '0.5rem', display: 'block' }}
+      />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '0.75rem',
+          marginTop: '1rem',
+        }}
+      >
         <div style={{ background: '#111', borderRadius: '0.5rem', padding: '0.75rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+          <div
+            style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}
+          >
             <span style={{ color: '#888', fontSize: '0.75rem' }}>Monthly Invest</span>
-            <span style={{ color: '#eab308', fontSize: '0.85rem', fontWeight: 'bold', fontFamily: 'monospace' }}>${monthlyAmount}</span>
+            <span
+              style={{
+                color: '#eab308',
+                fontSize: '0.85rem',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+              }}
+            >
+              ${monthlyAmount}
+            </span>
           </div>
-          <input type="range" min={50} max={1000} step={50} value={monthlyAmount}
-            onChange={e => setMonthlyAmount(Number(e.target.value))}
+          <input
+            type="range"
+            min={50}
+            max={1000}
+            step={50}
+            value={monthlyAmount}
+            onChange={(e) => setMonthlyAmount(Number(e.target.value))}
             style={{ width: '100%', accentColor: '#eab308', height: '4px' }}
           />
         </div>
         <div style={{ background: '#111', borderRadius: '0.5rem', padding: '0.75rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+          <div
+            style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}
+          >
             <span style={{ color: '#888', fontSize: '0.75rem' }}>Months</span>
-            <span style={{ color: '#6366f1', fontSize: '0.85rem', fontWeight: 'bold', fontFamily: 'monospace' }}>{months}</span>
+            <span
+              style={{
+                color: '#6366f1',
+                fontSize: '0.85rem',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+              }}
+            >
+              {months}
+            </span>
           </div>
-          <input type="range" min={6} max={60} step={6} value={months}
-            onChange={e => setMonths(Number(e.target.value))}
+          <input
+            type="range"
+            min={6}
+            max={60}
+            step={6}
+            value={months}
+            onChange={(e) => setMonths(Number(e.target.value))}
             style={{ width: '100%', accentColor: '#6366f1', height: '4px' }}
           />
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.75rem' }}>
-        <div style={{
-          background: '#22c55e11', border: '1px solid #22c55e33', borderRadius: '0.5rem',
-          padding: '0.75rem', textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 'bold', marginBottom: '0.25rem' }}>DCA Strategy</div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', fontFamily: 'monospace' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '0.5rem',
+          marginTop: '0.75rem',
+        }}
+      >
+        <div
+          style={{
+            background: '#22c55e11',
+            border: '1px solid #22c55e33',
+            borderRadius: '0.5rem',
+            padding: '0.75rem',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '0.7rem',
+              color: '#22c55e',
+              fontWeight: 'bold',
+              marginBottom: '0.25rem',
+            }}
+          >
+            DCA Strategy
+          </div>
+          <div
+            style={{
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              color: '#fff',
+              fontFamily: 'monospace',
+            }}
+          >
             ${dcaValue.toFixed(0)}
           </div>
           <div style={{ fontSize: '0.7rem', color: dcaReturn >= 0 ? '#22c55e' : '#ef4444' }}>
-            {dcaReturn >= 0 ? '+' : ''}{dcaReturn.toFixed(1)}% return
+            {dcaReturn >= 0 ? '+' : ''}
+            {dcaReturn.toFixed(1)}% return
           </div>
         </div>
-        <div style={{
-          background: '#3b82f611', border: '1px solid #3b82f633', borderRadius: '0.5rem',
-          padding: '0.75rem', textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 'bold', marginBottom: '0.25rem' }}>Lump Sum (Day 1)</div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', fontFamily: 'monospace' }}>
+        <div
+          style={{
+            background: '#3b82f611',
+            border: '1px solid #3b82f633',
+            borderRadius: '0.5rem',
+            padding: '0.75rem',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '0.7rem',
+              color: '#3b82f6',
+              fontWeight: 'bold',
+              marginBottom: '0.25rem',
+            }}
+          >
+            Lump Sum (Day 1)
+          </div>
+          <div
+            style={{
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              color: '#fff',
+              fontFamily: 'monospace',
+            }}
+          >
             ${lumpValue.toFixed(0)}
           </div>
           <div style={{ fontSize: '0.7rem', color: lumpReturn >= 0 ? '#22c55e' : '#ef4444' }}>
-            {lumpReturn >= 0 ? '+' : ''}{lumpReturn.toFixed(1)}% return
+            {lumpReturn >= 0 ? '+' : ''}
+            {lumpReturn.toFixed(1)}% return
           </div>
         </div>
       </div>
 
-      <div style={{
-        background: '#111', borderRadius: '0.5rem', padding: '0.6rem', marginTop: '0.5rem',
-        textAlign: 'center', fontSize: '0.8rem', color: '#888'
-      }}>
-        Total invested: <span style={{ color: '#fff', fontWeight: 'bold' }}>${dcaTotalInvested.toLocaleString()}</span>
-        &nbsp;&middot;&nbsp;
-        DCA avg price: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>${dcaAvgPrice.toFixed(2)}</span>
+      <div
+        style={{
+          background: '#111',
+          borderRadius: '0.5rem',
+          padding: '0.6rem',
+          marginTop: '0.5rem',
+          textAlign: 'center',
+          fontSize: '0.8rem',
+          color: '#888',
+        }}
+      >
+        Total invested:{' '}
+        <span style={{ color: '#fff', fontWeight: 'bold' }}>
+          ${dcaTotalInvested.toLocaleString()}
+        </span>
+        &nbsp;&middot;&nbsp; DCA avg price:{' '}
+        <span style={{ color: '#22c55e', fontWeight: 'bold' }}>${dcaAvgPrice.toFixed(2)}</span>
       </div>
 
       <p style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.75rem', textAlign: 'center' }}>

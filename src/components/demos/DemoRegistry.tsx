@@ -33,7 +33,7 @@ const DEMO_MAP: Record<string, React.LazyExoticComponent<() => JSX.Element>> = {
   'compound-growth': CompoundGrowthDemo,
   'blockchain-builder': BlockchainDemo,
   'order-book': OrderBookDemo,
-  'diversification': DiversificationDemo,
+  diversification: DiversificationDemo,
   'portfolio-allocation': PortfolioAllocationDemo,
   'dollar-cost-average': DollarCostAverageDemo,
   'margin-calculator': MarginCalculatorDemo,
@@ -46,11 +46,22 @@ export default function DemoRenderer({ demoId }: { demoId: string }) {
   if (!DemoComponent) return null;
 
   return (
-    <Suspense fallback={
-      <div style={{ background: 'var(--surface)', borderRadius: '1rem', padding: '2rem', border: '1px solid var(--border)', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Loading interactive demo...
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            background: 'var(--surface)',
+            borderRadius: '1rem',
+            padding: '2rem',
+            border: '1px solid var(--border)',
+            textAlign: 'center',
+            color: 'var(--text-muted)',
+          }}
+        >
+          Loading interactive demo...
+        </div>
+      }
+    >
       <div style={{ margin: '1.5rem 0' }}>
         <DemoComponent />
       </div>

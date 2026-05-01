@@ -1,5 +1,5 @@
 // copy the xp thresholds from UserContext so both sides agree on level.
-export function calculateLevel(xp: number): number {
+export default function calculateLevel(xp: number): number {
   if (xp < 1000) return 1;
   if (xp < 2500) return 2;
   if (xp < 4500) return 3;
